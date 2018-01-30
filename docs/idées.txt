@@ -7,6 +7,8 @@ Exemples d'applications
  - Compilation (test)
   Par exemple pour un script Arduino
 
+Une application est un fichier (xml ?) qui décrit le graphe (noeuds et arcs).
+
 Types de noeuds :
  - Source de données (brutes)
      - Base de données

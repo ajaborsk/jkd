@@ -17,19 +17,30 @@ class DataTable(Data):
 class DataProcessor(Node):
     def __init__(self):
         pass
-    def process(self):
+    async def process(self):
         pass
-    def get_results(self):
+    async def get_results(self):
         pass
 
+
+
+class HtmlReport(Node):
+    async def get(self):
+        return "<html><head></head><body><p>Full one !</p></body></html>"
+
 # The Web server part (to be put in a separate module)
+
+application = HtmlReport()
 
 from aiohttp import web
 
 async def handle(request):
     name = request.match_info.get('name', "Anonymous")
-    text = "Hello, " + name
-    return web.Response(text=text)
+    
+    text = await application.get()
+    
+    #text = "Hello, " + name
+    return web.Response(body=text)
 
 def serve():
     print("serving...")
