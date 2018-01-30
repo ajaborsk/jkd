@@ -9,3 +9,6 @@ Analyse activité EFS
 Compilation (test)
   Par exemple pour un script Arduino
 
+Tests à prévoir :
+- Tous les Nodes doivent être sérialisables
+
