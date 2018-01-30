@@ -1,13 +1,23 @@
 Idées en vrac
 
-Analyse immobilisations
-
-Indicateurs suivi Asset+
-
-Analyse activité EFS
-
-Compilation (test)
+Exemples d'applications
+ - Analyse immobilisations
+ - Indicateurs suivi Asset+
+ - Analyse activité EFS
+ - Compilation (test)
   Par exemple pour un script Arduino
+
+Types de noeuds :
+ - Source de données (brutes)
+     - Base de données
+     - Fichier(s) Excel
+     - h5
+     - fichier brut/binaire (.o .h .c .elf ...)
+ - Caches
+ - Transformateurs de données (import / export)
+ - Table
+ - Rapport (pdf/html/dhtml/svg...)
+
 
 Tests à prévoir :
 - Tous les Nodes doivent être sérialisables

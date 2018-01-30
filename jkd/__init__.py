@@ -1,5 +1,8 @@
 
-class Data:
+class Node:
+    pass
+
+class Data(Node):
     pass
 
 
@@ -11,7 +14,7 @@ class DataTable(Data):
     pass
 
 
-class DataProcessor:
+class DataProcessor(Node):
     def __init__(self):
         pass
     def process(self):
