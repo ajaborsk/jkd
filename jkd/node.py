@@ -4,8 +4,11 @@ class Node:
     def __init__(self):
         pass
 
-    def get_et(self):
-        """Return a ElementTree that represent the Node and contains its full state (if possible)
+    def get_etnode(self):
+        return ET.Element()
+
+    def get(self):
+        """Return a ElementTree that represent the Node full state (if possible)
         """
         warn("")
 

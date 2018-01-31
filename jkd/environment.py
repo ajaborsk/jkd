@@ -19,9 +19,10 @@ class HtmlReport(Node):
 
 application = HtmlReport()
 
-
-
 class Environment(Container):
+
+    def __init__(self):
+        super().__init__()
 
     async def handle(self, request):
         name = request.match_info.get('name', "Anonymous")
