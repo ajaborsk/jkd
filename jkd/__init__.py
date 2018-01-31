@@ -1,20 +1,28 @@
+import logging
 
-class Node:
+from .node import *
+
+
+class Container(Node):
+    def __init__(self):
+        super().__init(self)
+
+class Data:
     pass
 
-class Data(Node):
+class DatabaseManager(Node):
     pass
-
-
-class Database(Data):
-    pass
-
 
 class DataTable(Data):
     pass
 
+class DataBase(Data):
+    pass
 
-class DataProcessor(Node):
+class Cache(Node):
+    pass
+
+class Processor(Node):
     def __init__(self):
         pass
     async def process(self):
@@ -22,7 +30,10 @@ class DataProcessor(Node):
     async def get_results(self):
         pass
 
+# HTML report
 
+import aiohttp_jinja2
+import jinja2
 
 class HtmlReport(Node):
     async def get(self):
@@ -36,9 +47,9 @@ from aiohttp import web
 
 async def handle(request):
     name = request.match_info.get('name', "Anonymous")
-    
+
     text = await application.get()
-    
+
     #text = "Hello, " + name
     return web.Response(body=text)
 
