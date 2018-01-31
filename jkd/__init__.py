@@ -1,11 +1,6 @@
 import logging
 
-from .node import *
-
-
-class Container(Node):
-    def __init__(self):
-        super().__init(self)
+from .environment import *
 
 class Data:
     pass
@@ -32,26 +27,6 @@ class Processor(Node):
 
 # HTML report
 
-import aiohttp_jinja2
-import jinja2
-
-class HtmlReport(Node):
-    async def get(self):
-        return "<html><head></head><body><p>Full one !</p></body></html>"
-
-# The Web server part (to be put in a separate module)
-
-application = HtmlReport()
-
-from aiohttp import web
-
-async def handle(request):
-    name = request.match_info.get('name', "Anonymous")
-
-    text = await application.get()
-
-    #text = "Hello, " + name
-    return web.Response(body=text)
 
 def serve():
     print("serving...")
