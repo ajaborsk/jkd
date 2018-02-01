@@ -18,7 +18,7 @@ class Processor(Node):
         super().__init__(**kwargs)
         self.next_id = 1
 
-    async def process(self, future):
+    async def process(self, future): # unused
         asyncio.sleep(2)
         return "<html><head></head><body><p>Full one !</p></body></html>"
 
@@ -57,8 +57,11 @@ class Environment(Container):
     def __init__(self):
         super().__init__(env=self)
         self.web_app = web.Application()
-#        self.loop = self.web_app.loop
-        self.loop = asyncio.get_event_loop()
+
+        self.loop = self.web_app.loop
+        if self.loop is None:
+            self.loop = asyncio.get_event_loop()
+
         self.web_app.router.add_get('/', self.handle)
         self.web_app.router.add_get('/{app}', self.handle)
 
