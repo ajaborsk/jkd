@@ -33,16 +33,19 @@ class HtmlReport(Node):
         super().__init__(**kwargs)
         self.processor = processor
 
-    def process_get(self, future):
-        self.processor.get(self.get_cb, future)
-
     def get_cb(self, future, result):
+        # callback for the callback based interface
         return future.set_result(result)
 
     async def aget(self):
+        # create a future to "manage" the callback based interface
         future = self.env.loop.create_future()
-        self.process_get(future)
+
+        # call a callback based interface
+        self.processor.get(self.get_cb, future)
+        # await for the future to be completed (by the callback)
         await asyncio.wait_for(future, None)
+        # return the future result
         return future.result()
 
 # The Web server part (to be put in a separate module)
