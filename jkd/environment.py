@@ -3,8 +3,13 @@
 Created on Wed Jan 31 09:48:33 2018
 
 """
-
+import sys
 import asyncio
+
+if sys.platform == 'win32':
+    loop = asyncio.ProactorEventLoop()
+    asyncio.set_event_loop(loop)
+    
 from aiohttp import web
 
 from .container import *
@@ -71,7 +76,18 @@ class Environment(Container):
     async def handle(self, request):
         name = request.match_info.get('app', "Anonymous")
 
-        text = await self.test_application.aget()
+        if name == "Anonymous":
+            text = await self.test_application.aget()
+        else:
+            self.subprocess = await asyncio.create_subprocess_exec("Python", "-m", "jkd", "slave", loop=self.loop, stdout=asyncio.subprocess.PIPE)
+            line = b' '
+            text = ''
+            while line != b'':
+                line = await self.subprocess.stdout.readline()
+                print('line=', line)
+                text += line.decode('ascii')
+            await self.subprocess.wait()
+            return web.Response(body=text)
 
         #text = "Hello, " + name
         return web.Response(body=text)

@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 
 class Node:
     def __init__(self, env = None):
-        print("setting env to", env)
+        #print("setting env to", env)
         self.env = env
 
     def get_etnode(self):
