@@ -79,7 +79,7 @@ class Environment(Container):
         if name == "Anonymous":
             text = await self.test_application.aget()
         else:
-            self.subprocess = await asyncio.create_subprocess_exec("Python", "-m", "jkd", "slave", loop=self.loop, stdout=asyncio.subprocess.PIPE)
+            self.subprocess = await asyncio.create_subprocess_exec("Python", "-m", "jkd", "slave", "testapp", loop=self.loop, stdout=asyncio.subprocess.PIPE)
             line = b' '
             text = ''
             while line != b'':
