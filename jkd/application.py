@@ -7,8 +7,8 @@ from .container import *
 
 class Application(Container):
 
-    def __init__(self, appname = None):
-        super().__init__()
+    def __init__(self, appname = None, content = None, **kwargs):
+        super().__init__(content = content, **kwargs)
         if appname is not None:
             # load application description
             pass

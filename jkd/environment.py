@@ -4,16 +4,46 @@ Created on Wed Jan 31 09:48:33 2018
 
 """
 
+import asyncio
 from aiohttp import web
 
 from .container import *
 
 import aiohttp_jinja2
 import jinja2
+import time
+
+class Processor(Node):
+    def __init__(self, content = None, **kwargs):
+        super().__init__(**kwargs)
+        self.next_id = 1
+
+    async def process(self, future):
+        asyncio.sleep(2)
+        return "<html><head></head><body><p>Full one !</p></body></html>"
+
+    def get(self, callback, client):
+        time.sleep(1)
+        self.env.loop.call_soon(callback, client, "Process Result")
+
 
 class HtmlReport(Node):
-    async def get(self):
-        return "<html><head></head><body><p>Full one !</p></body></html>"
+
+    def __init__(self, content = None, processor = None, **kwargs):
+        super().__init__(**kwargs)
+        self.processor = processor
+
+    def process_get(self, future):
+        self.processor.get(self.get_cb, future)
+
+    def get_cb(self, future, result):
+        return future.set_result(result)
+
+    async def aget(self):
+        future = self.env.loop.create_future()
+        self.process_get(future)
+        await asyncio.wait_for(future, None)
+        return future.result()
 
 # The Web server part (to be put in a separate module)
 
@@ -22,20 +52,24 @@ application = HtmlReport()
 class Environment(Container):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(env=self)
+        self.web_app = web.Application()
+#        self.loop = self.web_app.loop
+        self.loop = asyncio.get_event_loop()
+        self.web_app.router.add_get('/', self.handle)
+        self.web_app.router.add_get('/{app}', self.handle)
+
+        self.processor = Processor(env = self)
+        self.test_application = HtmlReport(env = self, processor = self.processor)
 
     async def handle(self, request):
-        name = request.match_info.get('name', "Anonymous")
+        name = request.match_info.get('app', "Anonymous")
 
-        text = await application.get()
+        text = await self.test_application.aget()
 
         #text = "Hello, " + name
         return web.Response(body=text)
 
     def http_serve(self):
         print("serving...")
-        app = web.Application()
-        app.router.add_get('/', self.handle)
-        app.router.add_get('/{name}', self.handle)
-        web.run_app(app)
-        
+        web.run_app(self.web_app)

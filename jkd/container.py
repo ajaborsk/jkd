@@ -8,8 +8,8 @@ from .node import *
 
 class Container(Node):
     tagname = "container"
-    def __init__(self, content = None):
-        super().__init__()
+    def __init__(self, content = None, **kwargs):
+        super().__init__(**kwargs)
         if content is None:
             # a brand (and empty) new container
             #TODO
@@ -19,9 +19,9 @@ class Container(Node):
             # get container content from argument
             #TODO
             pass
-        
+
     def get(self):
         #return node content (a list of etree elements)
         #TODO
         return []
-        
+
