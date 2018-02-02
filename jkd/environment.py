@@ -86,6 +86,7 @@ class Environment(Container):
 
         self.web_app.router.add_get('/', self.handle)
         self.web_app.router.add_get('/{app}', self.handle)
+        self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
 
         self.processor = Processor(env = self)
         self.test_application = HtmlReport(env = self, processor = self.processor)
@@ -96,6 +97,7 @@ class Environment(Container):
         if name == "Anonymous":
             text = await self.test_application.aget()
         else:
+            logger.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
             self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", "testapp", loop=self.loop, stdout=asyncio.subprocess.PIPE)
             line = b' '
             text = ''
