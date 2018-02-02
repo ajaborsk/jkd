@@ -1,3 +1,5 @@
+from .logging import *
+
 import xml.etree.ElementTree as ET
 
 class Node:
@@ -8,10 +10,10 @@ class Node:
     def get_etnode(self):
         return ET.Element()
 
-    async def aget(self):
-        """Return a ElementTree that represent the Node full state (if possible)
+    async def aget(self, portname = None):
+        """Return a ElementTree that represent the Node full state (if possible) or the port value
         """
-        warn("")
+        logger.warning("Unimplemented aget() method.")
 
     def serialize(self):
         """

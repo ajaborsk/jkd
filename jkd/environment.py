@@ -78,6 +78,7 @@ class Environment(Container):
 
     def __init__(self):
         super().__init__(env=self)
+        self.contents = {}
         self.web_app = web.Application()
 
         self.loop = self.web_app.loop
