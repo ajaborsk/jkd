@@ -7,6 +7,7 @@ import logging
 log_handler = logging.StreamHandler()
 log_handler.setFormatter(logging.Formatter("%(asctime)s:%(name)s.%(module)s - %(levelname)s : %(message)s"))
 logger.addHandler(log_handler)
+logger.setLevel(logging.DEBUG)
 
 
 if len(sys.argv) <= 1:
@@ -30,6 +31,6 @@ elif sys.argv[1] == 'slave':
     else:
         logger.warning("Slave : No (sub)application name provided")
 else:
-    logger.warning("Unknown command")
+    logger.error("Unknown command : {:s}".format(sys.argv[1]))
 
 

@@ -24,3 +24,6 @@ Types de noeuds :
 Tests à prévoir :
 - Tous les Nodes doivent être sérialisables
 
+Pour le serveur WEB, typologie des adresses :
+  /application/node/subnode/subsubnode/port.[html/xls/pdf]
+
