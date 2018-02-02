@@ -29,7 +29,7 @@ class Processor(Node):
         asyncio.sleep(2)
         return "<html><head></head><body><p>Full one !</p></body></html>"
 
-    def get(self, callback, client):
+    def get(self, callback, client, portname = None, format = None):
         time.sleep(1)
         self.env.loop.call_soon(callback, client, "Process Result")
 
@@ -44,10 +44,9 @@ class HtmlReport(Node):
         # callback for the callback based interface
         return future.set_result(result)
 
-    async def aget(self):
+    async def aget(self, portname = None, format = None):
         # create a future to "manage" the callback based interface
         future = self.env.loop.create_future()
-
         # call a callback based interface
         self.processor.get(self.get_cb, future)
         # await for the future to be completed (by the callback)
@@ -57,6 +56,8 @@ class HtmlReport(Node):
 
 
 # The Web server part (to be put in a separate module)
+
+import pyodbc
 
 application = HtmlReport()
 
@@ -78,7 +79,6 @@ class Environment(Container):
 
     def __init__(self):
         super().__init__(env=self)
-        self.contents = {}
         self.web_app = web.Application()
 
         self.loop = self.web_app.loop
