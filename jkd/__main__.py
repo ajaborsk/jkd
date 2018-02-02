@@ -1,12 +1,13 @@
 import sys
 
 import jkd
+from jkd.logging import *
 
-a = jkd.Data()
+import logging
+log_handler = logging.StreamHandler()
+log_handler.setFormatter(logging.Formatter("%(asctime)s:%(name)s.%(module)s - %(levelname)s : %(message)s"))
+logger.addHandler(log_handler)
 
-#print("jkd launched", a)
-#print(sys.argv)
-#jkd.serve()
 
 if len(sys.argv) <= 1:
     environment = jkd.Environment()
@@ -14,14 +15,21 @@ if len(sys.argv) <= 1:
 elif sys.argv[1] == 'http':
     environment = jkd.Environment()
     environment.http_serve()
+elif sys.argv[1] == 'batch':
+    if len(sys.argv) == 3:
+        app_name = sys.argv[2]
+        #TODO
+        print("application result : blabla...")
+    else:
+        logger.warning("Batch mode : No application name provided")
 elif sys.argv[1] == 'slave':
     if len(sys.argv) == 3:
         app_name = sys.argv[2]
         #TODO
         print("(sub)application result : blabla...")
     else:
-        print("Slave : No (sub)application name provided")
+        logger.warning("Slave : No (sub)application name provided")
 else:
-    print("Unknown command")
+    logger.warning("Unknown command")
 
 

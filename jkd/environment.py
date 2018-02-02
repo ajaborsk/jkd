@@ -9,14 +9,16 @@ import asyncio
 if sys.platform == 'win32':
     loop = asyncio.ProactorEventLoop()
     asyncio.set_event_loop(loop)
-    
+
 from aiohttp import web
 
+from .logging import *
 from .container import *
 
 import aiohttp_jinja2
 import jinja2
 import time
+
 
 class Processor(Node):
     def __init__(self, content = None, **kwargs):
@@ -53,9 +55,24 @@ class HtmlReport(Node):
         # return the future result
         return future.result()
 
+
 # The Web server part (to be put in a separate module)
 
 application = HtmlReport()
+
+class Subprocessus(Node):
+    def __init__(self, content=None):
+        super().__init__(content)
+
+    def launch(self):
+        pass
+
+    async def aget_status(self):
+        pass
+
+    async def aget(self):
+        pass
+
 
 class Environment(Container):
 
@@ -79,7 +96,7 @@ class Environment(Container):
         if name == "Anonymous":
             text = await self.test_application.aget()
         else:
-            self.subprocess = await asyncio.create_subprocess_exec("Python", "-m", "jkd", "slave", "testapp", loop=self.loop, stdout=asyncio.subprocess.PIPE)
+            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", "testapp", loop=self.loop, stdout=asyncio.subprocess.PIPE)
             line = b' '
             text = ''
             while line != b'':
@@ -93,5 +110,5 @@ class Environment(Container):
         return web.Response(body=text)
 
     def http_serve(self):
-        print("serving...")
+        logger.info("serving...")
         web.run_app(self.web_app)
