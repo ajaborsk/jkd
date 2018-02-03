@@ -30,4 +30,4 @@ Pour le serveur WEB, typologie des adresses :
 Un rapport peut être :
   Offline (contient toutes les données) ou Online (va chercher des données dynamiquement)
   Static (figé et donc Offline) ou Dynamic (Online or Offline)
-  Le type est *fixe*
+  Le type est *fixe* : html, pdf, web_page, txt...
