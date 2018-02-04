@@ -14,6 +14,7 @@ from aiohttp import web
 
 from .logging import *
 from .container import *
+from .report_bokeh_offline_html import *
 
 import aiohttp_jinja2
 import jinja2
@@ -31,14 +32,6 @@ cds = ColumnDataSource(data = {
 'y1':[0, 8, 2, 4, 6, 9, 5, 6, 25, 28,  4, 7]
 })
 
-x1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-y1 = [0, 8, 2, 4, 6, 9, 5, 6, 25, 28, 4, 7]
-
-
-x2 = [2, 5, 7, 15, 18, 19, 25, 28, 9, 10, 4]
-y2 = [2, 4, 6, 9, 15, 18, 0, 8, 2, 25, 28]
-x3 = [0, 1, 0, 8, 2, 4, 6, 9, 7, 8, 9]
-y3 = [0, 8, 4, 6, 9, 15, 18, 19, 19, 25, 28]
 
 # select the tools we want
 TOOLS="pan,wheel_zoom,box_zoom,reset,save"
@@ -154,8 +147,10 @@ class Environment(Container):
         self.web_app.router.add_get('/{app}', self.handle)
         self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
 
-        self.processor = Processor(env = self)
-        self.test_application = HtmlReport(env = self, processor = self.processor)
+#        self.processor = Processor(env = self)
+#        self.test_application = HtmlReport(env = self, processor = self.processor)
+        self.test_application = BokehOfflineReportHtml(env = self)
+
 
     async def handle(self, request):
         name = request.match_info.get('app', "Anonymous")
