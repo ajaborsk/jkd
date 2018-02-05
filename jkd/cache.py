@@ -7,6 +7,7 @@ Created on Mon Feb  5 14:38:12 2018
 
 import datetime
 
+import asyncio
 from .node import *
 
 class Cache(Node):
@@ -17,6 +18,8 @@ class Cache(Node):
         self.contents = None
         self.sources = [] # inputs list
         self.subscriptions = [] # output
+        self.output = asyncio.Queue()
+        self.input = asyncio.Queue()
     
     async def aset(self, value):
         self.contents = value
