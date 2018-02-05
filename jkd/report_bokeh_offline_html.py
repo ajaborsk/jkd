@@ -26,6 +26,13 @@ class BokehOfflineReportHtml(Node):
 
     def __init__(self, content = None, **kwargs):
         super().__init__(**kwargs)
+
+        # ports
+        # output => html dynmamic page
+        self.output = Port()
+        # input => data table
+        self.input = Port()
+
         self.cds = ColumnDataSource(data = {
                 'x1':[0, 1, 2, 3, 4, 5, 6, 7,  8,  9, 10, 9],
                 'y1':[0, 8, 2, 4, 6, 9, 5, 6, 25, 28,  4, 7]
@@ -37,6 +44,9 @@ class BokehOfflineReportHtml(Node):
         # build our figures
         self.p1 = figure(x_range=self.xr1, y_range=self.yr1, tools=self.TOOLS, plot_width=900, plot_height=600)
         self.p1.scatter('x1', 'y1', size=12, color="blue", alpha=0.5, source = self.cds)
+
+    async def process(self, intput, output):
+        pass
 
     async def aget(self, portname = None):
         return file_html(self.p1, CDN, "The title")
