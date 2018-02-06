@@ -4,6 +4,7 @@ Created on Wed Jan 31 09:48:33 2018
 
 """
 import sys
+import json
 import asyncio
 
 if sys.platform == 'win32':
@@ -117,20 +118,60 @@ class HtmlReport(Node):
 
 #import pyodbc
 
+def jkd_serialize(data):
+    return json.dumps(data).encode('utf8')
+
+def jkd_deserialize(bytestring):
+    return json.loads(bytestring)
+
 application = HtmlReport()
 
 class Subprocessus(Node):
-    def __init__(self, content=None):
-        super().__init__(content)
+    def __init__(self, appname, content=None, **kwargs):
+        super().__init__(**kwargs)
+        self.subprocess = None
+        self.appname = appname
+        self.reply = None
+        
+    async def launch(self):
+        self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.appname, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+        done = False
+        self.reply = ''
 
-    def launch(self):
-        pass
+    async def loop(self):
+        while not done:
+            print("Waiting...", file=sys.stderr, flush=True)
+            msg = await self.recv()
+            if msg['reply'] == 'exited':
+                done = True
+            else:
+                self.reply = msg['reply']
+        # end task
+        await self.subprocess.wait()
+        await self.bg
+        self.subprocess = None
 
-    async def aget_status(self):
-        pass
+    def send(self, msg):
+        print("Sending : ", str(msg), file=sys.stderr, flush=True)
+        self.subprocess.stdin.write(jkd_serialize(msg)+b'\n')
+
+    async def recv(self):
+        line = await self.subprocess.stdout.readline()
+        msg = jkd_deserialize(line[:-1])
+        return msg
 
     async def aget(self):
-        pass
+        if self.subprocess is None:
+            await self.launch()
+            self.bg = self.env.loop.create_task(self.loop())
+            
+        print("Running on...", file=sys.stderr, flush=True)
+        # Try to write...
+        self.send({'command':'go'})
+        
+        await asyncio.sleep(1)
+        
+        return self.reply
 
 
 async def continuous_task(c):
@@ -143,6 +184,88 @@ class Environment(Container):
 
     def __init__(self):
         super().__init__(env=self)
+        self.loop = asyncio.get_event_loop()
+
+    def run(self):
+        # default
+        self.loop.run_forever()
+
+
+#class MyProtocol(asyncio.Protocol):
+#
+#    def connection_made(self, transport):
+#        print('pipe opened', file=sys.stderr, flush=True)
+#        super(MyProtocol, self).connection_made(transport=transport)
+#
+#    def data_received(self, data):
+#        print('received: {!r}'.format(data), file=sys.stderr, flush=True)
+#        print(data.decode(), file=sys.stderr, flush=True)
+#        super(MyProtocol, self).data_received(data)
+#
+##    def pipe_data_received(self, data):
+##        print('pipe received: {!r}'.format(data), file=sys.stderr, flush=True)
+##        print(data.decode(), file=sys.stderr, flush=True)
+##        super(MyProtocol, self).data_received(data)
+##
+#    def connection_lost(self, exc):
+#        print('pipe closed', file=sys.stderr, flush=True)
+#        super(MyProtocol, self).connection_lost(exc)
+        
+
+
+class SubApplication(Environment):
+    def __init__(self, appname, **kwargs):
+        super().__init__(**kwargs)
+        self.done = False
+        # Get inputs from stdin & send output to stdout
+        self.appname = appname
+        self.main = self.loop.create_task(self.task())
+        #self.read_p = self.loop.connect_read_pipe(MyProtocol, sys.stdin)
+        self.reader_t = self.loop.create_task(self.aio_readline())
+        print(sys.stdin.read(3), file = sys.stderr, flush=True)
+        #self.write_p = self.loop.connect_write_pipe(MyProtocol, sys.stdout)
+        #self.loop.add_reader(sys.stdin.fileno(), self.reader)
+        #self.loop.add_writer(sys.stdout.fileno(), self.writer)
+        #sys.stdout.write("Subapplication init OK...")
+
+    def send(self, msg):
+        line = jkd_serialize(msg) + '\n'
+        sys.stdout.writeln(line, flush=True)
+
+    async def handler(self, msg):
+        if msg['cmd'] == 'go':
+            self.reply = 'Lplsdnsdn skdjf sdkdjf klsdj f'
+            self.send(self.reply)
+        elif msg['cmd'] == 'exit':
+            self.reply = {'reply':'exited'}
+            self.send(self.reply)
+            self.done = True
+            self.loop.exit()
+
+    async def aio_readline(self):
+        while not self.done:
+            line = await self.loop.run_in_executor(None, sys.stdin.readline)
+            msg = jkd_deserialize(line[:-1])
+            await self.handler(msg)
+            #print('Got line:', line, end='', file=sys.stderr, flush=True)
+
+#    def reader(self, stream):
+#        sys.stderr.write("reader...")
+#        pass
+#    
+#    def writer(self, stream):
+#        sys.stderr.write("writer...")
+#        pass
+#
+    async def task(self):
+        while True:
+            await asyncio.sleep(3)
+
+
+class HttpServer(Environment):
+
+    def __init__(self):
+        super().__init__()
         self.web_app = web.Application()
 
         self.loop = self.web_app.loop
@@ -158,6 +281,8 @@ class Environment(Container):
         self.test_application = BokehOfflineReportHtml(env = self)
         self.count = 1
         self.task = self.loop.create_task(continuous_task(self))
+        
+        self.ext_app = Subprocessus('heavyapp', env = self)
 
 
     async def handle(self, request):
@@ -169,19 +294,20 @@ class Environment(Container):
             #text = await self.test_application.aget()
         else:
             logger.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
-            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", "testapp", loop=self.loop, stdout=asyncio.subprocess.PIPE)
-            line = b' '
-            text = ''
-            while line != b'':
-                line = await self.subprocess.stdout.readline()
-                print('line=', line)
-                text += line.decode('ascii')
-            await self.subprocess.wait()
+            #self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", "testapp", loop=self.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+            #line = b' '
+            #text = ''
+            #while line != b'':
+            #    line = await self.subprocess.stdout.readline()
+            #    print('line=', line)
+            #    text += line.decode('ascii')
+            #await self.subprocess.wait()
+            text = await self.ext_app.aget()
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
         #text = "Hello, " + name
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
-    def http_serve(self):
+    def run(self):
         logger.info("serving...")
         web.run_app(self.web_app)
