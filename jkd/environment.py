@@ -133,6 +133,12 @@ class Subprocessus(Node):
         pass
 
 
+async def continuous_task(c):
+    while True:
+        await asyncio.sleep(1)
+        c.count += 1
+
+
 class Environment(Container):
 
     def __init__(self):
@@ -150,13 +156,17 @@ class Environment(Container):
 #        self.processor = Processor(env = self)
 #        self.test_application = HtmlReport(env = self, processor = self.processor)
         self.test_application = BokehOfflineReportHtml(env = self)
+        self.count = 1
+        self.task = self.loop.create_task(continuous_task(self))
 
 
     async def handle(self, request):
         name = request.match_info.get('app', "Anonymous")
 
         if name == "Anonymous":
-            text = await self.test_application.aget()
+            text = "<html><body><p>Count = {}</p></body></html>".format(self.count)
+
+            #text = await self.test_application.aget()
         else:
             logger.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
             self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", "testapp", loop=self.loop, stdout=asyncio.subprocess.PIPE)
