@@ -9,10 +9,7 @@ log_handler.setFormatter(logging.Formatter("%(asctime)s:[%(process)s]jkd.%(modul
 logger.addHandler(log_handler)
 logger.setLevel(logging.DEBUG)
 
-
 from .node import *
-
-
 
 if len(sys.argv) <= 1:
     environment = jkd.HttpServer()
