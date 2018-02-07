@@ -127,6 +127,7 @@ def jkd_deserialize(bytestring):
 application = HtmlReport()
 
 class Subprocessus(Node):
+    #TODO: Manage subprocessus death (and get error message and backtrace if possible)...
     def __init__(self, appname, content=None, **kwargs):
         super().__init__(**kwargs)
         self.subprocess = None
@@ -172,8 +173,8 @@ class Subprocessus(Node):
         #print("Running on...", file=sys.stderr, flush=True)
         # Try to write...
         self.send({'cmd':'get'})
-
-        await asyncio.sleep(1)
+        #TODO: Wait a little bit for the message reply !
+        #await asyncio.sleep(1)
 
         return self.reply
 
@@ -223,7 +224,10 @@ class SubApplication(Environment):
         self.done = False
         # Get inputs from stdin & send output to stdout
         self.appname = appname
-        self.main = self.loop.create_task(self.task())
+
+        self.test_count = 0
+        self.main = self.loop.create_task(self.test_task())
+
         #self.read_p = self.loop.connect_read_pipe(MyProtocol, sys.stdin)
         self.reader_t = self.loop.create_task(self.aio_readline())
         #print(sys.stdin.read(3), file = sys.stderr, flush=True)
@@ -243,7 +247,7 @@ class SubApplication(Environment):
     async def handler(self, msg):
         logger.debug("SubApplication : Handling message : {}".format(str(msg)))
         if msg['cmd'] == 'get':
-            self.reply = {'reply':'Lplsdnsdn skdjf sdkdjf klsdj f'}
+            self.reply = {'reply':'This is the reply from the subprocess application : ' + str(self.test_count) + ' cycles done'}
             self.send(self.reply)
         elif msg['cmd'] == 'exit':
             self.reply = {'reply':'exited'}
@@ -267,9 +271,11 @@ class SubApplication(Environment):
 #        sys.stderr.write("writer...")
 #        pass
 #
-    async def task(self):
+    async def test_task(self):
         while True:
-            await asyncio.sleep(3)
+            await asyncio.sleep(1)
+            self.test_count += 1
+            self.send({'reply':'Update at ' + str(self.test_count) + ' cycles'})
 
 
 class HttpServer(Environment):

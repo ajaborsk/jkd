@@ -5,7 +5,7 @@ from jkd.logging import *
 
 import logging
 log_handler = logging.StreamHandler()
-log_handler.setFormatter(logging.Formatter("%(asctime)s:%(name)s.%(module)s - %(levelname)s : %(message)s"))
+log_handler.setFormatter(logging.Formatter("%(asctime)s:[%(process)s]jkd.%(module)s - %(levelname)s : %(message)s"))
 logger.addHandler(log_handler)
 logger.setLevel(logging.DEBUG)
 
