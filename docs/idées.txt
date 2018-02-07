@@ -25,7 +25,7 @@ Tests à prévoir :
 - Tous les Nodes doivent être sérialisables
 
 Pour le serveur WEB, typologie des adresses :
-  /application/node/subnode/subsubnode/port.[html/xls/pdf]
+  /application/node/subnode/subsubnode/port.[html/xls/pdf/csv/svg]
 
 Un rapport peut être :
   Offline (contient toutes les données) ou Online (va chercher des données dynamiquement)

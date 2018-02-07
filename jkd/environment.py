@@ -132,18 +132,21 @@ class Subprocessus(Node):
         self.subprocess = None
         self.appname = appname
         self.reply = None
-        
+
     async def launch(self):
+        logger.debug("Subprocessus : Launching subprocessus...")
         self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.appname, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-        done = False
+        self.done = False
         self.reply = ''
 
     async def loop(self):
-        while not done:
-            print("Waiting...", file=sys.stderr, flush=True)
+        while not self.done:
+            logger.debug("Subprocessus : Waiting for messages...")
+            #print("Waiting...", file=sys.stderr, flush=True)
             msg = await self.recv()
+            logger.debug("Subprocessus : Handling message : {}".format(str(msg)))
             if msg['reply'] == 'exited':
-                done = True
+                self.done = True
             else:
                 self.reply = msg['reply']
         # end task
@@ -152,25 +155,26 @@ class Subprocessus(Node):
         self.subprocess = None
 
     def send(self, msg):
-        print("Sending : ", str(msg), file=sys.stderr, flush=True)
-        self.subprocess.stdin.write(jkd_serialize(msg)+b'\n')
+        logger.debug("Subprocessus : Sending : {}".format(str(msg)))
+        #print("Sending : ", str(msg), file=sys.stderr, flush=True)
+        self.subprocess.stdin.write(jkd_serialize(msg) + b'\n')
 
     async def recv(self):
         line = await self.subprocess.stdout.readline()
         msg = jkd_deserialize(line[:-1])
         return msg
 
-    async def aget(self):
+    async def aget(self, address = None):
         if self.subprocess is None:
             await self.launch()
             self.bg = self.env.loop.create_task(self.loop())
-            
-        print("Running on...", file=sys.stderr, flush=True)
+        logger.debug("Subprocessus : Running on...")
+        #print("Running on...", file=sys.stderr, flush=True)
         # Try to write...
-        self.send({'command':'go'})
-        
+        self.send({'cmd':'get'})
+
         await asyncio.sleep(1)
-        
+
         return self.reply
 
 
@@ -210,7 +214,7 @@ class Environment(Container):
 #    def connection_lost(self, exc):
 #        print('pipe closed', file=sys.stderr, flush=True)
 #        super(MyProtocol, self).connection_lost(exc)
-        
+
 
 
 class SubApplication(Environment):
@@ -222,19 +226,24 @@ class SubApplication(Environment):
         self.main = self.loop.create_task(self.task())
         #self.read_p = self.loop.connect_read_pipe(MyProtocol, sys.stdin)
         self.reader_t = self.loop.create_task(self.aio_readline())
-        print(sys.stdin.read(3), file = sys.stderr, flush=True)
+        #print(sys.stdin.read(3), file = sys.stderr, flush=True)
         #self.write_p = self.loop.connect_write_pipe(MyProtocol, sys.stdout)
         #self.loop.add_reader(sys.stdin.fileno(), self.reader)
         #self.loop.add_writer(sys.stdout.fileno(), self.writer)
         #sys.stdout.write("Subapplication init OK...")
 
     def send(self, msg):
-        line = jkd_serialize(msg) + '\n'
-        sys.stdout.writeln(line, flush=True)
+        logger.debug("SubApplication : Sending message : {}".format(str(msg)))
+        line = jkd_serialize(msg) + b'\n'
+        logger.debug("SubApplication : Serialized message : {}".format(line))
+        # To write binary data to stdout, use buffer.raw
+        sys.stdout.buffer.raw.write(line)
+        logger.debug("SubApplication : message sent")
 
     async def handler(self, msg):
-        if msg['cmd'] == 'go':
-            self.reply = 'Lplsdnsdn skdjf sdkdjf klsdj f'
+        logger.debug("SubApplication : Handling message : {}".format(str(msg)))
+        if msg['cmd'] == 'get':
+            self.reply = {'reply':'Lplsdnsdn skdjf sdkdjf klsdj f'}
             self.send(self.reply)
         elif msg['cmd'] == 'exit':
             self.reply = {'reply':'exited'}
@@ -244,6 +253,7 @@ class SubApplication(Environment):
 
     async def aio_readline(self):
         while not self.done:
+            logger.debug("SubApplication : Waiting...")
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
             await self.handler(msg)
@@ -252,7 +262,7 @@ class SubApplication(Environment):
 #    def reader(self, stream):
 #        sys.stderr.write("reader...")
 #        pass
-#    
+#
 #    def writer(self, stream):
 #        sys.stderr.write("writer...")
 #        pass
@@ -281,7 +291,7 @@ class HttpServer(Environment):
         self.test_application = BokehOfflineReportHtml(env = self)
         self.count = 1
         self.task = self.loop.create_task(continuous_task(self))
-        
+
         self.ext_app = Subprocessus('heavyapp', env = self)
 
 
@@ -302,7 +312,8 @@ class HttpServer(Environment):
             #    print('line=', line)
             #    text += line.decode('ascii')
             #await self.subprocess.wait()
-            text = await self.ext_app.aget()
+            address = request.match_info.get('address', "")
+            text = await self.ext_app.aget(address)
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
         #text = "Hello, " + name
