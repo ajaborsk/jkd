@@ -152,7 +152,9 @@ setup(
     data_files=[('my_data', ['data/data_file']),
                 ('static', ['static/css/jkd.css',
                             'static/scripts/jquery-3.3.1.min.js',
-                            'static/scripts/jquery-3.3.1.min.map']),],  # Optional
+                            'static/scripts/jquery-3.3.1.min.map']),
+                ('templates', ['templates/tmpl.jinja2',]),
+                ],  # Optional
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

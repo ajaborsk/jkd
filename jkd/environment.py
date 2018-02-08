@@ -277,6 +277,8 @@ class SubApplication(Environment):
             self.test_count += 1
             self.send({'reply':'Update at ' + str(self.test_count) + ' cycles'})
 
+import jinja2
+import aiohttp_jinja2
 
 class HttpServer(Environment):
 
@@ -291,6 +293,7 @@ class HttpServer(Environment):
         self.web_app.router.add_get('/', self.handle)
         self.web_app.router.add_static('/static', 'static/')
 #        self.web_app.router.add_get('/ws', self.websocket_handler)
+        self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
         self.web_app.router.add_get('/{app}', self.handle)
         self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
 #        self.processor = Processor(env = self)
@@ -298,6 +301,8 @@ class HttpServer(Environment):
         self.test_application = BokehOfflineReportHtml(env = self)
         self.count = 1
         self.task = self.loop.create_task(continuous_task(self))
+
+        aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
         self.ext_app = Subprocessus('heavyapp', env = self)
 
@@ -319,6 +324,10 @@ class HttpServer(Environment):
         print('websocket connection closed')
 
         return ws
+
+    @aiohttp_jinja2.template('tmpl.jinja2')
+    def tmpl_handler(self, request):
+        return {'name': 'Andrew', 'surname': 'Svetlov'}
 
 
     async def handle(self, request):
