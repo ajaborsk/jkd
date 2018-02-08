@@ -12,6 +12,7 @@ if sys.platform == 'win32':
     asyncio.set_event_loop(loop)
 
 from aiohttp import web
+import aiohttp
 
 from .logging import *
 from .container import *
@@ -292,10 +293,10 @@ class HttpServer(Environment):
 
         self.web_app.router.add_get('/', self.handle)
         self.web_app.router.add_static('/static', 'static/')
-#        self.web_app.router.add_get('/ws', self.websocket_handler)
+        self.web_app.router.add_get('/ws/{ed}', self.websocket_handler)
         self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
-        self.web_app.router.add_get('/{app}', self.handle)
-        self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
+        #self.web_app.router.add_get('/{app}', self.handle)
+        #self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
 #        self.processor = Processor(env = self)
 #        self.test_application = HtmlReport(env = self, processor = self.processor)
         self.test_application = BokehOfflineReportHtml(env = self)
