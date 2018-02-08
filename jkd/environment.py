@@ -289,9 +289,10 @@ class HttpServer(Environment):
             self.loop = asyncio.get_event_loop()
 
         self.web_app.router.add_get('/', self.handle)
+        self.web_app.router.add_static('/static', 'static/')
+#        self.web_app.router.add_get('/ws', self.websocket_handler)
         self.web_app.router.add_get('/{app}', self.handle)
         self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
-
 #        self.processor = Processor(env = self)
 #        self.test_application = HtmlReport(env = self, processor = self.processor)
         self.test_application = BokehOfflineReportHtml(env = self)
@@ -299,6 +300,25 @@ class HttpServer(Environment):
         self.task = self.loop.create_task(continuous_task(self))
 
         self.ext_app = Subprocessus('heavyapp', env = self)
+
+    async def websocket_handler(self, request):
+
+        ws = web.WebSocketResponse()
+        await ws.prepare(request)
+
+        async for msg in ws:
+            if msg.type == aiohttp.WSMsgType.TEXT:
+                if msg.data == 'close':
+                    await ws.close()
+                else:
+                    await ws.send_str(msg.data + '/answer')
+            elif msg.type == aiohttp.WSMsgType.ERROR:
+                print('ws connection closed with exception %s' %
+                  ws.exception())
+
+        print('websocket connection closed')
+
+        return ws
 
 
     async def handle(self, request):
