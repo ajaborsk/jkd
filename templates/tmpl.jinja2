@@ -10,6 +10,7 @@
   <p>{{name}}</p>
   <!-- Le reste du contenu -->
   <p id="test1">Blabla</p>
+  <span id="push">Press me</span>
 <script>
 
 $(document).ready(function()
@@ -17,22 +18,22 @@ $(document).ready(function()
   // jQuery methods go here...
   $("#test1").text("Hello world!");
 
+  $("#push").click(function(evt){websocket.send("lokfid")});
+
   onMessage = function(evt)
    {
-    $("#test1").text("Response : " + evt.data); 
+    $("#test1").text("Response : " + evt.data);
    };
- 
+
   websocket = new WebSocket("ws://localhost:8080/ws/mlk");
   websocket.onopen = function(evt)
    {
-     websocket.send("Plikdf 1"); 
+     websocket.send("Plikdf 1");
    };
 
 //    websocket.onclose = function(evt) { onClose(evt) };
     websocket.onmessage = function(evt) { onMessage(evt) };
-//    websocket.onerror = function(evt) { onError(evt) };  
-
-   
+//    websocket.onerror = function(evt) { onError(evt) };
 
 });
 
