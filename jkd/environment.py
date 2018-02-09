@@ -223,25 +223,19 @@ class SubApplication(Environment):
     def __init__(self, appname, **kwargs):
         super().__init__(**kwargs)
         self.done = False
-        # Get inputs from stdin & send output to stdout
         self.appname = appname
 
         self.test_count = 0
         self.main = self.loop.create_task(self.test_task())
 
-        #self.read_p = self.loop.connect_read_pipe(MyProtocol, sys.stdin)
+        # Launch the reading/handle mainloop task
         self.reader_t = self.loop.create_task(self.aio_readline())
-        #print(sys.stdin.read(3), file = sys.stderr, flush=True)
-        #self.write_p = self.loop.connect_write_pipe(MyProtocol, sys.stdout)
-        #self.loop.add_reader(sys.stdin.fileno(), self.reader)
-        #self.loop.add_writer(sys.stdout.fileno(), self.writer)
-        #sys.stdout.write("Subapplication init OK...")
 
     def send(self, msg):
         logger.debug("SubApplication : Sending message : {}".format(str(msg)))
         line = jkd_serialize(msg) + b'\n'
         logger.debug("SubApplication : Serialized message : {}".format(line))
-        # To write binary data to stdout, use buffer.raw
+        # To be sure to write binary data to stdout, use .buffer.raw
         sys.stdout.buffer.raw.write(line)
         logger.debug("SubApplication : message sent")
 
@@ -257,26 +251,19 @@ class SubApplication(Environment):
             self.loop.exit()
 
     async def aio_readline(self):
+        # The mainloop
         while not self.done:
             logger.debug("SubApplication : Waiting...")
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
             await self.handler(msg)
-            #print('Got line:', line, end='', file=sys.stderr, flush=True)
 
-#    def reader(self, stream):
-#        sys.stderr.write("reader...")
-#        pass
-#
-#    def writer(self, stream):
-#        sys.stderr.write("writer...")
-#        pass
-#
     async def test_task(self):
         while True:
             await asyncio.sleep(1)
             self.test_count += 1
             self.send({'reply':'Update at ' + str(self.test_count) + ' cycles'})
+
 
 import json
 import jinja2
