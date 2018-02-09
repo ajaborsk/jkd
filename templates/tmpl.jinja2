@@ -11,30 +11,40 @@
   <!-- Le reste du contenu -->
   <p id="test1">Blabla</p>
   <span id="push">Press me</span>
+  <div id="status_bar"><span id="conn_status">Connecting...</span></div>
 <script>
 
 $(document).ready(function()
  {
   // jQuery methods go here...
+  // First of all: launch websocket connection
+  websocket = new WebSocket("ws://localhost:8080/ws");
+
   $("#test1").text("Hello world!");
 
-  $("#push").click(function(evt){websocket.send("lokfid")});
+  $("#push").click(function(evt){websocket.send(JSON.stringify({"data":"lokfid"}))});
 
-  onMessage = function(evt)
-   {
-    $("#test1").text("Response : " + evt.data);
-   };
-
-  websocket = new WebSocket("ws://localhost:8080/ws/mlk");
   websocket.onopen = function(evt)
    {
-     websocket.send("Plikdf 1");
+    $("#conn_status").text("Connected");
+     websocket.send(JSON.stringify({"data":"Plikdf 1"}));
    };
 
-//    websocket.onclose = function(evt) { onClose(evt) };
-    websocket.onmessage = function(evt) { onMessage(evt) };
-//    websocket.onerror = function(evt) { onError(evt) };
+  // Message handling
+  websocket.onmessage = function(evt)
+   {
+    msg = JSON.parse(evt.data);
+    $("#test1").text("Response : " + msg.reply);
+   };
 
+  websocket.onclose = function(evt)
+   {
+    $("#conn_status").text("Unconnected");
+   };
+
+//TODO:
+// Error handling
+//  websocket.onerror = function(evt) { onError(evt) };
 });
 
 </script>

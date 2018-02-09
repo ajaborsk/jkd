@@ -278,6 +278,7 @@ class SubApplication(Environment):
             self.test_count += 1
             self.send({'reply':'Update at ' + str(self.test_count) + ' cycles'})
 
+import json
 import jinja2
 import aiohttp_jinja2
 
@@ -293,7 +294,7 @@ class HttpServer(Environment):
 
         self.web_app.router.add_get('/', self.handle)
         self.web_app.router.add_static('/static', 'static/')
-        self.web_app.router.add_get('/ws/{ed}', self.websocket_handler)
+        self.web_app.router.add_get('/ws', self.ws_handler)
         self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
         #self.web_app.router.add_get('/{app}', self.handle)
         #self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
@@ -307,24 +308,27 @@ class HttpServer(Environment):
 
         self.ext_app = Subprocessus('heavyapp', env = self)
 
-    async def websocket_handler(self, request):
+    async def ws_send(self, message):
+        if self.ws is not None:
+            self.ws.send_str(json.dumps(message))
 
-        ws = web.WebSocketResponse()
-        await ws.prepare(request)
+    async def ws_handler(self, request):
+        self.ws = web.WebSocketResponse()
+        await self.ws.prepare(request)
 
-        async for msg in ws:
+        async for msg in self.ws:
             if msg.type == aiohttp.WSMsgType.TEXT:
+                message = json.loads(msg.data);
                 if msg.data == 'close':
-                    await ws.close()
+                    await self.ws.close()
                 else:
-                    await ws.send_str(msg.data + '/answer')
+                    # test echo reply
+                    await self.ws_send({"reply": message['data'] + '/answer'})
             elif msg.type == aiohttp.WSMsgType.ERROR:
-                print('ws connection closed with exception %s' %
-                  ws.exception())
-
-        print('websocket connection closed')
-
-        return ws
+                logger.warning('ws connection closed with exception %s' %
+                  self.ws.exception())
+        logger.debug('websocket connection closed')
+        return self.ws
 
     @aiohttp_jinja2.template('tmpl.jinja2')
     def tmpl_handler(self, request):
