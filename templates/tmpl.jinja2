@@ -10,31 +10,54 @@
   <p>{{name}}</p>
   <!-- Le reste du contenu -->
   <p id="test1">Blabla</p>
-  <span id="push">Press me</span>
+  <div>
+    <span id="push1">Launch : </span>
+    <span id="result1">Result</span>
+  </div>
+  <div>
+    <span id="push2">Launch : </span>
+    <span id="result2">Result</span>
+  </div>
   <div id="status_bar"><span id="conn_status">Connecting...</span></div>
 <script>
 
 $(document).ready(function()
  {
-  // jQuery methods go here...
+  send = function(msg)
+   {
+    websocket.send(JSON.stringify(msg));   
+   };
+   
   // First of all: launch websocket connection
   websocket = new WebSocket("ws://localhost:8080/ws");
 
   $("#test1").text("Hello world!");
 
-  $("#push").click(function(evt){websocket.send(JSON.stringify({"data":"lokfid"}))});
+  $("#push1").click(function(evt){send({'qid':'q1', 'query':'test1'})});
+  $("#push2").click(function(evt){send({'qid':'q2', 'query':'test2'})});
 
   websocket.onopen = function(evt)
    {
     $("#conn_status").text("Connected");
-     websocket.send(JSON.stringify({"data":"Plikdf 1"}));
+     //send({"data":"Plikdf 1"});
    };
 
   // Message handling
   websocket.onmessage = function(evt)
    {
     msg = JSON.parse(evt.data);
-    $("#test1").text("Response : " + msg.reply);
+    if (msg.qid == 'q1') 
+     {
+      $("#result1").text("Response : " + JSON.stringify(msg));
+     }
+    else if (msg.qid == 'q2') 
+     {
+      $("#result2").text("Response : " + JSON.stringify(msg));
+     }
+    else
+     { 
+      $("#test1").text("Response : " + JSON.stringify(msg));
+     }
    };
 
   websocket.onclose = function(evt)

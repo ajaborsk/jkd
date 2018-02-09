@@ -134,30 +134,40 @@ class Subprocessus(Node):
         self.subprocess = None
         self.appname = appname
         self.reply = None
+        self.subscription = None
+
+    def subscribe(self, coro):
+        self.subscription = coro
 
     async def launch(self):
-        logger.debug("Subprocessus : Launching subprocessus...")
+        logger.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
         self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.appname, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
         self.done = False
         self.reply = ''
 
     async def loop(self):
         while not self.done:
-            logger.debug("Subprocessus : Waiting for messages...")
+            logger.debug("Subprocessus {}s : Waiting for messages...".format(self.appname))
             #print("Waiting...", file=sys.stderr, flush=True)
             msg = await self.recv()
-            logger.debug("Subprocessus : Handling message : {}".format(str(msg)))
-            if msg['reply'] == 'exited':
+            logger.debug("Subprocessus {}s : Handling message : {}".format(self.appname, str(msg)))
+            if 0:#msg['reply'] == 'exited':
                 self.done = True
             else:
-                self.reply = msg['reply']
+                #self.reply = msg['reply']
+                if self.subscription is not None:
+#                if asyncio.iscoroutine(self.subscription):
+                    pass
+                    logger.debug("Subprocessus {}s : transfering message {}...".format(self.appname, str(msg)))
+                    await self.subscription(msg)
+                    logger.debug("Subprocessus {}s : message transfered : {}".format(self.appname, str(msg)))
         # end task
         await self.subprocess.wait()
         await self.bg
         self.subprocess = None
 
     def send(self, msg):
-        logger.debug("Subprocessus : Sending : {}".format(str(msg)))
+        logger.debug("Subprocessus {}s : Sending : {}".format(self.appname, str(msg)))
         #print("Sending : ", str(msg), file=sys.stderr, flush=True)
         self.subprocess.stdin.write(jkd_serialize(msg) + b'\n')
 
@@ -167,14 +177,14 @@ class Subprocessus(Node):
         return msg
 
     # Initiate a query (launching subprocess if not already running)
-    async def aget(self, address = None):
+    async def aget(self, qid = None):
         if self.subprocess is None:
             await self.launch()
             self.bg = self.env.loop.create_task(self.loop())
-        logger.debug("Subprocessus : Running on...")
+        logger.debug("Subprocessus {}s: Running on...".format(self.appname))
         #print("Running on...", file=sys.stderr, flush=True)
         # Try to write...
-        self.send({'cmd':'get'})
+        self.send({'qid':qid, 'cmd':'get'})
         #TODO: Wait a little bit for the message reply !
         #await asyncio.sleep(1)
 
@@ -218,7 +228,7 @@ class Environment(Container):
 #        print('pipe closed', file=sys.stderr, flush=True)
 #        super(MyProtocol, self).connection_lost(exc)
 
-
+import time
 
 class SubApplication(Environment):
     def __init__(self, appname, **kwargs):
@@ -227,24 +237,34 @@ class SubApplication(Environment):
         self.appname = appname
 
         self.test_count = 0
-        self.main = self.loop.create_task(self.test_task())
+        #self.main = self.loop.create_task(self.test_task())
 
         # Launch the reading/handle mainloop task
         self.reader_t = self.loop.create_task(self.aio_readline())
 
     def send(self, msg):
-        logger.debug("SubApplication : Sending message : {}".format(str(msg)))
+        logger.debug("SubApplication {}s: Sending message : {}".format(self.appname, str(msg)))
         line = jkd_serialize(msg) + b'\n'
-        logger.debug("SubApplication : Serialized message : {}".format(line))
+        logger.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
         # To be sure to write binary data to stdout, use .buffer.raw
         sys.stdout.buffer.raw.write(line)
-        logger.debug("SubApplication : message sent")
+        logger.debug("SubApplication {}s: message sent".format(self.appname))
 
     async def handler(self, msg):
-        logger.debug("SubApplication : Handling message : {}".format(str(msg)))
+        logger.debug("SubApplication {}s: Handling message : {}".format(self.appname, str(msg)))
         if msg['cmd'] == 'get':
+            qid = msg['qid']
             self.reply = {'reply':'This is the reply from the subprocess application : ' + str(self.test_count) + ' cycles done'}
             self.send(self.reply)
+            # a fully synchronous code part...
+            parts = 100
+            for i in range(parts):
+                self.send({"qid":qid, "ratio":i / parts})
+                time.sleep(0.01)
+            for i in range(parts):
+                self.send({"qid":qid, "part": i, "parts": parts})
+                time.sleep(0.01)
+                
         elif msg['cmd'] == 'exit':
             self.reply = {'reply':'exited'}
             self.send(self.reply)
@@ -254,7 +274,7 @@ class SubApplication(Environment):
     async def aio_readline(self):
         # The mainloop
         while not self.done:
-            logger.debug("SubApplication : Waiting...")
+            logger.debug("SubApplication {}s: Waiting...".format(self.appname))
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
             await self.handler(msg)
@@ -295,6 +315,9 @@ class HttpServer(Environment):
         aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
         self.ext_app = Subprocessus('heavyapp', env = self)
+        self.ext_app.subscribe(self.callback)
+        self.ext_app2 = Subprocessus('heavyapp2', env = self)
+        self.ext_app2.subscribe(self.callback)
 
     async def ws_send(self, message):
         if self.ws is not None:
@@ -304,21 +327,34 @@ class HttpServer(Environment):
         self.ws = web.WebSocketResponse()
         await self.ws.prepare(request)
 
-        async for msg in self.ws:
-            if msg.type == aiohttp.WSMsgType.TEXT:
-                message = json.loads(msg.data);
-                if msg.data == 'close':
+        async for message in self.ws:
+            if message.type == aiohttp.WSMsgType.TEXT:
+                if message.data == 'close':
+                    #TODO : Better close handling
                     await self.ws.close()
                 else:
+                    msg = json.loads(message.data);
+                    if msg['qid'] == "q1":
+                        reply = await self.ext_app.aget(msg['qid'])
+                    elif msg['qid'] == "q2":
+                        reply = await self.ext_app2.aget(msg['qid'])
+                    else:
                     # test echo reply
-                    reply = await self.ext_app.aget('address')
+                        reply = await self.ext_app.aget("other")
 #                    await self.ws_send({"reply": message['data'] + '/answer'})
                     await self.ws_send({"reply": reply})
-            elif msg.type == aiohttp.WSMsgType.ERROR:
+            elif message.type == aiohttp.WSMsgType.ERROR:
                 logger.warning('ws connection closed with exception %s' %
                   self.ws.exception())
         logger.debug('websocket connection closed')
         return self.ws
+
+    async def callback(self, msg):
+        # Called for each incoming message from a Node
+        # Transfert message to webSocket
+        #logger.debug("Callback called")
+        await self.ws_send(msg)
+        
 
     @aiohttp_jinja2.template('tmpl.jinja2')
     def tmpl_handler(self, request):
