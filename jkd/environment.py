@@ -166,6 +166,7 @@ class Subprocessus(Node):
         msg = jkd_deserialize(line[:-1])
         return msg
 
+    # Initiate a query (launching subprocess if not already running)
     async def aget(self, address = None):
         if self.subprocess is None:
             await self.launch()
@@ -310,7 +311,9 @@ class HttpServer(Environment):
                     await self.ws.close()
                 else:
                     # test echo reply
-                    await self.ws_send({"reply": message['data'] + '/answer'})
+                    reply = await self.ext_app.aget('address')
+#                    await self.ws_send({"reply": message['data'] + '/answer'})
+                    await self.ws_send({"reply": reply})
             elif msg.type == aiohttp.WSMsgType.ERROR:
                 logger.warning('ws connection closed with exception %s' %
                   self.ws.exception())
