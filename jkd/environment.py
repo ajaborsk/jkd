@@ -119,76 +119,7 @@ class HtmlReport(Node):
 
 #import pyodbc
 
-def jkd_serialize(data):
-    return json.dumps(data).encode('utf8')
-
-def jkd_deserialize(bytestring):
-    return json.loads(bytestring)
-
 application = HtmlReport()
-
-class Subprocessus(Node):
-    #TODO: Manage subprocessus death (and get error message and backtrace if possible)...
-    def __init__(self, appname, content=None, **kwargs):
-        super().__init__(**kwargs)
-        self.subprocess = None
-        self.appname = appname
-        self.reply = None
-        self.subscription = None
-
-    def subscribe(self, coro):
-        self.subscription = coro
-
-    async def launch(self):
-        logger.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
-        self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.appname, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-        self.done = False
-        self.reply = ''
-
-    async def loop(self):
-        while not self.done:
-            logger.debug("Subprocessus {}s : Waiting for messages...".format(self.appname))
-            #print("Waiting...", file=sys.stderr, flush=True)
-            msg = await self.recv()
-            logger.debug("Subprocessus {}s : Handling message : {}".format(self.appname, str(msg)))
-            if 0:#msg['reply'] == 'exited':
-                self.done = True
-            else:
-                #self.reply = msg['reply']
-                if self.subscription is not None:
-#                if asyncio.iscoroutine(self.subscription):
-                    pass
-                    logger.debug("Subprocessus {}s : transfering message {}...".format(self.appname, str(msg)))
-                    await self.subscription(msg)
-                    logger.debug("Subprocessus {}s : message transfered : {}".format(self.appname, str(msg)))
-        # end task
-        await self.subprocess.wait()
-        await self.bg
-        self.subprocess = None
-
-    def send(self, msg):
-        logger.debug("Subprocessus {}s : Sending : {}".format(self.appname, str(msg)))
-        #print("Sending : ", str(msg), file=sys.stderr, flush=True)
-        self.subprocess.stdin.write(jkd_serialize(msg) + b'\n')
-
-    async def recv(self):
-        line = await self.subprocess.stdout.readline()
-        msg = jkd_deserialize(line[:-1])
-        return msg
-
-    # Initiate a query (launching subprocess if not already running)
-    async def aget(self, qid = None):
-        if self.subprocess is None:
-            await self.launch()
-            self.bg = self.env.loop.create_task(self.loop())
-        logger.debug("Subprocessus {}s: Running on...".format(self.appname))
-        #print("Running on...", file=sys.stderr, flush=True)
-        # Try to write...
-        self.send({'qid':qid, 'cmd':'get'})
-        #TODO: Wait a little bit for the message reply !
-        #await asyncio.sleep(1)
-
-        return self.reply
 
 
 async def continuous_task(c):
@@ -229,6 +160,8 @@ class Environment(Container):
 #        super(MyProtocol, self).connection_lost(exc)
 
 import time
+
+from .serialize import *
 
 class SubApplication(Environment):
     def __init__(self, appname, **kwargs):
@@ -286,98 +219,42 @@ class SubApplication(Environment):
             self.send({'reply':'Update at ' + str(self.test_count) + ' cycles'})
 
 
-import json
-import jinja2
-import aiohttp_jinja2
+#import json
+#import jinja2
+#import aiohttp_jinja2
 
-class HttpServer(Environment):
+from .http_server import *
+
+class HttpServerEnv(Environment):
 
     def __init__(self):
         super().__init__()
-        self.web_app = web.Application()
+        self.http_server = HttpServer(env = self)
 
-        self.loop = self.web_app.loop
+        self.loop = self.http_server.web_app.loop
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
 
-        self.web_app.router.add_get('/', self.handle)
-        self.web_app.router.add_static('/static', 'static/')
-        self.web_app.router.add_get('/ws', self.ws_handler)
-        self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
-        #self.web_app.router.add_get('/{app}', self.handle)
-        #self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
-#        self.processor = Processor(env = self)
-#        self.test_application = HtmlReport(env = self, processor = self.processor)
-        self.test_application = BokehOfflineReportHtml(env = self)
-        self.count = 1
-        self.task = self.loop.create_task(continuous_task(self))
+        # self.web_app.router.add_get('/', self.handle)
+        # self.web_app.router.add_static('/static', 'static/')
+        # self.web_app.router.add_get('/ws', self.ws_handler)
+        # self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
+        # #self.web_app.router.add_get('/{app}', self.handle)
+        # #self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
+# #        self.processor = Processor(env = self)
+# #        self.test_application = HtmlReport(env = self, processor = self.processor)
+        # self.test_application = BokehOfflineReportHtml(env = self)
+        # self.count = 1
+        # self.task = self.loop.create_task(continuous_task(self))
 
-        aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
+        # aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
-        self.ext_app = Subprocessus('heavyapp', env = self)
-        self.ext_app.subscribe(self.ws_send)
-        self.ext_app2 = Subprocessus('heavyapp2', env = self)
-        self.ext_app2.subscribe(self.ws_send)
+        # self.ext_app = Subprocessus('heavyapp', env = self)
+        # self.ext_app.subscribe(self.ws_send)
+        # self.ext_app2 = Subprocessus('heavyapp2', env = self)
+        # self.ext_app2.subscribe(self.ws_send)
 
-    async def ws_send(self, message):
-        if self.ws is not None:
-            self.ws.send_str(json.dumps(message))
-
-    async def ws_handler(self, request):
-        self.ws = web.WebSocketResponse()
-        await self.ws.prepare(request)
-
-        async for message in self.ws:
-            if message.type == aiohttp.WSMsgType.TEXT:
-                if message.data == 'close':
-                    #TODO : Better close handling
-                    await self.ws.close()
-                else:
-                    msg = json.loads(message.data);
-                    if msg['qid'] == "q1":
-                        reply = await self.ext_app.aget(msg['qid'])
-                    elif msg['qid'] == "q2":
-                        reply = await self.ext_app2.aget(msg['qid'])
-                    else:
-                    # test echo reply
-                        reply = await self.ext_app.aget("other")
-#                    await self.ws_send({"reply": message['data'] + '/answer'})
-                    await self.ws_send({"reply": reply})
-            elif message.type == aiohttp.WSMsgType.ERROR:
-                logger.warning('ws connection closed with exception %s' %
-                  self.ws.exception())
-        logger.debug('websocket connection closed')
-        return self.ws
-
-    @aiohttp_jinja2.template('tmpl.jinja2')
-    def tmpl_handler(self, request):
-        return {'name': 'Andrew', 'surname': 'Svetlov'}
-
-
-    async def handle(self, request):
-        name = request.match_info.get('app', "Anonymous")
-
-        if name == "Anonymous":
-            text = "<html><body><p>Count = {}</p></body></html>".format(self.count)
-
-            #text = await self.test_application.aget()
-        else:
-            logger.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
-            #self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", "testapp", loop=self.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-            #line = b' '
-            #text = ''
-            #while line != b'':
-            #    line = await self.subprocess.stdout.readline()
-            #    print('line=', line)
-            #    text += line.decode('ascii')
-            #await self.subprocess.wait()
-            address = request.match_info.get('address', "")
-            text = await self.ext_app.aget(address)
-            return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
-
-        #text = "Hello, " + name
-        return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
     def run(self):
-        logger.info("serving...")
-        web.run_app(self.web_app)
+        logger.info("Launching http server node...")
+        self.http_server.run()

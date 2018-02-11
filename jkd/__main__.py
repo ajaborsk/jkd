@@ -12,10 +12,10 @@ logger.setLevel(logging.DEBUG)
 from .node import *
 
 if len(sys.argv) <= 1:
-    environment = jkd.HttpServer()
+    environment = jkd.HttpServerEnv()
     environment.run()
 elif sys.argv[1] == 'http':
-    environment = jkd.HttpServer()
+    environment = jkd.HttpServerEnv()
     environment.run()
 elif sys.argv[1] == 'batch':
     if len(sys.argv) == 3:
