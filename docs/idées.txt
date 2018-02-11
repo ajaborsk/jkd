@@ -32,7 +32,12 @@ Un rapport peut être :
   Static (figé et donc Offline) ou Dynamic (Online or Offline)
   Le type est *fixe* : html, pdf, web_page, txt...
 
-  Chaque Noeud a une entrée sous forme de queue qui reçoit les messages entrants et
+  Chaque Noeud est identifié de façon unique
+  MAIS il n'est pas envisageable d'avoir une gestion GLOBALE des identifiants
+  => gestion arborescente (chaque noeud a un ID unique dans son parent)
+  => Cela nécessite un système de requête pour rechercher l'id d'un noeud
+
+  Chaque Noeud a une entrée sous forme de file d'attente (en:queue) qui reçoit les messages entrants et
 une sortie sous forme de liste de triggers qui déclenchent l'envoi de message(s) sur d'autres
 noeuds lorsque certaines conditions sont remplies.
 
@@ -40,5 +45,11 @@ Evénements qui peuvent déclencher un trigger :
  - Réception d'un message (suivant le message), avant ou après traitement du message
  - Fin d'exécution d'une tâche interne (bloquante ou non)
  - Etapes intermédiaires d'un (long) calcul
+
+Trame d'un message :
+ - src : id du noeud d'envoi (adresse hiérarchique ?)
+ - dst : id du noeud destination (adresse hiérarchique ?)
+ - qid : id de la requête
+ - Charge utile :
 
 
