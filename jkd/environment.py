@@ -117,15 +117,8 @@ class HtmlReport(Node):
 
 # The Web server part (to be put in a separate module)
 
-#import pyodbc
 
 application = HtmlReport()
-
-
-async def continuous_task(c):
-    while True:
-        await asyncio.sleep(1)
-        c.count += 1
 
 
 class Environment(Container):
@@ -139,38 +132,15 @@ class Environment(Container):
         self.loop.run_forever()
 
 
-#class MyProtocol(asyncio.Protocol):
-#
-#    def connection_made(self, transport):
-#        print('pipe opened', file=sys.stderr, flush=True)
-#        super(MyProtocol, self).connection_made(transport=transport)
-#
-#    def data_received(self, data):
-#        print('received: {!r}'.format(data), file=sys.stderr, flush=True)
-#        print(data.decode(), file=sys.stderr, flush=True)
-#        super(MyProtocol, self).data_received(data)
-#
-##    def pipe_data_received(self, data):
-##        print('pipe received: {!r}'.format(data), file=sys.stderr, flush=True)
-##        print(data.decode(), file=sys.stderr, flush=True)
-##        super(MyProtocol, self).data_received(data)
-##
-#    def connection_lost(self, exc):
-#        print('pipe closed', file=sys.stderr, flush=True)
-#        super(MyProtocol, self).connection_lost(exc)
-
 import time
 
 from .serialize import *
 
-class SubApplication(Environment):
+class EnvSubApplication(Environment):
     def __init__(self, appname, **kwargs):
         super().__init__(**kwargs)
         self.done = False
         self.appname = appname
-
-        self.test_count = 0
-        #self.main = self.loop.create_task(self.test_task())
 
         # Launch the reading/handle mainloop task
         self.reader_t = self.loop.create_task(self.aio_readline())
@@ -187,7 +157,7 @@ class SubApplication(Environment):
         logger.debug("SubApplication {}s: Handling message : {}".format(self.appname, str(msg)))
         if msg['cmd'] == 'get':
             qid = msg['qid']
-            self.reply = {'reply':'This is the reply from the subprocess application : ' + str(self.test_count) + ' cycles done'}
+            self.reply = {'reply':'This is the reply from the subprocess application.'}
             self.send(self.reply)
             # a fully synchronous code part...
             parts = 100
@@ -212,20 +182,10 @@ class SubApplication(Environment):
             msg = jkd_deserialize(line[:-1])
             await self.handler(msg)
 
-    async def test_task(self):
-        while True:
-            await asyncio.sleep(1)
-            self.test_count += 1
-            self.send({'reply':'Update at ' + str(self.test_count) + ' cycles'})
-
-
-#import json
-#import jinja2
-#import aiohttp_jinja2
 
 from .http_server import *
 
-class HttpServerEnv(Environment):
+class EnvHttpServer(Environment):
 
     def __init__(self):
         super().__init__()
@@ -234,26 +194,6 @@ class HttpServerEnv(Environment):
         self.loop = self.http_server.web_app.loop
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
-
-        # self.web_app.router.add_get('/', self.handle)
-        # self.web_app.router.add_static('/static', 'static/')
-        # self.web_app.router.add_get('/ws', self.ws_handler)
-        # self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
-        # #self.web_app.router.add_get('/{app}', self.handle)
-        # #self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.handle)
-# #        self.processor = Processor(env = self)
-# #        self.test_application = HtmlReport(env = self, processor = self.processor)
-        # self.test_application = BokehOfflineReportHtml(env = self)
-        # self.count = 1
-        # self.task = self.loop.create_task(continuous_task(self))
-
-        # aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
-
-        # self.ext_app = Subprocessus('heavyapp', env = self)
-        # self.ext_app.subscribe(self.ws_send)
-        # self.ext_app2 = Subprocessus('heavyapp2', env = self)
-        # self.ext_app2.subscribe(self.ws_send)
-
 
     def run(self):
         logger.info("Launching http server node...")

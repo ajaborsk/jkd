@@ -12,10 +12,10 @@ logger.setLevel(logging.DEBUG)
 from .node import *
 
 if len(sys.argv) <= 1:
-    environment = jkd.HttpServerEnv()
+    environment = jkd.EnvHttpServer()
     environment.run()
 elif sys.argv[1] == 'http':
-    environment = jkd.HttpServerEnv()
+    environment = jkd.EnvHttpServer()
     environment.run()
 elif sys.argv[1] == 'batch':
     if len(sys.argv) == 3:
@@ -28,7 +28,7 @@ elif sys.argv[1] == 'slave':
     if len(sys.argv) == 3:
         app_name = sys.argv[2]
         #TODO
-        sub = jkd.SubApplication(app_name)
+        sub = jkd.EnvSubApplication(app_name)
         print("(sub)application result : blabla...", sys.argv[2])
         sub.run()
     else:
