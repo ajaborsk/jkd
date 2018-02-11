@@ -264,7 +264,7 @@ class SubApplication(Environment):
             for i in range(parts):
                 self.send({"qid":qid, "part": i, "parts": parts})
                 time.sleep(0.01)
-                
+
         elif msg['cmd'] == 'exit':
             self.reply = {'reply':'exited'}
             self.send(self.reply)
@@ -315,9 +315,9 @@ class HttpServer(Environment):
         aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
         self.ext_app = Subprocessus('heavyapp', env = self)
-        self.ext_app.subscribe(self.callback)
+        self.ext_app.subscribe(self.ws_send)
         self.ext_app2 = Subprocessus('heavyapp2', env = self)
-        self.ext_app2.subscribe(self.callback)
+        self.ext_app2.subscribe(self.ws_send)
 
     async def ws_send(self, message):
         if self.ws is not None:
@@ -348,13 +348,6 @@ class HttpServer(Environment):
                   self.ws.exception())
         logger.debug('websocket connection closed')
         return self.ws
-
-    async def callback(self, msg):
-        # Called for each incoming message from a Node
-        # Transfert message to webSocket
-        #logger.debug("Callback called")
-        await self.ws_send(msg)
-        
 
     @aiohttp_jinja2.template('tmpl.jinja2')
     def tmpl_handler(self, request):

@@ -34,6 +34,17 @@ class Node:
     def __init__(self, env = None):
         #print("setting env to", env)
         self.env = env
+        self.input = asyncio.Queue()
+        self.triggers = []
+        self.done = False
+
+    async def mainloop(self):
+        while not self.done:
+            msg = await self.input.get()
+            await self.msg_handle(msg)
+
+    async def msg_handle(self, msg):
+        logger.warning("Unimplemented msg_handle() method.")
 
     def get_etnode(self):
         return ET.Element()

@@ -28,7 +28,7 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=10
+current_page=9
 FILE_NAME_0=0;reStructuredText;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2FREADME.rst;0;4
 FILE_NAME_1=526;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2F__main__.py;0;4
 FILE_NAME_2=6494;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fsetup.py;0;4
@@ -38,13 +38,14 @@ FILE_NAME_5=0;Markdown;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2F
 FILE_NAME_6=0;None;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fdata%2Fdata_file;0;4
 FILE_NAME_7=0;None;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd.geany;0;4
 FILE_NAME_8=455;None;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fdocs%2Fidées.txt;0;4
-FILE_NAME_9=695;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fnode.py;0;4
-FILE_NAME_10=3648;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fenvironment.py;0;4
+FILE_NAME_9=829;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fnode.py;0;4
+FILE_NAME_10=5076;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fenvironment.py;0;4
 FILE_NAME_11=225;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fcontainer.py;0;4
 FILE_NAME_12=163;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fapplication.py;0;4
 FILE_NAME_13=55;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Flogging.py;0;4
 FILE_NAME_14=1549;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Freport_bokeh_offline_html.py;0;4
 FILE_NAME_15=208;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fresult.py;0;4
+FILE_NAME_16=583;None;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Ftemplates%2Ftmpl.jinja2;0;4
 
 [VTE]
 last_dir=/home/alexandre/Dropbox/Projets/Jkf/Jkf-c

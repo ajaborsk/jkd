@@ -5,6 +5,8 @@
   <title>Titre de la page</title>
   <link rel="stylesheet" href="/static/css/jkd.css">
   <script src="/static/scripts/jquery-3.3.1.min.js"></script>
+  <script src="/static/scripts/Chart.bundle.min.js"></script>
+  <script src="/static/scripts/jkd.js"></script>
 </head>
 <body>
   <p>{{name}}</p>
@@ -13,6 +15,7 @@
   <div>
     <span id="push1">Launch : </span>
     <span id="result1">Result</span>
+    <canvas id="chart1" width="800" height="400"></canvas>
   </div>
   <div>
     <span id="push2">Launch : </span>
@@ -25,9 +28,9 @@ $(document).ready(function()
  {
   send = function(msg)
    {
-    websocket.send(JSON.stringify(msg));   
+    websocket.send(JSON.stringify(msg));
    };
-   
+
   // First of all: launch websocket connection
   websocket = new WebSocket("ws://localhost:8080/ws");
 
@@ -46,16 +49,16 @@ $(document).ready(function()
   websocket.onmessage = function(evt)
    {
     msg = JSON.parse(evt.data);
-    if (msg.qid == 'q1') 
+    if (msg.qid == 'q1')
      {
       $("#result1").text("Response : " + JSON.stringify(msg));
      }
-    else if (msg.qid == 'q2') 
+    else if (msg.qid == 'q2')
      {
       $("#result2").text("Response : " + JSON.stringify(msg));
      }
     else
-     { 
+     {
       $("#test1").text("Response : " + JSON.stringify(msg));
      }
    };

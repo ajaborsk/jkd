@@ -31,3 +31,14 @@ Un rapport peut être :
   Offline (contient toutes les données) ou Online (va chercher des données dynamiquement)
   Static (figé et donc Offline) ou Dynamic (Online or Offline)
   Le type est *fixe* : html, pdf, web_page, txt...
+
+  Chaque Noeud a une entrée sous forme de queue qui reçoit les messages entrants et
+une sortie sous forme de liste de triggers qui déclenchent l'envoi de message(s) sur d'autres
+noeuds lorsque certaines conditions sont remplies.
+
+Evénements qui peuvent déclencher un trigger :
+ - Réception d'un message (suivant le message), avant ou après traitement du message
+ - Fin d'exécution d'une tâche interne (bloquante ou non)
+ - Etapes intermédiaires d'un (long) calcul
+
+
