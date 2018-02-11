@@ -1,3 +1,5 @@
+import inspect
+
 from .node import *
 from .serialize import *
 
@@ -28,10 +30,7 @@ class Subprocessus(Node):
             if 0:#msg['reply'] == 'exited':
                 self.done = True
             else:
-                #self.reply = msg['reply']
-                if self.subscription is not None:
-#                if asyncio.iscoroutine(self.subscription):
-                    pass
+                if inspect.iscoroutinefunction(self.subscription):
                     logger.debug("Subprocessus {}s : transfering message {}...".format(self.appname, str(msg)))
                     await self.subscription(msg)
                     logger.debug("Subprocessus {}s : message transfered : {}".format(self.appname, str(msg)))

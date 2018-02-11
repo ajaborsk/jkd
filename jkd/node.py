@@ -31,23 +31,55 @@ class Port:
 
 
 class Node:
-    def __init__(self, env = None):
+    def __init__(self, env = None, name = ''):
         #print("setting env to", env)
         self.env = env
+        self.next_qid = 0
+        # name for debugging purpose
+        self.name = name
+        logger.debug(str(self.__class__)+" name :" + self.name)
+        # Input queue
         self.input = asyncio.Queue()
-        self.triggers = []
+        self.queries = {}
+        # Output connections
+        self.connections = []
         self.done = False
+        if self.env is not None and hasattr(self.env, 'loop'):
+            print("launching mainloop...")
+            self.loop_task = self.env.loop.create_task(self.mainloop())
 
     async def mainloop(self):
+        logger.debug(str(self.__class__)+self.name + ": Entering mainloop...")
         while not self.done:
             msg = await self.input.get()
+            logger.debug(str(self.__class__)+self.name + ": Handling msg: " + str(msg))
             await self.msg_handle(msg)
 
     async def msg_handle(self, msg):
-        logger.warning("Unimplemented msg_handle() method.")
+        if 'qid' in msg:
+            qid = msg['qid']
+            if qid in self.queries:
+                await self.queries[qid].put(msg)
+                if 'eoq' in msg and msg['eoq'] == True:
+                    del self.queries[qid]
+            else:
+                logger.warning('No registred query id '+str(qid))
+        else:
+            logger.warning(str(self.__class__)+self.name + ": Unhandled msg: " + str(msg))
 
     def get_etnode(self):
         return ET.Element()
+
+    async def query(self, destination, query):
+        qid = self.next_qid
+        query.update({'qid':qid, 'src':self})
+        self.queries[qid] = asyncio.Queue()
+        await destination.input.put(query)
+        self.next_qid += 1
+        return qid
+
+    async def wait_for_reply(self, qid, timeout = 10.):
+        return await asyncio.wait_for(self.queries[qid].get(), timeout, loop = self.env.loop)
 
     async def aget(self, portname = None):
         """Return a ElementTree that represent the Node full state (if possible) or the port value
@@ -59,3 +91,6 @@ class Node:
         """
         pass
 
+    def connect(self, dest, **kwargs):
+        #TODO: whole thing...
+        pass

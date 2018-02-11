@@ -22,11 +22,25 @@ class Container(Node):
 
     def node_add(self, name, node):
         "Add a named node to the containe"
-        #TODO
-        pass
+        #TODO: Check if node already exists
+        #TODO: Check node type
+        #TODO: Check name type
+        self.contents[name] = node
 
     def get(self):
         #return node content (a list of etree elements)
         #TODO
         return []
+
+    def __setitem__(self, key, value):
+        self.contents[key] = value
+
+    def __getitem__(self, key):
+        return self.contents[key]
+
+    def __delitem__(self, key):
+        del self.contents[key]
+
+    def __contains__(self, key):
+        return key in self.contents
 

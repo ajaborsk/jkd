@@ -163,10 +163,10 @@ class EnvSubApplication(Environment):
             parts = 100
             for i in range(parts):
                 self.send({"qid":qid, "ratio":i / parts})
-                time.sleep(0.01)
+                time.sleep(0.05)
             for i in range(parts):
                 self.send({"qid":qid, "part": i, "parts": parts})
-                time.sleep(0.01)
+                time.sleep(0.05)
 
         elif msg['cmd'] == 'exit':
             self.reply = {'reply':'exited'}
