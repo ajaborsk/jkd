@@ -14,6 +14,7 @@ class HttpServer(Container):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.debug('httpserver input: '+str(self.input))
         self.next_qid = 0
         self.web_app = web.Application()
         #self.instances = {} # Running applications
@@ -78,13 +79,13 @@ class HttpServer(Container):
             address = request.match_info.get('address', "")
             #text = await self.ext_app.aget(address)
             if name in self:
-                qid = await self.query(self[name], {'get':'html'})
+                qid = await self.query(self[name], {'query':'get'})
                 self.debug("Query launched "+str(qid))
                 #self.next_qid += 1
-                text = "popololo"
+                text = "Timeout."
                 try:
 #                    text = await asyncio.shield(self.wait_for_reply(qid, timeout = 0.1))
-                    msg = await self.wait_for_reply(qid, timeout = 10.)
+                    msg = await self.wait_for_reply(qid, timeout = 5.)
                     text = msg['reply']
                 except asyncio.TimeoutError:
                     self.debug("timeout")

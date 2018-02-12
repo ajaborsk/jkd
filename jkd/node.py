@@ -56,7 +56,7 @@ class Node:
             await self.msg_handle(msg)
 
     async def msg_handle(self, msg):
-        if 'qid' in msg:
+        if 'query' not in msg:
             # This is a reply
             qid = msg['qid']
             if qid in self.queries:
@@ -85,6 +85,11 @@ class Node:
         await destination.input.put(query)
         # Return the query id
         return qid
+    
+    async def delegate(self, destination, query):
+        self.debug("Delegating to " + str(destination))
+        await destination.input.put(query)
+        
 
     async def wait_for_reply(self, qid, timeout = 10.):
         return await asyncio.wait_for(self.queries[qid].get(), timeout, loop = self.env.loop)
