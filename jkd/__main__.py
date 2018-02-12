@@ -5,9 +5,9 @@ from jkd.logging import *
 
 import logging
 log_handler = logging.StreamHandler()
-log_handler.setFormatter(logging.Formatter("%(asctime)s:[%(process)s]jkd.%(module)s - %(levelname)s : %(message)s"))
-logger.addHandler(log_handler)
-logger.setLevel(logging.DEBUG)
+log_handler.setFormatter(logging.Formatter("%(asctime)s:[%(process)s] {main} jkd.%(module)s - %(levelname)s : %(message)s"))
+logger_main.addHandler(log_handler)
+logger_main.setLevel(logging.DEBUG)
 
 from .node import *
 
@@ -23,7 +23,7 @@ elif sys.argv[1] == 'batch':
         #TODO
         print("application result : blabla...")
     else:
-        logger.warning("Batch mode : No application name provided")
+        logger_main.warning("Batch mode : No application name provided")
 elif sys.argv[1] == 'slave':
     if len(sys.argv) == 3:
         app_name = sys.argv[2]
@@ -32,8 +32,8 @@ elif sys.argv[1] == 'slave':
         print("(sub)application result : blabla...", sys.argv[2])
         sub.run()
     else:
-        logger.warning("Slave : No (sub)application name provided")
+        logger_main.warning("Slave : No (sub)application name provided")
 else:
-    logger.error("Unknown command : {:s}".format(sys.argv[1]))
+    logger_main.error("Unknown command : {:s}".format(sys.argv[1]))
 
 

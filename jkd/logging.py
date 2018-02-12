@@ -1,17 +1,17 @@
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger_main = logging.getLogger(__name__)
 
 
 def debug(*args):
-    logger.debug(*args)
+    logger_main.debug(*args)
 
 def warning(*args):
-    logger.warning(*args)
+    logger_main.warning(*args)
 
 def info(*args):
-    logger.info(*args)
+    logger_main.info(*args)
 
 def error(*args):
-    logger.error(*args)
+    logger_main.error(*args)

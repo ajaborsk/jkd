@@ -124,7 +124,7 @@ class HtmlReport(Node):
 class Environment(Container):
 
     def __init__(self):
-        self.loggers = {'main':logger}
+        self.loggers = {'main':logger_main}
         super().__init__(env=self)
         self.loop = asyncio.get_event_loop()
 
