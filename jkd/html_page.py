@@ -6,9 +6,13 @@ from .node import *
 
 class HtmlPage(Node):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        if 'appname' in kwargs:
+            self.appname = kwargs['appname']
+        else:
+            self.appname = '.'
+        super().__init__(env = kwargs['env'])
         self.jinja_env = jinja2.Environment(
-                loader=jinja2.FileSystemLoader('templates/'),
+                loader=jinja2.FileSystemLoader(self.appname + '/templates/'),
                 autoescape=jinja2.select_autoescape(['html', 'xml']))
         
     async def msg_handle(self, msg):
