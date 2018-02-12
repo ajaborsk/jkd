@@ -118,12 +118,13 @@ class HtmlReport(Node):
 # The Web server part (to be put in a separate module)
 
 
-application = HtmlReport()
+#application = HtmlReport()
 
 
 class Environment(Container):
 
     def __init__(self):
+        self.loggers = {'main':logger}
         super().__init__(env=self)
         self.loop = asyncio.get_event_loop()
 
@@ -146,15 +147,15 @@ class EnvSubApplication(Environment):
         self.reader_t = self.loop.create_task(self.aio_readline())
 
     def send(self, msg):
-        logger.debug("SubApplication {}s: Sending message : {}".format(self.appname, str(msg)))
+        self.debug("SubApplication {}s: Sending message : {}".format(self.appname, str(msg)))
         line = jkd_serialize(msg) + b'\n'
-        logger.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
+        self.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
         # To be sure to write binary data to stdout, use .buffer.raw
         sys.stdout.buffer.raw.write(line)
-        logger.debug("SubApplication {}s: message sent".format(self.appname))
+        self.debug("SubApplication {}s: message sent".format(self.appname))
 
     async def handler(self, msg):
-        logger.debug("SubApplication {}s: Handling message : {}".format(self.appname, str(msg)))
+        self.debug("SubApplication {}s: Handling message : {}".format(self.appname, str(msg)))
         if msg['cmd'] == 'get':
             qid = msg['qid']
             self.reply = {'reply':'This is the reply from the subprocess application.'}
@@ -177,7 +178,7 @@ class EnvSubApplication(Environment):
     async def aio_readline(self):
         # The mainloop
         while not self.done:
-            logger.debug("SubApplication {}s: Waiting...".format(self.appname))
+            self.debug("SubApplication {}s: Waiting...".format(self.appname))
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
             await self.handler(msg)
@@ -196,5 +197,5 @@ class EnvHttpServer(Environment):
             self.loop = asyncio.get_event_loop()
 
     def run(self):
-        logger.info("Launching http server node...")
+        self.info("Launching http server node...")
         self.http_server.run()

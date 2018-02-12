@@ -58,9 +58,9 @@ class HttpServer(Container):
 #                    await self.ws_send({"reply": message['data'] + '/answer'})
                     await self.ws_send({"reply": reply})
             elif message.type == aiohttp.WSMsgType.ERROR:
-                logger.warning('ws connection closed with exception %s' %
+                self.warning('ws connection closed with exception %s' %
                   self.ws.exception())
-        logger.debug('websocket connection closed')
+        self.debug('websocket connection closed')
         return self.ws
 
     @aiohttp_jinja2.template('tmpl.jinja2')
@@ -74,12 +74,12 @@ class HttpServer(Container):
             text = "<html><body><p>Count = {}</p></body></html>".format(self.count)
 
         else:
-            logger.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
+            self.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
             address = request.match_info.get('address', "")
             #text = await self.ext_app.aget(address)
             if name in self:
                 qid = await self.query(self[name], {'get':'html'})
-                logger.debug("Query launched "+str(qid))
+                self.debug("Query launched "+str(qid))
                 #self.next_qid += 1
                 text = "popololo"
                 try:
@@ -87,8 +87,8 @@ class HttpServer(Container):
                     msg = await self.wait_for_reply(qid, timeout = 10.)
                     text = msg['reply']
                 except asyncio.TimeoutError:
-                    logger.debug("timeout")
-                logger.debug("Query first reply "+str(qid))
+                    self.debug("timeout")
+                self.debug("Query first reply "+str(qid))
                 if qid in self.queries:
                     del self.queries[qid] # remove query input queue
             else:
