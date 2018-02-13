@@ -8,7 +8,7 @@ class DemoApplication(Application):
 
         if 'name' in kwargs:
             del kwargs['name']
-        self["homepage"] = HtmlPage(name="homepage", appname="demo", **kwargs)
+        self["homepage"] = HtmlPage(name="homepage", appname = self.name, **kwargs)
         self["extapp"] = Subprocessus("heavyapp", name = "heavyapp", **kwargs)
 
         self["extapp"].connect(self["homepage"])

@@ -3,6 +3,7 @@
 Created on Wed Jan 31 09:46:14 2018
 
 """
+
 from .container import *
 
 class Application(Container):
@@ -18,6 +19,11 @@ class Application(Container):
             # - editor
             # - main page
             pass
+        try:
+            etree = ET.parse(self.name + '/' + self.name + '.xml')
+            self.debug(self.name+ ' application etree loaded')
+        except:
+            self.warning('unable to load {}s application description'.format(self.name))
 
     async def msg_handle(self, msg):
         self.debug('Application: handling msg'+str(msg))

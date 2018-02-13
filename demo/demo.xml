@@ -1,2 +1,8 @@
 <xml>
+    <application>
+        <html_page title="A Jkd demonstation application" template="homepage.jinja2">
+        </html_page>
+        <subprocess>
+        </subprocess>
+    </application>
 </xml>
