@@ -147,15 +147,15 @@ class EnvSubApplication(Environment):
         self.reader_t = self.loop.create_task(self.aio_readline())
 
     def send(self, msg):
-        self.debug("SubApplication {}s: Sending message : {}".format(self.appname, str(msg)))
+        #self.debug("SubApplication {}s: Sending message : {}".format(self.appname, str(msg)))
         line = jkd_serialize(msg) + b'\n'
-        self.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
+        #self.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
         # To be sure to write binary data to stdout, use .buffer.raw
         sys.stdout.buffer.raw.write(line)
-        self.debug("SubApplication {}s: message sent".format(self.appname))
+        #self.debug("SubApplication {}s: message sent".format(self.appname))
 
     async def handler(self, msg):
-        self.debug("SubApplication {}s: Handling message : {}".format(self.appname, str(msg)))
+        #self.debug("SubApplication {}s: Handling message : {}".format(self.appname, str(msg)))
         if msg['cmd'] == 'get':
             qid = msg['qid']
             self.reply = {'reply':'This is the reply from the subprocess application.'}
@@ -178,7 +178,7 @@ class EnvSubApplication(Environment):
     async def aio_readline(self):
         # The mainloop
         while not self.done:
-            self.debug("SubApplication {}s: Waiting...".format(self.appname))
+            #self.debug("SubApplication {}s: Waiting...".format(self.appname))
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
             await self.handler(msg)

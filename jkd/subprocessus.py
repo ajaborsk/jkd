@@ -23,24 +23,24 @@ class Subprocessus(Node):
 
     async def loop(self):
         while not self.done:
-            self.debug("Subprocessus {}s : Waiting for messages...".format(self.appname))
+            #self.debug("Subprocessus {}s : Waiting for messages...".format(self.appname))
             #print("Waiting...", file=sys.stderr, flush=True)
             msg = await self.recv()
-            self.debug("Subprocessus {}s : Handling message : {}".format(self.appname, str(msg)))
+            #self.debug("Subprocessus {}s : Handling message : {}".format(self.appname, str(msg)))
             if 0:#msg['reply'] == 'exited':
                 self.done = True
             else:
                 if inspect.iscoroutinefunction(self.subscription):
-                    self.debug("Subprocessus {}s : transfering message {}...".format(self.appname, str(msg)))
+                    #self.debug("Subprocessus {}s : transfering message {}...".format(self.appname, str(msg)))
                     await self.subscription(msg)
-                    self.debug("Subprocessus {}s : message transfered : {}".format(self.appname, str(msg)))
+                    #self.debug("Subprocessus {}s : message transfered : {}".format(self.appname, str(msg)))
         # end task
         await self.subprocess.wait()
         await self.bg
         self.subprocess = None
 
     def send(self, msg):
-        self.debug("Subprocessus {}s : Sending : {}".format(self.appname, str(msg)))
+        #self.debug("Subprocessus {}s : Sending : {}".format(self.appname, str(msg)))
         #print("Sending : ", str(msg), file=sys.stderr, flush=True)
         self.subprocess.stdin.write(jkd_serialize(msg) + b'\n')
 
@@ -54,7 +54,7 @@ class Subprocessus(Node):
         if self.subprocess is None:
             await self.launch()
             self.bg = self.env.loop.create_task(self.loop())
-        self.debug("Subprocessus {}s: Running on...".format(self.appname))
+        #self.debug("Subprocessus {}s: Running on...".format(self.appname))
         #print("Running on...", file=sys.stderr, flush=True)
         # Try to write...
         self.send({'qid':qid, 'cmd':'get'})

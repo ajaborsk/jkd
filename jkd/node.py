@@ -45,14 +45,14 @@ class Node:
         self.connections = []
         self.done = False
         if self.env is not None and hasattr(self.env, 'loop'):
-            self.debug("launching mainloop...")
+            #self.debug("launching mainloop...")
             self.loop_task = self.env.loop.create_task(self.mainloop())
 
     async def mainloop(self):
-        self.debug(str(self.__class__)+self.name + ": Entering mainloop...")
+        #self.debug(str(self.__class__)+self.name + ": Entering mainloop...")
         while not self.done:
             msg = await self.input.get()
-            self.debug(str(self.__class__)+self.name + ": Handling msg: " + str(msg))
+            #self.debug(str(self.__class__)+self.name + ": Handling msg: " + str(msg))
             await self.msg_handle(msg)
 
     async def msg_handle(self, msg):
@@ -87,7 +87,7 @@ class Node:
         return qid
 
     async def delegate(self, destination, query):
-        self.debug("Delegating to " + str(destination))
+        #self.debug("Delegating to " + str(destination))
         await destination.input.put(query)
 
 
