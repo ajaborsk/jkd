@@ -1,3 +1,4 @@
+import os.path
 import json
 
 from aiohttp import web
@@ -8,6 +9,7 @@ import aiohttp_jinja2
 from .container import *
 from .subprocessus import *
 from .demo_application import*
+
 
 
 class HttpServer(Container):
@@ -79,8 +81,15 @@ class HttpServer(Container):
             #self.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
             address = request.match_info.get('address', "")
             #text = await self.ext_app.aget(address)
+            app = None
             if name in self:
-                qid = await self.query(self[name], {'query':'get'})
+                app = self[name]
+            elif os.path.isdir(name) and os.path.isfile(name + '/' + name + '.xml'):
+                self[name] = Application(env = self.env, name = name)
+                app = self[name]
+
+            if app is not None:
+                qid = await self.query(app, {'query':'get'})
                 #self.debug("Query launched "+str(qid))
                 #self.next_qid += 1
                 text = "Timeout."
@@ -94,7 +103,8 @@ class HttpServer(Container):
                 if qid in self.queries:
                     del self.queries[qid] # remove query input queue
             else:
-                text = 'Not found'
+                #TODO : True 404 Not Found page
+                text = 'Application Not found'
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
