@@ -18,6 +18,12 @@ class HtmlPage(Node):
         self.jinja_env = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(self.appname + '/templates/'),
                 autoescape=jinja2.select_autoescape(['html', 'xml']))
+        
+        self.parts = []
+        for part in elt:
+            self.debug(" Page part: {}".format(part.tag))
+            #self.parts.append({'template':self.jinja_env.get_template(part.attrib['template'] + '.jinja2')})
+
 
     async def msg_handle(self, msg):
         if 'query' in msg and msg['query'] == 'get':

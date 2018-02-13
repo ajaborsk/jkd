@@ -3,5 +3,7 @@
     <subprocessus name="heavyproc" appname="erer">
     </subprocessus>
     <html_page appname="demo" name="homepage" template="homepage" title="A jkd Demo Application">
+        <table source="heavyproc" template="table">
+        </table>
     </html_page>
 </application>
