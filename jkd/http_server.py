@@ -35,7 +35,7 @@ class HttpServer(Container):
         self.ext_app2 = Subprocessus('heavyapp2', env = self.env)
         self.ext_app2.subscribe(self.ws_send)
 
-        self['demo'] = DemoApplication(env = self.env, name="demo")
+        #self['demo'] = DemoApplication(env = self.env, name="demo")
 
     async def ws_send(self, message):
         if self.ws is not None:

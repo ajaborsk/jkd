@@ -20,10 +20,18 @@ class Application(Container):
             # - main page
             pass
         try:
-            etree = ET.parse(self.name + '/' + self.name + '.xml')
+            tree = ET.parse(self.name + '/' + self.name + '.xml')
             self.debug(self.name+ ' application etree loaded')
+            root = tree.getroot()
+            self.debug("Root :"+str(root.tag)+' '+str(root.attrib))
+            for child in root:
+                self.debug("Child :"+str(child.tag)+' '+str(child.attrib))
+                if child.tag in self.env.registry:
+                    self[child.attrib['name']] = self.env.registry[child.tag](env=self.env, elt=child, **child.attrib)
+                else:
+                    self.warning("Application : Unable to instanciate node for '{}' tag".format(child.tag))
         except:
-            self.warning('unable to load {}s application description'.format(self.name))
+            self.warning('unable to load {} application description'.format(self.name))
 
     async def msg_handle(self, msg):
         self.debug('Application: handling msg'+str(msg))
@@ -33,6 +41,6 @@ class Application(Container):
                 await self.delegate(self['homepage'], msg)
             else:
                 # Default (very) basic reply
-                await msg['src'].input.put({"dst":msg['src'], 'qid':msg['qid'], 'eoq':True, "reply":'Default Application "{}s" Reply'.format(self.name)})
+                await msg['src'].input.put({"dst":msg['src'], 'qid':msg['qid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
         else:
             await super().msg_handle(msg)

@@ -4,23 +4,28 @@ Created on Wed Jan 31 09:48:33 2018
 
 """
 import sys
-import json
+#import json
 import asyncio
 
 if sys.platform == 'win32':
     loop = asyncio.ProactorEventLoop()
     asyncio.set_event_loop(loop)
 
-from aiohttp import web
-import aiohttp
+#from aiohttp import web
+#import aiohttp
 
 from .logging import *
-from .container import *
+from .container import Container
 from .report_bokeh_offline_html import *
 
 import aiohttp_jinja2
 import jinja2
 import time
+
+
+from .html_page import HtmlPage
+registry = {"html_page":HtmlPage}
+
 
 from bokeh.plotting import figure
 from bokeh.models import Range1d
@@ -127,6 +132,7 @@ class Environment(Container):
         self.loggers = {'main':logger_main}
         super().__init__(env=self)
         self.loop = asyncio.get_event_loop()
+        self.registry = registry
 
     def run(self):
         # default

@@ -5,7 +5,7 @@ import jinja2
 from .node import *
 
 class HtmlPage(Node):
-    def __init__(self, **kwargs):
+    def __init__(self, elt = None, **kwargs):
         if 'appname' in kwargs:
             self.appname = kwargs['appname']
         else:

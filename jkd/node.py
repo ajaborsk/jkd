@@ -52,7 +52,7 @@ class Node:
         #self.debug(str(self.__class__)+self.name + ": Entering mainloop...")
         while not self.done:
             msg = await self.input.get()
-            #self.debug(str(self.__class__)+self.name + ": Handling msg: " + str(msg))
+            self.debug(str(self.__class__)+self.name + ": Handling msg: " + str(msg))
             await self.msg_handle(msg)
 
     async def msg_handle(self, msg):
