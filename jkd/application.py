@@ -20,8 +20,13 @@ class Application(Container):
             pass
 
     async def msg_handle(self, msg):
-        print('Application: handling msg'+str(msg))
-        if 'src' in msg:
-            await msg['src'].input.put({"dst":msg['src'], 'qid':msg['qid'], 'eoq':True, "reply":'Default Application Reply'})
+        self.debug('Application: handling msg'+str(msg))
+        if 'query' in msg and msg['query'] == 'get':
+            if 'homepage' in self:
+                # Delegate "get" query (= http) to homepage, if it exists
+                await self.delegate(self['homepage'], msg)
+            else:
+                # Default (very) basic reply
+                await msg['src'].input.put({"dst":msg['src'], 'qid':msg['qid'], 'eoq':True, "reply":'Default Application "{}s" Reply'.format(self.name)})
         else:
             await super().msg_handle(msg)
