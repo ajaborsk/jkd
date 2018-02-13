@@ -10,6 +10,10 @@ class HtmlPage(Node):
             self.appname = kwargs['appname']
         else:
             self.appname = '.'
+        if 'title' in kwargs:
+            self.pagetitle = kwargs['title']
+        else:
+            self.pagetitle = 'Default page title'
         super().__init__(env = kwargs['env'], name = kwargs['name'])
         self.jinja_env = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(self.appname + '/templates/'),
@@ -18,7 +22,7 @@ class HtmlPage(Node):
     async def msg_handle(self, msg):
         if 'query' in msg and msg['query'] == 'get':
             template = self.jinja_env.get_template(self.name + '.jinja2')
-            html_page = template.render({'name':'Joris'})
+            html_page = template.render({'pagetitle':self.pagetitle, 'name':'Joris'})
             #self.debug("handling"+str(msg))
             #self.debug("Reply to " + str(msg['src']) + "/ qid=" + str(msg['qid']))
             rep= {'qid':msg['qid'], 'reply':html_page}

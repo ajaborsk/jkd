@@ -5,7 +5,7 @@ from .serialize import *
 
 class Subprocessus(Node):
     #TODO: Manage subprocessus death (and get error message and backtrace if possible)...
-    def __init__(self, appname, content=None, **kwargs):
+    def __init__(self, appname, content=None, elt = None, **kwargs):
         super().__init__(**kwargs)
         self.subprocess = None
         self.appname = appname

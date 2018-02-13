@@ -24,7 +24,11 @@ import time
 
 
 from .html_page import HtmlPage
-registry = {"html_page":HtmlPage}
+from .subprocessus import Subprocessus
+registry = { 
+        "html_page":HtmlPage,
+        "subprocessus":Subprocessus,
+         }
 
 
 from bokeh.plotting import figure
