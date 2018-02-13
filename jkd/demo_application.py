@@ -15,8 +15,8 @@ class DemoApplication(Application):
 
     async def msg_handle(self, msg):
         if 'query' in msg and msg['query'] == 'get':
-            self.debug('delegating...'+str(msg))
+            #self.debug('delegating...'+str(msg))
             await self.delegate(self['homepage'], msg)
-            self.debug('delegated.')
+            #self.debug('delegated.')
         else:
             await super().msg_handle(msg)

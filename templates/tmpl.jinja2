@@ -105,6 +105,8 @@ var myChart = new Chart(ctx, {
   websocket.onclose = function(evt)
    {
     $("#conn_status").text("Unconnected");
+    //TODO:
+    // Periodic reconnection try
    };
 
 //TODO:
