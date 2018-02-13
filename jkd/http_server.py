@@ -19,11 +19,12 @@ class HttpServer(Container):
         self.web_app = web.Application()
         #self.instances = {} # Running applications
 
-        self.web_app.router.add_get('/', self.handle)
+        self.web_app.router.add_get('/', self.http_handler)
         self.web_app.router.add_static('/static', 'static/')
         self.web_app.router.add_get('/ws', self.ws_handler)
         self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
-        self.web_app.router.add_get('/{app}', self.handle)
+        self.web_app.router.add_get('/{app}', self.http_handler)
+        self.web_app.router.add_get('/{app}/{address}', self.http_handler)
 
         aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
@@ -68,7 +69,7 @@ class HttpServer(Container):
     def tmpl_handler(self, request):
         return {'name': 'Andrew', 'surname': 'Svetlov'}
 
-    async def handle(self, request):
+    async def http_handler(self, request):
         name = request.match_info.get('app', "Anonymous")
 
         if name == "Anonymous":
