@@ -34,7 +34,7 @@ class Application(Container):
             self.warning('unable to load {} application description : {}'.format(self.name, str(ex)))
 
     async def msg_handle(self, msg):
-        self.debug('Application: handling msg'+str(msg))
+        self.debug('Application: handling msg: '+str(msg))
         if 'query' in msg and msg['query'] == 'get':
             if 'homepage' in self:
                 # Delegate "get" query (= http) to homepage, if it exists
@@ -42,5 +42,7 @@ class Application(Container):
             else:
                 # Default (very) basic reply
                 await msg['src'].input.put({"dst":msg['src'], 'qid':msg['qid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
+        elif 'query' in msg and msg['query'] == 'data':
+            await self.delegate(self[msg['dst']], msg)
         else:
             await super().msg_handle(msg)

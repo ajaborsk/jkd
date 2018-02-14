@@ -75,7 +75,7 @@ var myChart = new Chart(ctx, {
 
   $("#test1").text("Hello world!");
 
-  $("#push1").click(function(evt){send({'qid':'q1', 'query':'test1'})});
+  $("#push1").click(function(evt){send({'qid':1, 'query':'data', 'dst':'heavyproc', 'appname':'demo'})});
   $("#push2").click(function(evt){send({'qid':'q2', 'query':'test2'})});
 
   websocket.onopen = function(evt)

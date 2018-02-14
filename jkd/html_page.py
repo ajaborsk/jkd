@@ -18,7 +18,7 @@ class HtmlPage(Node):
         self.jinja_env = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(self.appname + '/templates/'),
                 autoescape=jinja2.select_autoescape(['html', 'xml']))
-        
+
         self.parts = []
         for part in elt:
             self.debug(" Page part: {}".format(part.tag))

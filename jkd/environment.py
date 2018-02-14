@@ -25,7 +25,7 @@ import time
 
 from .html_page import HtmlPage
 from .subprocessus import Subprocessus
-registry = { 
+registry = {
         "html_page":HtmlPage,
         "subprocessus":Subprocessus,
          }
@@ -157,7 +157,7 @@ class EnvSubApplication(Environment):
         self.reader_t = self.loop.create_task(self.aio_readline())
 
     def send(self, msg):
-        #self.debug("SubApplication {}s: Sending message : {}".format(self.appname, str(msg)))
+        self.debug("SubApplication {}: Sending message : {}".format(self.appname, str(msg)))
         line = jkd_serialize(msg) + b'\n'
         #self.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
         # To be sure to write binary data to stdout, use .buffer.raw
@@ -165,8 +165,8 @@ class EnvSubApplication(Environment):
         #self.debug("SubApplication {}s: message sent".format(self.appname))
 
     async def handler(self, msg):
-        #self.debug("SubApplication {}s: Handling message : {}".format(self.appname, str(msg)))
-        if msg['cmd'] == 'get':
+        self.debug("SubApplication {}: Handling message : {}".format(self.appname, str(msg)))
+        if 'cmd' in msg and msg['cmd'] == 'get':
             qid = msg['qid']
             self.reply = {'reply':'This is the reply from the subprocess application.'}
             self.send(self.reply)
@@ -178,12 +178,19 @@ class EnvSubApplication(Environment):
             for i in range(parts):
                 self.send({"qid":qid, "part": i, "parts": parts})
                 time.sleep(0.05)
-
-        elif msg['cmd'] == 'exit':
+        elif 'cmd' in msg and msg['cmd'] == 'exit':
             self.reply = {'reply':'exited'}
             self.send(self.reply)
             self.done = True
             self.loop.exit()
+        elif 'query' in msg and msg['query'] == 'data':
+            self.debug('data query requested')
+            qid = msg['qid']
+            self.reply = {'qid':qid, 'reply':'This is the data reply from the subprocess application.'}
+            self.send(self.reply)
+        else:
+            self.warning('Unhandled message: '+str(msg))
+
 
     async def aio_readline(self):
         # The mainloop

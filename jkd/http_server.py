@@ -18,6 +18,8 @@ class HttpServer(Container):
         super().__init__(**kwargs)
         self.debug('httpserver input: '+str(self.input))
         self.next_qid = 0
+        self.next_wsid = 0
+        self.ws = {}
         self.web_app = web.Application()
         #self.instances = {} # Running applications
 
@@ -37,22 +39,27 @@ class HttpServer(Container):
 
         #self['demo'] = DemoApplication(env = self.env, name="demo")
 
-    async def ws_send(self, message):
-        if self.ws is not None:
-            self.ws.send_str(json.dumps(message))
+    async def ws_send(self, wsid, message):
+        if self.ws[wsid] is not None:
+            self.ws[wsid].send_str(json.dumps(message))
 
     async def ws_handler(self, request):
-        self.ws = web.WebSocketResponse()
-        await self.ws.prepare(request)
-
-        async for message in self.ws:
+        wsid = self.next_wsid
+        self.next_wsid += 1
+        self.ws[wsid] = web.WebSocketResponse()
+        await self.ws[wsid].prepare(request)
+        self.info("websocket connection {} opened".format(wsid))
+        async for message in self.ws[wsid]:
             if message.type == aiohttp.WSMsgType.TEXT:
                 if message.data == 'close':
                     #TODO : Better close handling
-                    await self.ws.close()
+                    await self.ws[wsid].close()
                 else:
                     msg = json.loads(message.data);
-                    if msg['qid'] == "q1":
+                    if 'dst' in msg:
+                        appname = msg['appname']
+                        await self.query(self[appname], msg)
+                    elif msg['qid'] == "q1":
                         reply = await self.ext_app.aget(msg['qid'])
                     elif msg['qid'] == "q2":
                         reply = await self.ext_app2.aget(msg['qid'])
@@ -60,12 +67,11 @@ class HttpServer(Container):
                     # test echo reply
                         reply = await self.ext_app.aget("other")
 #                    await self.ws_send({"reply": message['data'] + '/answer'})
-                    await self.ws_send({"reply": reply})
+                        await self.ws_send(wsid, {"reply": reply})
             elif message.type == aiohttp.WSMsgType.ERROR:
-                self.warning('ws connection closed with exception %s' %
-                  self.ws.exception())
-        self.debug('websocket connection closed')
-        return self.ws
+                self.warning('websocket connection {} closed with exception {}'.format(wsid, self.ws[wsid].exception()))
+        self.debug('websocket connection {} closed'.format(wsid))
+        return self.ws[wsid] #useless ?
 
     @aiohttp_jinja2.template('tmpl.jinja2')
     def tmpl_handler(self, request):
