@@ -5,7 +5,7 @@ import jinja2
 from .node import *
 
 class HtmlPage(Node):
-    def __init__(self, elt = None, **kwargs):
+    def __init__(self, elt = None, parent = None, **kwargs):
         if 'appname' in kwargs:
             self.appname = kwargs['appname']
         else:
@@ -14,10 +14,12 @@ class HtmlPage(Node):
             self.pagetitle = kwargs['title']
         else:
             self.pagetitle = 'Default page title'
-        super().__init__(env = kwargs['env'], name = kwargs['name'])
+        super().__init__(env = kwargs['env'], parent = parent, name = kwargs['name'])
         self.jinja_env = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(self.appname + '/templates/'),
                 autoescape=jinja2.select_autoescape(['html', 'xml']))
+        
+        self.ports['html'] = {'mode':'output'}
 
         self.parts = []
         for part in elt:

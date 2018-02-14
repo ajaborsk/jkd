@@ -21,11 +21,22 @@ class Container(Node):
             pass
 
     def node_add(self, name, node):
-        "Add a named node to the containe"
+        "Add a named node to the container"
         #TODO: Check if node already exists
         #TODO: Check node type
         #TODO: Check name type
         self.contents[name] = node
+
+    async def msg_handle(self, msg):
+        if 'node' in msg and msg['node'] == self.name:
+            # This node is the final destination
+            # TODO
+            pass
+        else:
+            if 'dst' in msg and msg['dst'].split('/')[0] in self.contents:
+                # reroute to contained
+                pass
+        await super().msg_handle(msg)
 
     def get(self):
         #return node content (a list of etree elements)

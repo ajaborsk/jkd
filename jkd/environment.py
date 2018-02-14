@@ -173,7 +173,7 @@ class EnvSubApplication(Environment):
             self.reply = {'reply':'This is the reply from the subprocess application.'}
             self.send(self.reply)
             # a fully synchronous code part...
-            parts = 100
+            parts = 10
             for i in range(parts):
                 self.send({"qid":qid, "ratio":i / parts})
                 time.sleep(0.05)

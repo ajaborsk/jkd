@@ -28,6 +28,9 @@ $(document).ready(function()
  {
   send = function(msg)
    {
+    msg.url = '//demo' + msg.url;
+    msg.src = '//demo/homepage';
+    msg.qid = 1000;
     websocket.send(JSON.stringify(msg));
    };
 
@@ -76,7 +79,7 @@ var myChart = new Chart(ctx, {
   $("#test1").text("Hello world!");
 
   $("#push1").click(function(evt){send({'qid':1, 'query':'data', 'dst':'heavyproc', 'appname':'demo'})});
-  $("#push2").click(function(evt){send({'qid':'q2', 'query':'test2'})});
+  $("#push2").click(function(evt){send({'url':'/siggen#output', 'query':'single'})});
 
   websocket.onopen = function(evt)
    {

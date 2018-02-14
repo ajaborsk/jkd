@@ -30,17 +30,21 @@ class Port:
 
 
 class Node:
-    def __init__(self, env = None, name = ''):
+    def __init__(self, env = None, parent = None, name = ''):
         #print("setting env to", env)
         self.env = env
-        self.next_qid = 0
-        # name for debugging purpose
+        self.parent = parent
         self.name = name
-        self.debug(str(self.__class__)+" name :" + self.name)
+        self.debug(str(self.__class__) + " fqn: " + self.fqn())
+
+        self.next_qid = 0
         # Global input queue
         self.input = asyncio.Queue()
-        # Per-Query input queues
+        # I/O ports. each port has a entry in the dictionary : 'portname':{propoerties}
+        self.ports = {}
+        # Per-Query input queues (bof...)
         self.queries = {}
+        self.current_queries = {}
         # Output connections
         self.connections = []
         self.done = False
@@ -48,15 +52,25 @@ class Node:
             #self.debug("launching mainloop...")
             self.loop_task = self.env.loop.create_task(self.mainloop())
 
+    def fqn(self):
+        if self.parent is None:
+            return(self.name)
+        else:
+            return self.parent.fqn() + '/' + self.name
+
     async def mainloop(self):
         #self.debug(str(self.__class__)+self.name + ": Entering mainloop...")
         while not self.done:
             msg = await self.input.get()
-            #self.debug(str(self.__class__)+self.name + ": Handling msg: " + str(msg))
+            #self.debug(str(self.__class__) + self.name + ": Handling msg: " + str(msg))
             await self.msg_handle(msg)
 
     async def msg_handle(self, msg):
-        if 'query' not in msg:
+        if 'node' in msg and msg['node'] == self.name:
+            # This node is the final destination
+            # TODO
+            pass
+        elif 'query' not in msg:
             # This is a reply
             qid = msg['qid']
             if qid in self.queries:
@@ -67,7 +81,7 @@ class Node:
             else:
                 self.warning('No registred query id '+str(qid))
         else:
-            self.warning(str(self.__class__)+self.name + ": Unhandled msg: " + str(msg))
+            self.warning(str(self.__class__) + self.name + ": Unhandled msg: " + str(msg))
 
     def get_etnode(self):
         return ET.Element()
@@ -77,19 +91,28 @@ class Node:
         # get next query id (qid) and increment counter for next time
         qid = self.next_qid
         self.next_qid += 1
-        # Add a internal dedicated queue for this query id
-        self.queries[qid] = asyncio.Queue()
-        # Update message with qid and source reference (as python object for now)
-        query.update({'qid':qid, 'src':self})
-        # Put the message into the destination (global) queue
-        await destination.input.put(query)
-        # Return the query id
-        return qid
+        if 'node' in query:
+            # New protocol
+            if 'prox_src' in query:
+                prox_dst = query['prox_src']
+            else:
+                prox_dst = query['src']
+            self.current_queries[qid] = {'qid': query['qid'], 'prox_dst': prox_dst}
+            query.update({'qid':qid, 'prox_src':self})
+            await destination.input.put(query)            
+        else:
+            # Add a internal dedicated queue for this query id
+            self.queries[qid] = asyncio.Queue()
+            # Update message with qid and source reference (as python object for now)
+            query.update({'qid':qid, 'src':self})
+            # Put the message into the destination (global) queue
+            await destination.input.put(query)
+            # Return the query id
+            return qid
 
     async def delegate(self, destination, query):
         #self.debug("Delegating to " + str(destination))
         await destination.input.put(query)
-
 
     async def wait_for_reply(self, qid, timeout = 10.):
         return await asyncio.wait_for(self.queries[qid].get(), timeout, loop = self.env.loop)
