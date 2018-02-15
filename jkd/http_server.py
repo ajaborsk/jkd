@@ -59,9 +59,9 @@ class HttpServer(Container):
                     if 'dst' in msg:
                         appname = msg['appname']
                         await self.query(self[appname], msg)
-                    elif 'node' in msg:
-                        appname = msg['appname']
-                        await self.query(self[appname], msg)                        
+                    elif 'url' in msg:
+                        appname = msg['url'][2:].split('/')[0]
+                        await self.query(self[appname], msg)
                     elif msg['qid'] == "q1":
                         reply = await self.ext_app.aget(msg['qid'])
                     elif msg['qid'] == "q2":
