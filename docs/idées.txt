@@ -71,9 +71,12 @@ Liens, connexions et messages :
   Chaque requête comporte un destinataire final, sous forme d'une addresse complète
   (Fully Qualified Name / fqn /path).
 
-
   La transmission d'un message entre deux noeuds (qui peuvent être de simples routeurs)
-  comporte des tags
+  comporte des tags particuiers :
+  *prox_qid* : proximal query id = identifant local de la requête : créé par l'envoyeur
+  pour les requêtes et transmis par l'envoyeur pour les réponses
+  *prox_src* : envoyeur (sous un format qui dépend du type de connection)
+  *prox_dst* : destinataire (idem).
 
 
 

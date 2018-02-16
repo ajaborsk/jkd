@@ -26,6 +26,8 @@
 
 $(document).ready(function()
  {
+  env = new JkdEnv("ws://localhost:8080/ws");
+
   send = function(msg)
    {
     msg.url = '//demo' + msg.url;
@@ -33,6 +35,10 @@ $(document).ready(function()
     msg.qid = 1000;
     websocket.send(JSON.stringify(msg));
    };
+
+  query = function(msg, callback)
+   {
+   }
 
   var ctx = $("#chart1");
 
@@ -73,46 +79,21 @@ var myChart = new Chart(ctx, {
     }
 });
 
-  // First of all: launch websocket connection
-  websocket = new WebSocket("ws://localhost:8080/ws");
+
+  $("#push1").click(function(evt)
+   {
+    env.query('/siggen#output', {'qid':1, 'query':'data', 'dst':'heavyproc', 'appname':'demo'})
+   });
+  $("#push2").click(function(evt)
+   {
+    env.query('/siggen#output', {'url':'/siggen#output', 'query':'single'})
+   });
+
+  // Launch jkd environment
+  env.run();
 
   $("#test1").text("Hello world!");
 
-  $("#push1").click(function(evt){send({'qid':1, 'query':'data', 'dst':'heavyproc', 'appname':'demo'})});
-  $("#push2").click(function(evt){send({'url':'/siggen#output', 'query':'single'})});
-
-  websocket.onopen = function(evt)
-   {
-    $("#conn_status").text("Connected");
-     //send({"data":"Plikdf 1"});
-   };
-
-  // Message handling
-  websocket.onmessage = function(evt)
-   {
-    msg = JSON.parse(evt.data);
-    if (msg.qid == 'q1')
-     {
-      $("#result1").text("Response : " + JSON.stringify(msg));
-     }
-    else if (msg.qid == 'q2')
-     {
-      $("#result2").text("Response : " + JSON.stringify(msg));
-     }
-    else
-     {
-      $("#test1").text("Response : " + JSON.stringify(msg));
-     }
-   };
-
-  websocket.onclose = function(evt)
-   {
-    $("#conn_status").text("Unconnected");
-   };
-
-//TODO:
-// Error handling
-//  websocket.onerror = function(evt) { onError(evt) };
 });
 
 </script>
