@@ -9,9 +9,10 @@ class Subprocessus(Node):
         super().__init__(**kwargs)
         self.subprocess = None
         self.appname = appname
+        self.next_pipe_qid = 0
         self.reply = None
-        self.subscription = None
-        self.pipe_queries = {}
+        #self.subscription = None
+        self.pipe_channels = {}
 
     def subscribe(self, coro):
         self.subscription = coro
@@ -28,13 +29,20 @@ class Subprocessus(Node):
             #print("Waiting...", file=sys.stderr, flush=True)
             msg = await self.recv()
             self.debug("Subprocessus {} : Handling message : {}".format(self.appname, str(msg)))
-            if 0:#msg['reply'] == 'exited':
-                self.done = True
-            else:
-                if inspect.iscoroutinefunction(self.subscription):
-                    #self.debug("Subprocessus {}s : transfering message {}...".format(self.appname, str(msg)))
-                    await self.subscription(msg)
-                    #self.debug("Subprocessus {}s : message transfered : {}".format(self.appname, str(msg)))
+
+            if 'qid' in msg and msg['qid'] in self.pipe_channels:
+                channel = self.pipe_channels[msg['qid']]
+                msg.update({'qid':channel['qid']})
+                self.debug('reply_to'+str(channel['prx_dst']))
+                await channel['prx_dst'].input.put(msg)
+
+#            if 0:#msg['reply'] == 'exited':
+#                self.done = True
+#            else:
+#                if inspect.iscoroutinefunction(self.subscription):
+#                    #self.debug("Subprocessus {}s : transfering message {}...".format(self.appname, str(msg)))
+#                    await self.subscription(msg)
+#                    self.debug("Subprocessus {}s : message transfered : {}".format(self.appname, str(msg)))
         # end task
         await self.subprocess.wait()
         await self.bg
@@ -52,17 +60,21 @@ class Subprocessus(Node):
         msg = jkd_deserialize(line[:-1])
         return msg
 
-    async def msg_handle(self, msg):
+    async def query_handle(self, msg):
         "Handle message from python queue input"
-        self.debug("subprocessus.msg_handle: " + str(msg))
-        if 'query' in msg and msg['query'] == 'data':
+        self.debug("subprocessus.query_handle: " + str(msg))
+
+        pipe_qid = self.next_pipe_qid
+        self.next_pipe_qid += 1
+
+        if 'query' in msg:
             if self.subprocess is None:
                 await self.launch()
                 self.bg = self.env.loop.create_task(self.loop())
         self.debug("subprocessus.sending to process: " + str({'qid':msg['qid'], 'query':'data'}))
-        self.pipe_queries[msg['qid']] = {'dst':msg['src']} # reply_to
-        self.send({'qid':msg['qid'], 'query':'data'})
-        return self.reply
+        self.pipe_channels[pipe_qid] = {'prx_dst':msg['prx_src'], 'qid':msg['qid']} # reply_to
+        self.send({'qid':pipe_qid, 'query':'data'})
+        #return self.reply
 
     # Initiate a query (launching subprocess if not already running)
     async def aget(self, qid = None):

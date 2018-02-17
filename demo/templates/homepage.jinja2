@@ -82,7 +82,12 @@ var myChart = new Chart(ctx, {
 
   $("#push1").click(function(evt)
    {
-    env.query('/siggen#output', {'qid':1, 'query':'data', 'dst':'heavyproc', 'appname':'demo'})
+    env.query('/heavyproc#output', 'single',
+      function (msg, client)
+       {
+        $('#result1').text(msg.reply);
+       },
+      null);
    });
 
   cb = function(msg, client)

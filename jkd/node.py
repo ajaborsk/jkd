@@ -69,7 +69,7 @@ class Node:
 
     async def msg_handle(self, msg):
         # General message handling (including routing)
-        #self.debug(self.name + ' msg_handle '+str(msg))
+        self.debug(self.name + ' msg_handle '+str(msg))
         if 'query' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:
@@ -98,7 +98,7 @@ class Node:
                     # The node is the final destination (queue mode)
                     await self.channels[qid].put(msg)
                 elif isinstance(self.channels[qid], tuple):
-                    #self.debug(self.name + ' reply coro mode : ' + str(msg))
+                    self.debug(self.name + ' reply coro mode : ' + str(msg))
                     # The node is the final destination (coroutine mode)
                     await self.channels[qid][0](msg, self.channels[qid][1])
                 else:
@@ -141,36 +141,40 @@ class Node:
     # Outgoing query
     async def query(self, destination, query, coro = None, client = None):
         # get next query id (qid) and increment counter for next time
-        qid = self.next_qid
+        chan_id = self.next_qid
         self.next_qid += 1
         if 'url' in query:
             if coro is None:
-                self.channels[qid] = asyncio.Queue()
+                # Add a internal dedicated queue for this channel id
+                self.channels[chan_id] = asyncio.Queue()
             else:
-                self.channels[qid] = (coro, client)
+                # Add a callback and its client data for this channel id
+                self.channels[chan_id] = (coro, client)
             url = urlparse(query['url'])
-            self.debug(self.name+': '+"Url = "+str(url))
-            query.update({'path':url.path, 'port':url.fragment, 'qid':qid, 'prx_src':self})
+            self.debug(self.name+': '+"Url = " + str(url))
+            query.update({'path':url.path, 'port':url.fragment, 'qid':chan_id, 'prx_src':self})
             await destination.input.put(query)
-            return qid
-        elif 'node' in query:
-            # New protocol
-            if 'prox_src' in query:
-                prox_dst = query['prox_src']
-            else:
-                prox_dst = query['src']
-            self.current_queries[qid] = {'qid': query['qid'], 'prox_dst': prox_dst}
-            query.update({'qid':qid, 'prox_src':self})
-            await destination.input.put(query)
-        else:
-            # Add a internal dedicated queue for this query id
-            self.channels[qid] = asyncio.Queue()
-            # Update message with qid and source reference (as python object for now)
-            query.update({'qid':qid, 'src':self})
-            # Put the message into the destination (global) queue
-            await destination.input.put(query)
+            return chan_id
+        # elif 'node' in query:
+            # # New protocol
+            # if 'prox_src' in query:
+                # prox_dst = query['prox_src']
+            # else:
+                # prox_dst = query['src']
+            # self.current_queries[qid] = {'qid': query['qid'], 'prox_dst': prox_dst}
+            # query.update({'qid':qid, 'prox_src':self})
+            # await destination.input.put(query)
+#        else:
+#            # Add a internal dedicated queue for this query id
+#            self.channels[chan_id] = asyncio.Queue()
+#            # Update message with qid and source reference (as python object for now)
+#            query.update({'qid':chan_id, 'src':self})
+#            # Put the message into the destination (global) queue
+#            await destination.input.put(query)
             # Return the query id
-            return qid
+        else:
+            self.warning('No url for query' + str(query))
+            return None
 
     async def delegate(self, destination, query):
         self.debug("Delegating to " + str(destination)+' : '+str(query))

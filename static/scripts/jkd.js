@@ -60,7 +60,7 @@ class JkdEnv
        }
       else
        {
-        $("#test1").text("Response : " + JSON.stringify(msg));
+        //$("#test1").text("Response : " + JSON.stringify(msg));
         var qid = msg['qid'];
         //if (!(self.queries[qid]['cb'] === undefined))
          {
