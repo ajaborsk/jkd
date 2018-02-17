@@ -43,6 +43,13 @@ class HttpServer(Container):
         if self.ws[wsid] is not None:
             self.ws[wsid].send_str(json.dumps(message))
 
+    async def reply_for_ws(self, msg, client = None):
+        #self.debug("handling reply for ws " + str(msg) + ' client:' + str(client))
+        qid = client['qid']
+        wsid = client['wsid']
+        msg['qid'] = qid
+        await self.ws_send(wsid, msg)
+
     async def ws_handler(self, request):
         wsid = self.next_wsid
         self.next_wsid += 1
@@ -60,8 +67,8 @@ class HttpServer(Container):
                         appname = msg['appname']
                         await self.query(self[appname], msg)
                     elif 'url' in msg:
-                        appname = msg['url'][2:].split('/')[0]
-                        await self.query(self[appname], msg)
+                        appname = msg['url'][1:].split('/')[0]
+                        await self.query(self[appname], msg, self.reply_for_ws, {'wsid':wsid, 'qid':msg['qid']})
                     elif msg['qid'] == "q1":
                         reply = await self.ext_app.aget(msg['qid'])
                     elif msg['qid'] == "q2":
@@ -98,7 +105,7 @@ class HttpServer(Container):
                 app = self[name]
 
             if app is not None:
-                qid = await self.query(app, {'query':'get'})
+                qid = await self.query(app, {'query':'get', 'src':self.fqn(), 'url':name})
                 #self.debug("Query launched "+str(qid))
                 #self.next_qid += 1
                 text = "Timeout."

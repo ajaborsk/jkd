@@ -18,7 +18,7 @@ class HtmlPage(Node):
         self.jinja_env = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(self.appname + '/templates/'),
                 autoescape=jinja2.select_autoescape(['html', 'xml']))
-        
+
         self.ports['html'] = {'mode':'output'}
 
         self.parts = []
@@ -27,17 +27,18 @@ class HtmlPage(Node):
             #self.parts.append({'template':self.jinja_env.get_template(part.attrib['template'] + '.jinja2')})
 
 
-    async def msg_handle(self, msg):
+    async def query_handle(self, msg):
+        self.debug(self.name + ' : query_handle : '+ str(msg))
         if 'query' in msg and msg['query'] == 'get':
             template = self.jinja_env.get_template(self.name + '.jinja2')
             html_page = template.render({'pagetitle':self.pagetitle, 'name':'Joris'})
-            #self.debug("handling"+str(msg))
-            #self.debug("Reply to " + str(msg['src']) + "/ qid=" + str(msg['qid']))
-            rep= {'qid':msg['qid'], 'reply':html_page}
-            #self.debug("Reply = " + str(rep))
+            self.debug("handling"+str(msg))
+            self.debug("Reply to " + str(msg['src']) + " / qid=" + str(msg['qid']))
+            rep = {'prx_dst':msg['prx_src'], 'qid':msg['qid'], 'reply':html_page}
+            self.debug("Reply = " + str(rep))
             #self.debug("Queue = " + str(msg['src'].input))
-            await msg['src'].input.put(rep)
+            await msg['prx_src'].input.put(rep)
             #self.debug("Replied")
         else:
-            await super().msg_handle(msg)
+            await super().query_handle(msg)
 

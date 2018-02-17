@@ -26,12 +26,12 @@
 
 $(document).ready(function()
  {
-  env = new JkdEnv("ws://localhost:8080/ws");
+  env = new JkdEnv("ws://localhost:8080/ws", "/demo/homepage");
 
   send = function(msg)
    {
-    msg.url = '//demo' + msg.url;
-    msg.src = '//demo/homepage';
+    msg.url = '/demo' + msg.url;
+    msg.src = '/demo/homepage';
     msg.qid = 1000;
     websocket.send(JSON.stringify(msg));
    };
@@ -84,9 +84,15 @@ var myChart = new Chart(ctx, {
    {
     env.query('/siggen#output', {'qid':1, 'query':'data', 'dst':'heavyproc', 'appname':'demo'})
    });
+
+  cb = function(msg, client)
+   {
+    $('#result2').text(client + ' ' + msg.reply);
+   };
+
   $("#push2").click(function(evt)
    {
-    env.query('/siggen#output', {'url':'/siggen#output', 'query':'single'})
+    env.query('/siggen#output', 'updates', cb, 'popo');
    });
 
   // Launch jkd environment

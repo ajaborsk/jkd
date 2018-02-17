@@ -209,7 +209,7 @@ class EnvHttpServer(Environment):
 
     def __init__(self):
         super().__init__()
-        self.http_server = HttpServer(env = self)
+        self.http_server = HttpServer(env = self, name = 'httpd')
 
         self.loop = self.http_server.web_app.loop
         if self.loop is None:

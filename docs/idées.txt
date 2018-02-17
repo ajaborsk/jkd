@@ -86,4 +86,11 @@ Trame d'un message :
  - qid : id de la requête
  - Charge utile :
 
+Routage Aller d'un message :
+ - Principe : Toujours passer par le noeud parent, dans la perspective de
+            gérer (ultérieurement) les droits d'accès
+
+Routage Retour d'un message :
+ - Utiliser les prox_qid => facile
+
 

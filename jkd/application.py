@@ -36,16 +36,26 @@ class Application(Container):
     def fqn(self):
         return '//' + self.name
 
-    async def msg_handle(self, msg):
-        self.debug('Application: handling msg: '+str(msg))
-        if 'query' in msg and msg['query'] == 'get':
-            if 'homepage' in self:
-                # Delegate "get" query (= http) to homepage, if it exists
-                await self.delegate(self['homepage'], msg)
-            else:
-                # Default (very) basic reply
-                await msg['src'].input.put({"dst":msg['src'], 'qid':msg['qid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
-        elif 'query' in msg and msg['query'] == 'data':
-            await self.delegate(self[msg['dst']], msg)
+    async def query_handle(self, query):
+        self.debug('Application: handling query: '+str(query))
+        if 'homepage' in self:
+            # Delegate "get" query (= http) to homepage, if it exists
+            await self.delegate(self['homepage'], query)
         else:
-            await super().msg_handle(msg)
+            # Default (very) basic reply
+            await msg['src'].input.put({"dst":query['src'], 'qid':query['qid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
+
+
+    # async def msg_handle(self, msg):
+        # self.debug('Application: handling msg: '+str(msg))
+        # if 'query' in msg and msg['query'] == 'get':
+            # if 'homepage' in self:
+                # # Delegate "get" query (= http) to homepage, if it exists
+                # await self.delegate(self['homepage'], msg)
+            # else:
+                # # Default (very) basic reply
+                # await msg['src'].input.put({"dst":msg['src'], 'qid':msg['qid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
+        # elif 'query' in msg and msg['query'] == 'data':
+            # await self.delegate(self[msg['dst']], msg)
+        # else:
+            # await super().msg_handle(msg)
