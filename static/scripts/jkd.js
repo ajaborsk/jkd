@@ -18,7 +18,7 @@ class JkdEnv
  {
   constructor(ws_url, from)
    {
-    this.next_qid = 1000;
+    this.next_lcid = 1000;
     this.ws_url = ws_url;
     this.from = from;
     this.queries = {};
@@ -31,18 +31,18 @@ class JkdEnv
 
   query(url, query, callback, client)
    {
-    var qid = this.next_qid;
-    this.next_qid++;
+    var lcid = this.next_lcid;
+    this.next_lcid++;
 
-    this.queries[qid] = {'cb':callback, 'client':client};
+    this.queries[lcid] = {'cb':callback, 'client':client};
 
     console.log(typeof(callback));
-    console.log(typeof(this.queries[qid]['cb']));
+    console.log(typeof(this.queries[lcid]['cb']));
 
     var msg = { 'url'   : '/demo' + url,
                 'src'   : '/demo/homepage',
                 'from'  : this.from,
-                'qid'   : qid,
+                'lcid'   : lcid,
                 'query' : query };
     this.websocket.send(JSON.stringify(msg));
    }
@@ -50,25 +50,25 @@ class JkdEnv
   onmessage(self, evt)
    {
       var msg = JSON.parse(evt.data);
-      if (msg.qid == 'q1')
+      if (msg.lcid == 'q1')
        {
         $("#result1").text("Response : " + JSON.stringify(msg));
        }
-      else if (msg.qid == 'q2')
+      else if (msg.lcid == 'q2')
        {
         $("#result2").text("Response : " + JSON.stringify(msg));
        }
       else
        {
         //$("#test1").text("Response : " + JSON.stringify(msg));
-        var qid = msg['qid'];
-        //if (!(self.queries[qid]['cb'] === undefined))
+        var lcid = msg['lcid'];
+        //if (!(self.queries[lcid]['cb'] === undefined))
          {
-          self.queries[qid]['cb'](msg, self.queries[qid]['client']);
+          self.queries[lcid]['cb'](msg, self.queries[lcid]['client']);
          }
         if (msg['eoq'] == true)
          {
-          delete self.queries[qid];
+          delete self.queries[lcid];
          }
        }
    }

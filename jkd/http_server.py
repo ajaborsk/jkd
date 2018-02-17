@@ -17,7 +17,7 @@ class HttpServer(Container):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.debug('httpserver input: '+str(self.input))
-        self.next_qid = 0
+        self.next_lcid = 0
         self.next_wsid = 0
         self.ws = {}
         self.web_app = web.Application()
@@ -41,13 +41,13 @@ class HttpServer(Container):
 
     async def ws_send(self, wsid, message):
         if self.ws[wsid] is not None:
-            self.ws[wsid].send_str(json.dumps(message))
+            await self.ws[wsid].send_str(json.dumps(message))
 
     async def reply_for_ws(self, msg, client = None):
-        #self.debug("handling reply for ws " + str(msg) + ' client:' + str(client))
-        qid = client['qid']
+        self.debug("handling reply for ws " + str(msg) + ' client:' + str(client))
+        lcid = client['lcid']
         wsid = client['wsid']
-        msg['qid'] = qid
+        msg['lcid'] = lcid
         await self.ws_send(wsid, msg)
 
     async def ws_handler(self, request):
@@ -68,11 +68,11 @@ class HttpServer(Container):
                         await self.query(self[appname], msg)
                     elif 'url' in msg:
                         appname = msg['url'][1:].split('/')[0]
-                        await self.query(self[appname], msg, self.reply_for_ws, {'wsid':wsid, 'qid':msg['qid']})
-                    elif msg['qid'] == "q1":
-                        reply = await self.ext_app.aget(msg['qid'])
-                    elif msg['qid'] == "q2":
-                        reply = await self.ext_app2.aget(msg['qid'])
+                        await self.query(self[appname], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
+                    elif msg['lcid'] == "q1":
+                        reply = await self.ext_app.aget(msg['lcid'])
+                    elif msg['lcid'] == "q2":
+                        reply = await self.ext_app2.aget(msg['lcid'])
                     else:
                     # test echo reply
                         reply = await self.ext_app.aget("other")
@@ -105,19 +105,19 @@ class HttpServer(Container):
                 app = self[name]
 
             if app is not None:
-                qid = await self.query(app, {'query':'get', 'src':self.fqn(), 'url':name})
-                #self.debug("Query launched "+str(qid))
-                #self.next_qid += 1
+                lcid = await self.query(app, {'query':'get', 'src':self.fqn(), 'url':name})
+                #self.debug("Query launched "+str(lcid))
+                #self.next_lcid += 1
                 text = "Timeout."
                 try:
-#                    text = await asyncio.shield(self.wait_for_reply(qid, timeout = 0.1))
-                    msg = await self.wait_for_reply(qid, timeout = 5.)
+#                    text = await asyncio.shield(self.wait_for_reply(lcid, timeout = 0.1))
+                    msg = await self.wait_for_reply(lcid, timeout = 5.)
                     text = msg['reply']
                 except asyncio.TimeoutError:
                     self.info("http request timeout")
-                #self.debug("Query first reply "+str(qid))
-                if qid in self.channels:
-                    del self.channels[qid] # remove query input queue
+                #self.debug("Query first reply "+str(lcid))
+                if lcid in self.channels:
+                    del self.channels[lcid] # remove query input queue
             else:
                 #TODO : True 404 Not Found page
                 text = 'Application Not found'

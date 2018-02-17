@@ -9,7 +9,7 @@ class Subprocessus(Node):
         super().__init__(**kwargs)
         self.subprocess = None
         self.appname = appname
-        self.next_pipe_qid = 0
+        self.next_pipe_lcid = 0
         self.reply = None
         #self.subscription = None
         self.pipe_channels = {}
@@ -30,9 +30,9 @@ class Subprocessus(Node):
             msg = await self.recv()
             self.debug("Subprocessus {} : Handling message : {}".format(self.appname, str(msg)))
 
-            if 'qid' in msg and msg['qid'] in self.pipe_channels:
-                channel = self.pipe_channels[msg['qid']]
-                msg.update({'qid':channel['qid']})
+            if 'lcid' in msg and msg['lcid'] in self.pipe_channels:
+                channel = self.pipe_channels[msg['lcid']]
+                msg.update({'lcid':channel['lcid']})
                 self.debug('reply_to'+str(channel['prx_dst']))
                 await channel['prx_dst'].input.put(msg)
 
@@ -64,27 +64,27 @@ class Subprocessus(Node):
         "Handle message from python queue input"
         self.debug("subprocessus.query_handle: " + str(msg))
 
-        pipe_qid = self.next_pipe_qid
-        self.next_pipe_qid += 1
+        pipe_lcid = self.next_pipe_lcid
+        self.next_pipe_lcid += 1
 
         if 'query' in msg:
             if self.subprocess is None:
                 await self.launch()
                 self.bg = self.env.loop.create_task(self.loop())
-        self.debug("subprocessus.sending to process: " + str({'qid':msg['qid'], 'query':'data'}))
-        self.pipe_channels[pipe_qid] = {'prx_dst':msg['prx_src'], 'qid':msg['qid']} # reply_to
-        self.send({'qid':pipe_qid, 'query':'data'})
+        self.debug("subprocessus.sending to process: " + str({'lcid':msg['lcid'], 'query':'data'}))
+        self.pipe_channels[pipe_lcid] = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid']} # reply_to
+        self.send({'lcid':pipe_lcid, 'query':'data'})
         #return self.reply
 
     # Initiate a query (launching subprocess if not already running)
-    async def aget(self, qid = None):
+    async def aget(self, lcid = None):
         if self.subprocess is None:
             await self.launch()
             self.bg = self.env.loop.create_task(self.loop())
         #self.debug("Subprocessus {}s: Running on...".format(self.appname))
         #print("Running on...", file=sys.stderr, flush=True)
         # Try to write...
-        self.send({'qid':qid, 'cmd':'get'})
+        self.send({'lcid':lcid, 'cmd':'get'})
         #TODO: Wait a little bit for the message reply !
         #await asyncio.sleep(1)
 

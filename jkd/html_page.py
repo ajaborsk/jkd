@@ -33,8 +33,8 @@ class HtmlPage(Node):
             template = self.jinja_env.get_template(self.name + '.jinja2')
             html_page = template.render({'pagetitle':self.pagetitle, 'name':'Joris'})
             self.debug("handling"+str(msg))
-            self.debug("Reply to " + str(msg['src']) + " / qid=" + str(msg['qid']))
-            rep = {'prx_dst':msg['prx_src'], 'qid':msg['qid'], 'reply':html_page}
+            self.debug("Reply to " + str(msg['src']) + " / lcid=" + str(msg['lcid']))
+            rep = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':html_page}
             self.debug("Reply = " + str(rep))
             #self.debug("Queue = " + str(msg['src'].input))
             await msg['prx_src'].input.put(rep)

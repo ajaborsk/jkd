@@ -40,7 +40,8 @@ class Node:
         self.name = name
         self.debug(str(self.__class__) + " fqn: " + self.fqn())
 
-        self.next_qid = 0
+        # Next available Local Channel ID (lcid)
+        self.next_lcid = 0
         # Global input messages queue
         self.input = asyncio.Queue()
         # I/O ports. each port has a entry in the dictionary : 'portname':{properties}
@@ -91,25 +92,25 @@ class Node:
         elif 'reply' in msg:
             # This is a reply
             #self.debug(self.name + ' reply catched : ' + str(msg))
-            qid = msg['qid']
-            if qid in self.channels:
-                if isinstance(self.channels[qid], asyncio.Queue):
+            lcid = msg['lcid']
+            if lcid in self.channels:
+                if isinstance(self.channels[lcid], asyncio.Queue):
                     self.debug(self.name + ' reply queue mode : ' + str(msg))
                     # The node is the final destination (queue mode)
-                    await self.channels[qid].put(msg)
-                elif isinstance(self.channels[qid], tuple):
+                    await self.channels[lcid].put(msg)
+                elif isinstance(self.channels[lcid], tuple):
                     self.debug(self.name + ' reply coro mode : ' + str(msg))
                     # The node is the final destination (coroutine mode)
-                    await self.channels[qid][0](msg, self.channels[qid][1])
+                    await self.channels[lcid][0](msg, self.channels[lcid][1])
                 else:
                     # Just route to next node
                     self.debug(self.name + ' reply reroute mode : ' + str(msg))
-                    msg['qid'] = self.channels[qid]['qid']
+                    msg['lcid'] = self.channels[lcid]['lcid']
                     msg['prx_src'] = self
-                    self.channels[qid]['prx_dst'].input.put(msg)
+                    self.channels[lcid]['prx_dst'].input.put(msg)
                 if 'eoq' in msg and msg['eoq'] == True:
                     # last message of the reply (eoq = End Of Query), so remove internal dedicated queue
-                    del self.channels[qid]
+                    del self.channels[lcid]
         elif 'error' in msg:
             # This is a (replied) error
             if 0:
@@ -124,14 +125,14 @@ class Node:
             pass
         elif 'query' not in msg:
             # This is a reply
-            qid = msg['qid']
-            if qid in self.channels:
-                await self.channels[qid].put(msg)
+            lcid = msg['lcid']
+            if lcid in self.channels:
+                await self.channels[lcid].put(msg)
                 if 'eoq' in msg and msg['eoq'] == True:
                     # last message of the reply (eoq = End Of Query), so remove internal dedicated queue
-                    del self.channels[qid]
+                    del self.channels[lcid]
             else:
-                self.warning('No registred query id '+str(qid))
+                self.warning('No registred query id '+str(lcid))
         else:
             self.warning(str(self.__class__) + self.name + ": Unhandled msg: " + str(msg))
 
@@ -140,9 +141,9 @@ class Node:
 
     # Outgoing query
     async def query(self, destination, query, coro = None, client = None):
-        # get next query id (qid) and increment counter for next time
-        chan_id = self.next_qid
-        self.next_qid += 1
+        # get next query id (lcid) and increment counter for next time
+        chan_id = self.next_lcid
+        self.next_lcid += 1
         if 'url' in query:
             if coro is None:
                 # Add a internal dedicated queue for this channel id
@@ -152,7 +153,7 @@ class Node:
                 self.channels[chan_id] = (coro, client)
             url = urlparse(query['url'])
             self.debug(self.name+': '+"Url = " + str(url))
-            query.update({'path':url.path, 'port':url.fragment, 'qid':chan_id, 'prx_src':self})
+            query.update({'path':url.path, 'port':url.fragment, 'lcid':chan_id, 'prx_src':self})
             await destination.input.put(query)
             return chan_id
         # elif 'node' in query:
@@ -161,14 +162,14 @@ class Node:
                 # prox_dst = query['prox_src']
             # else:
                 # prox_dst = query['src']
-            # self.current_queries[qid] = {'qid': query['qid'], 'prox_dst': prox_dst}
-            # query.update({'qid':qid, 'prox_src':self})
+            # self.current_queries[lcid] = {'lcid': query['lcid'], 'prox_dst': prox_dst}
+            # query.update({'lcid':lcid, 'prox_src':self})
             # await destination.input.put(query)
 #        else:
 #            # Add a internal dedicated queue for this query id
 #            self.channels[chan_id] = asyncio.Queue()
-#            # Update message with qid and source reference (as python object for now)
-#            query.update({'qid':chan_id, 'src':self})
+#            # Update message with lcid and source reference (as python object for now)
+#            query.update({'lcid':chan_id, 'src':self})
 #            # Put the message into the destination (global) queue
 #            await destination.input.put(query)
             # Return the query id
@@ -181,8 +182,8 @@ class Node:
         query['path'] = destination.name
         await destination.input.put(query)
 
-    async def wait_for_reply(self, qid, timeout = 10.):
-        return await asyncio.wait_for(self.channels[qid].get(), timeout, loop = self.env.loop)
+    async def wait_for_reply(self, lcid, timeout = 10.):
+        return await asyncio.wait_for(self.channels[lcid].get(), timeout, loop = self.env.loop)
 
     async def query_handle(self, query):
         # called when the node is the final destination of the query
@@ -192,13 +193,13 @@ class Node:
             port = query['port']
             self.debug(self.name + ": port = " + str(query))
             if query['query'] == 'immediate':
-                reply = {'qid':query['qid'], 'reply':self.ports[port]['value']}
+                reply = {'lcid':query['lcid'], 'reply':self.ports[port]['value']}
                 self.debug(self.name + ": immediate reply = " + str(query) + ' ' + str(reply))
                 await query['prx_src'].input.put(reply)
             else:
                 # Subscription
                 self.debug(self.name + ": subscribtion => " + str(query))
-                self.ports[port]['connections'].append({'update':True, 'qid':query['qid'], 'prx_dst':query['prx_src']})
+                self.ports[port]['connections'].append({'update':True, 'lcid':query['lcid'], 'prx_dst':query['prx_src']})
                 self.debug(self.name + ": subscribtions = " + str(self.ports[port]['connections']))
 
     async def reply_handle(self, reply):

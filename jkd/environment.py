@@ -169,16 +169,16 @@ class EnvSubApplication(Environment):
     async def handler(self, msg):
         self.debug("SubApplication {}: Handling message : {}".format(self.appname, str(msg)))
         if 'cmd' in msg and msg['cmd'] == 'get':
-            qid = msg['qid']
+            lcid = msg['lcid']
             self.reply = {'reply':'This is the reply from the subprocess application.'}
             self.send(self.reply)
             # a fully synchronous code part...
             parts = 10
             for i in range(parts):
-                self.send({"qid":qid, "ratio":i / parts})
+                self.send({"lcid":lcid, "ratio":i / parts})
                 time.sleep(0.05)
             for i in range(parts):
-                self.send({"qid":qid, "part": i, "parts": parts})
+                self.send({"lcid":lcid, "part": i, "parts": parts})
                 time.sleep(0.05)
         elif 'cmd' in msg and msg['cmd'] == 'exit':
             self.reply = {'reply':'exited'}
@@ -187,8 +187,8 @@ class EnvSubApplication(Environment):
             self.loop.exit()
         elif 'query' in msg and msg['query'] == 'data':
             self.debug('data query requested')
-            qid = msg['qid']
-            self.reply = {'qid':qid, 'reply':'This is the data reply from the subprocess application.'}
+            lcid = msg['lcid']
+            self.reply = {'lcid':lcid, 'reply':'This is the data reply from the subprocess application.'}
             self.send(self.reply)
         else:
             self.warning('Unhandled message: '+str(msg))

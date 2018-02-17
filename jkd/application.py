@@ -43,7 +43,7 @@ class Application(Container):
             await self.delegate(self['homepage'], query)
         else:
             # Default (very) basic reply
-            await msg['src'].input.put({"dst":query['src'], 'qid':query['qid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
+            await msg['src'].input.put({"dst":query['src'], 'lcid':query['lcid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
 
 
     # async def msg_handle(self, msg):
@@ -54,7 +54,7 @@ class Application(Container):
                 # await self.delegate(self['homepage'], msg)
             # else:
                 # # Default (very) basic reply
-                # await msg['src'].input.put({"dst":msg['src'], 'qid':msg['qid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
+                # await msg['src'].input.put({"dst":msg['src'], 'lcid':msg['lcid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
         # elif 'query' in msg and msg['query'] == 'data':
             # await self.delegate(self[msg['dst']], msg)
         # else:

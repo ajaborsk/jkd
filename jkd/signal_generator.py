@@ -24,7 +24,7 @@ class SignalGenerator(Node):
             self.compute()
             for cnx in self.ports['output']['connections']:
                 if 'update' in cnx:
-                    await cnx['prx_dst'].input.put({'qid':cnx['qid'], 'reply':int(self.ports['output']['value'])})
+                    await cnx['prx_dst'].input.put({'lcid':cnx['lcid'], 'reply':int(self.ports['output']['value'])})
             #self.debug(str(self.name) + " : output_task done.")
 #    def query_handle(self, query):
 #        pass
