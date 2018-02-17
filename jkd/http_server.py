@@ -116,8 +116,8 @@ class HttpServer(Container):
                 except asyncio.TimeoutError:
                     self.info("http request timeout")
                 #self.debug("Query first reply "+str(qid))
-                if qid in self.queries:
-                    del self.queries[qid] # remove query input queue
+                if qid in self.channels:
+                    del self.channels[qid] # remove query input queue
             else:
                 #TODO : True 404 Not Found page
                 text = 'Application Not found'
