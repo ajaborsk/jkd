@@ -26,7 +26,7 @@ class Subprocessus(Node):
         self.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
         test_xml = '<ooi att="poki"></po>' * 4000
         try:
-            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.appname, self.xml_contents, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.fqn(), self.xml_contents, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
             self.done = False
             self.reply = ''
         except Exception as ex:

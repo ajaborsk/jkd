@@ -101,7 +101,7 @@ class HttpServer(Container):
             if name in self:
                 app = self[name]
             elif os.path.isdir(name) and os.path.isfile(name + '/' + name + '.xml'):
-                self[name] = Application(env = self.env, name = name)
+                self[name] = Application(env = self.env, parent = self.env, name = name)
                 app = self[name]
 
             if app is not None:

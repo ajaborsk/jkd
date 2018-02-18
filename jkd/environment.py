@@ -150,12 +150,12 @@ import time
 from .serialize import *
 
 class EnvSubApplication(Environment):
-    def __init__(self, appname, tree = None, **kwargs):
+    def __init__(self, root_name, tree = None, **kwargs):
+        self.root_name = '/'.join(root_name.split('/')[:-1])
         super().__init__(**kwargs)
         self.done = False
-        self.appname = appname
 
-        self.root = Container(env = self, parent = None, name = appname, elt = tree, **kwargs)
+        self.root = Container(env = self, parent = self, name = root_name.split('/')[-1], elt = tree, **kwargs)
         if tree is not None:
             # Construct the sub-application tree
             self.debug("tree appname = " + str(tree.attrib['appname']))
@@ -164,9 +164,13 @@ class EnvSubApplication(Environment):
 
         # Launch the reading/handle mainloop task
         self.reader_t = self.loop.create_task(self.aio_readline())
+        self.debug("subapplication initialized")
+
+    def fqn(self):
+        return self.root_name
 
     def send(self, msg):
-        self.debug("SubApplication {}: Sending message : {}".format(self.appname, str(msg)))
+        self.debug("SubApplication {}: Sending message : {}".format(self.root_name, str(msg)))
         line = jkd_serialize(msg) + b'\n'
         #self.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
         # To be sure to write binary data to stdout, use .buffer.raw
@@ -174,7 +178,7 @@ class EnvSubApplication(Environment):
         #self.debug("SubApplication {}s: message sent".format(self.appname))
 
     async def handler(self, msg):
-        self.debug("SubApplication {}: Handling message : {}".format(self.appname, str(msg)))
+        self.debug("SubApplication {}: Handling message : {}".format(self.root_name, str(msg)))
         if 'cmd' in msg and msg['cmd'] == 'get':
             lcid = msg['lcid']
             self.reply = {'reply':'This is the reply from the subprocess application.'}
@@ -204,7 +208,7 @@ class EnvSubApplication(Environment):
     async def aio_readline(self):
         # The mainloop
         while not self.done:
-            #self.debug("SubApplication {}s: Waiting...".format(self.appname))
+            self.debug("SubApplication {}s: Waiting...".format(self.root_name))
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
             await self.handler(msg)
@@ -213,10 +217,10 @@ class EnvSubApplication(Environment):
 from .http_server import *
 
 class EnvHttpServer(Environment):
-
     def __init__(self):
         super().__init__()
-        self.http_server = HttpServer(env = self, name = 'httpd')
+        self.http_server = HttpServer(env = self, parent = self, name = 'httpd')
+        self.name = ''
 
         self.loop = self.http_server.web_app.loop
         if self.loop is None:

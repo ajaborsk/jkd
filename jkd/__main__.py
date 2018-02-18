@@ -26,7 +26,7 @@ elif sys.argv[1] == 'batch':
         logger_main.warning("Batch mode : No application name provided")
 elif sys.argv[1] == 'slave':
     if len(sys.argv) >= 3:
-        app_name = sys.argv[2]
+        root_name = sys.argv[2]
         if len(sys.argv) >= 4:
             logger_main.debug('Arg length = '+str(len(sys.argv[3])))
             logger_main.debug('Arg = '+str(sys.argv[3]))
@@ -35,7 +35,7 @@ elif sys.argv[1] == 'slave':
             tree = None
             logger_main.warning("Slave mode : No XML definition provided")
         #TODO
-        sub = jkd.EnvSubApplication(app_name, tree = tree)
+        sub = jkd.EnvSubApplication(root_name, tree = tree)
         print("(sub)application result : blabla...", sys.argv[2])
         sub.run()
     else:
