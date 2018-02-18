@@ -44,7 +44,7 @@ class HttpServer(Container):
             await self.ws[wsid].send_str(json.dumps(message))
 
     async def reply_for_ws(self, msg, client = None):
-        self.debug("handling reply for ws " + str(msg) + ' client:' + str(client))
+        #self.debug("handling reply for ws " + str(msg) + ' client:' + str(client))
         lcid = client['lcid']
         wsid = client['wsid']
         msg['lcid'] = lcid

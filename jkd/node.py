@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 import inspect
 import asyncio
+import logging
 
 import xml.etree.ElementTree as ET
 
@@ -70,7 +71,7 @@ class Node:
 
     async def msg_handle(self, msg):
         # General message handling (including routing)
-        self.debug(self.name + ' msg_handle '+str(msg))
+        #self.debug(self.name + ' msg_handle '+str(msg))
         if 'query' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:
@@ -95,16 +96,16 @@ class Node:
             lcid = msg['lcid']
             if lcid in self.channels:
                 if isinstance(self.channels[lcid], asyncio.Queue):
-                    self.debug(self.name + ' reply queue mode : ' + str(msg))
+                    #self.debug(self.name + ' reply queue mode : ' + str(msg))
                     # The node is the final destination (queue mode)
                     await self.channels[lcid].put(msg)
                 elif isinstance(self.channels[lcid], tuple):
-                    self.debug(self.name + ' reply coro mode : ' + str(msg))
+                    #self.debug(self.name + ' reply coro mode : ' + str(msg))
                     # The node is the final destination (coroutine mode)
                     await self.channels[lcid][0](msg, self.channels[lcid][1])
                 else:
                     # Just route to next node
-                    self.debug(self.name + ' reply reroute mode : ' + str(msg))
+                    #self.debug(self.name + ' reply reroute mode : ' + str(msg))
                     msg['lcid'] = self.channels[lcid]['lcid']
                     msg['prx_src'] = self
                     self.channels[lcid]['prx_dst'].input.put(msg)
@@ -220,16 +221,19 @@ class Node:
         #TODO: whole thing...
         pass
 
-    def debug(self, message, logger='main'):
+    def log(self, level, message, logger='main'):
         if len(message) > 255:
             message = message[:252] + '...'
-        self.env.loggers[logger].debug(self.fqn() + ': ' + message)
+        self.env.loggers[logger].log(level, self.fqn() + ': ' + message)
 
-    def info(self, *args, logger='main'):
-        self.env.loggers[logger].info(*args)
+    def debug(self, message, logger='main'):
+        self.log(logging.DEBUG, message, logger)
 
-    def warning(self, *args, logger='main'):
-        self.env.loggers[logger].warning(*args)
+    def info(self, message, logger='main'):
+        self.log(logging.INFO, message, logger)
 
-    def error(self, *args, logger='main'):
-        self.env.loggers[logger].error(*args)
+    def warning(self, message, logger='main'):
+        self.log(logging.WARNING, message, logger)
+
+    def error(self, message, logger='main'):
+        self.log(logging.ERROR, message, logger)

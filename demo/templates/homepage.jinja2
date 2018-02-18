@@ -21,6 +21,7 @@
     <span id="push2">Launch : </span>
     <span id="result2">Result</span>
   </div>
+  <canvas id="chart2" width="800" height="200"></canvas>
   <div id="status_bar"><span id="conn_status">Connecting...</span></div>
 <script>
 
@@ -79,6 +80,46 @@ var myChart = new Chart(ctx, {
     }
 });
 
+  var ctx2 = $("#chart2");
+
+var myChart2 = new Chart(ctx2, {
+    type: 'line',
+    data:  {
+      labels: [0, 1, 2, 3, 4, 5],
+      datasets: [{
+        fill:false,
+        pointRadius:0,
+        lineTension:0,
+        data: [12, 99, 3, -99, 2, 3],
+      }],
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            min: -100,
+            max: 100,
+          }
+        }]
+      }
+    }
+});
+
+function addData(chart, label, data) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+    });
+    chart.update(0);
+}
+
+function removeData(chart) {
+    chart.data.labels.shift();
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.shift();
+    });
+    chart.update(0);
+}
 
   $("#push1").click(function(evt)
    {
@@ -96,6 +137,11 @@ var myChart = new Chart(ctx, {
       function(msg, client)
        {
         $('#result2').text(client + ' ' + msg.reply);
+        if (myChart2.data.labels.length > 50)
+         {
+          removeData(myChart2);
+         }
+        addData(myChart2, 'n', msg.reply);
        },
       'popo');
     $("#push2").off("click");
