@@ -38,7 +38,7 @@ class Application(Container):
             await self.delegate(self['homepage'], query)
         else:
             # Default (very) basic reply
-            await msg['src'].input.put({"dst":query['src'], 'lcid':query['lcid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
+            await self.msg_send(msg['src'], {"dst":query['src'], 'lcid':query['lcid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
 
 
     # async def msg_handle(self, msg):

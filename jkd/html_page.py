@@ -37,7 +37,7 @@ class HtmlPage(Node):
             rep = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':html_page}
             self.debug("Reply = " + str(rep))
             #self.debug("Queue = " + str(msg['src'].input))
-            await msg['prx_src'].input.put(rep)
+            await self.msg_send(msg['prx_src'], rep)
             #self.debug("Replied")
         else:
             await super().query_handle(msg)

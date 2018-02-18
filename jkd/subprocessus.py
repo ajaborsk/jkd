@@ -43,7 +43,7 @@ class Subprocessus(Node):
                 channel = self.pipe_channels[msg['lcid']]
                 msg.update({'lcid':channel['lcid']})
                 self.debug('reply_to'+str(channel['prx_dst']))
-                await channel['prx_dst'].input.put(msg)
+                await self.msg_send(channel['prx_dst'], msg)
 
 #            if 0:#msg['reply'] == 'exited':
 #                self.done = True

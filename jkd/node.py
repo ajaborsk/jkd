@@ -69,6 +69,11 @@ class Node:
             #self.debug(str(self.__class__) + self.name + ": Handling msg: " + str(msg))
             await self.msg_handle(msg)
 
+    async def msg_send(self, destination, message):
+        "Low level message API"
+        #message.update({'prx_src':self})
+        await destination.input.put(message)
+
     async def msg_handle(self, msg):
         # General message handling (including routing)
         #self.debug(self.name + ' msg_handle '+str(msg))
@@ -108,7 +113,7 @@ class Node:
                     #self.debug(self.name + ' reply reroute mode : ' + str(msg))
                     msg['lcid'] = self.channels[lcid]['lcid']
                     msg['prx_src'] = self
-                    self.channels[lcid]['prx_dst'].input.put(msg)
+                    await self.msg_send(self.channels[lcid]['prx_dst'], msg)
                 if 'eoq' in msg and msg['eoq'] == True:
                     # last message of the reply (eoq = End Of Query), so remove internal dedicated queue
                     del self.channels[lcid]
@@ -155,7 +160,7 @@ class Node:
             url = urlparse(query['url'])
             self.debug(self.name+': '+"Url = " + str(url))
             query.update({'path':url.path, 'port':url.fragment, 'lcid':chan_id, 'prx_src':self})
-            await destination.input.put(query)
+            await self.msg_send(destination, query)
             return chan_id
         # elif 'node' in query:
             # # New protocol
@@ -181,7 +186,7 @@ class Node:
     async def delegate(self, destination, query):
         self.debug("Delegating to " + str(destination)+' : '+str(query))
         query['path'] = destination.name
-        await destination.input.put(query)
+        await self.msg_send(destination, query)
 
     async def wait_for_reply(self, lcid, timeout = 10.):
         return await asyncio.wait_for(self.channels[lcid].get(), timeout, loop = self.env.loop)
@@ -189,6 +194,7 @@ class Node:
     async def query_handle(self, query):
         # called when the node is the final destination of the query
         #TODO : port management ??
+        #TODO : channel management ??
         self.debug(self.name + ": generic query handle" + str(query))
         if 'port' in query and query['port'] in self.ports:
             port = query['port']
@@ -196,7 +202,7 @@ class Node:
             if query['query'] == 'immediate':
                 reply = {'lcid':query['lcid'], 'reply':self.ports[port]['value']}
                 self.debug(self.name + ": immediate reply = " + str(query) + ' ' + str(reply))
-                await query['prx_src'].input.put(reply)
+                await self.msg_send(query['prx_src'], reply)
             else:
                 # Subscription
                 self.debug(self.name + ": subscribtion => " + str(query))
