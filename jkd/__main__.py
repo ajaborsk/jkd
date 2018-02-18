@@ -18,17 +18,24 @@ elif sys.argv[1] == 'http':
     environment = jkd.EnvHttpServer()
     environment.run()
 elif sys.argv[1] == 'batch':
-    if len(sys.argv) == 3:
+    if len(sys.argv) >= 3:
         app_name = sys.argv[2]
         #TODO
         print("application result : blabla...")
     else:
         logger_main.warning("Batch mode : No application name provided")
 elif sys.argv[1] == 'slave':
-    if len(sys.argv) == 3:
+    if len(sys.argv) >= 3:
         app_name = sys.argv[2]
+        if len(sys.argv) >= 4:
+            logger_main.debug('Arg length = '+str(len(sys.argv[3])))
+            logger_main.debug('Arg = '+str(sys.argv[3]))
+            tree = ET.fromstring(sys.argv[3])
+        else:
+            tree = None
+            logger_main.warning("Slave mode : No XML definition provided")
         #TODO
-        sub = jkd.EnvSubApplication(app_name)
+        sub = jkd.EnvSubApplication(app_name, tree = tree)
         print("(sub)application result : blabla...", sys.argv[2])
         sub.run()
     else:

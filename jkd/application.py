@@ -24,17 +24,18 @@ class Application(Container):
             self.debug(self.name+ ' application etree loaded')
             root = tree.getroot()
             self.debug("Root :"+str(root.tag)+' '+str(root.attrib))
-            for child in root:
-                self.debug("Child :"+str(child.tag)+' '+str(child.attrib))
-                if child.tag in self.env.registry:
-                    self[child.attrib['name']] = self.env.registry[child.tag](env=self.env, parent=self, elt=child, **child.attrib)
-                else:
-                    self.warning("Application : Unable to instanciate node for '{}' tag".format(child.tag))
+            self.populate(root)
+            # for child in root:
+                # self.debug("Child :"+str(child.tag)+' '+str(child.attrib))
+                # if child.tag in self.env.registry:
+                    # self[child.attrib['name']] = self.env.registry[child.tag](env=self.env, parent=self, elt=child, **child.attrib)
+                # else:
+                    # self.warning("Application : Unable to instanciate node for '{}' tag".format(child.tag))
         except Exception as ex:
             self.warning('unable to load {} application description : {}'.format(self.name, str(ex)))
 
     def fqn(self):
-        return '//' + self.name
+        return '/' + self.name
 
     async def query_handle(self, query):
         self.debug('Application: handling query: '+str(query))

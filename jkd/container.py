@@ -8,7 +8,7 @@ from .node import *
 
 class Container(Node):
     tagname = "container"
-    def __init__(self, contents = None, **kwargs):
+    def __init__(self, contents = None, elt = None, **kwargs):
         super().__init__(**kwargs)
         if contents is None:
             # a brand (and empty) new container
@@ -19,6 +19,16 @@ class Container(Node):
             # get container content from argument
             #TODO
             pass
+        if elt is not None:
+            self.populate(elt)
+
+    def populate(self, root):
+        for child in root:
+            self.debug("Child :"+str(child.tag)+' '+str(child.attrib))
+            if child.tag in self.env.registry:
+                self[child.attrib['name']] = self.env.registry[child.tag](env=self.env, parent=self, elt=child, **child.attrib)
+            else:
+                self.warning("Application : Unable to instanciate node for '{}' tag".format(child.tag))
 
     def node_add(self, name, node):
         "Add a named node to the container"

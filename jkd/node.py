@@ -220,8 +220,10 @@ class Node:
         #TODO: whole thing...
         pass
 
-    def debug(self, *args, logger='main'):
-        self.env.loggers[logger].debug(*args)
+    def debug(self, message, logger='main'):
+        if len(message) > 255:
+            message = message[:252] + '...'
+        self.env.loggers[logger].debug(self.fqn() + ': ' + message)
 
     def info(self, *args, logger='main'):
         self.env.loggers[logger].info(*args)

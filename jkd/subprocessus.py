@@ -13,15 +13,24 @@ class Subprocessus(Node):
         self.reply = None
         #self.subscription = None
         self.pipe_channels = {}
+        if elt is not None:
+            self.xml_contents = ET.tostring(elt, encoding='utf8')
+        else:
+            self.xml_contents = ''
+            self.warning("No description for suprocess.")
 
     def subscribe(self, coro):
         self.subscription = coro
 
     async def launch(self):
         self.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
-        self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.appname, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-        self.done = False
-        self.reply = ''
+        test_xml = '<ooi att="poki"></po>' * 4000
+        try:
+            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.appname, self.xml_contents, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+            self.done = False
+            self.reply = ''
+        except Exception as ex:
+            self.warning("Unable to launch subprocess: " + str(ex))
 
     async def loop(self):
         while not self.done:

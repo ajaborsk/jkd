@@ -1,6 +1,8 @@
 <?xml version = "1.0" encoding="UTF-8" standalone="yes" ?>
 <application name="demo">
-    <subprocessus name="heavyproc" appname="erer"/>
+    <subprocessus name="heavyproc" appname="erer">
+      <signal_generator name="siggen_ext"/>
+    </subprocessus>
     <signal_generator name="siggen"/>
     <html_page appname="demo" name="homepage" template="homepage" title="A jkd Demo Application">
         <table data="node:/heavyproc#output" template="table"/>

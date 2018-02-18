@@ -90,14 +90,15 @@ var myChart = new Chart(ctx, {
       null);
    });
 
-  cb = function(msg, client)
-   {
-    $('#result2').text(client + ' ' + msg.reply);
-   };
-
   $("#push2").click(function(evt)
    {
-    env.query('/siggen#output', 'updates', cb, 'popo');
+    env.query('/siggen#output', 'updates',
+      function(msg, client)
+       {
+        $('#result2').text(client + ' ' + msg.reply);
+       },
+      'popo');
+    $("#push2").off("click");
    });
 
   // Launch jkd environment

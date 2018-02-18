@@ -150,10 +150,17 @@ import time
 from .serialize import *
 
 class EnvSubApplication(Environment):
-    def __init__(self, appname, **kwargs):
+    def __init__(self, appname, tree = None, **kwargs):
         super().__init__(**kwargs)
         self.done = False
         self.appname = appname
+
+        self.root = Container(env = self, parent = None, name = appname, elt = tree, **kwargs)
+        if tree is not None:
+            # Construct the sub-application tree
+            self.debug("tree appname = " + str(tree.attrib['appname']))
+            for elt in tree:
+                self.debug("  subnode " + str(elt.tag))
 
         # Launch the reading/handle mainloop task
         self.reader_t = self.loop.create_task(self.aio_readline())
