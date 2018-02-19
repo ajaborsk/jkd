@@ -28,10 +28,15 @@ class Application(Container):
         except Exception as ex:
             self.warning('unable to load {} application description : {}'.format(self.name, str(ex)))
 
+        # if there is a homepage in the container => /application
+        #   then delegate any queries on 'html' port
+        if 'homepage' in self:
+            self.ports['html'] = {'delegate':self['homepage']}
+
     def fqn(self):
         return '/' + self.name
 
-    async def query_handle(self, query):
+    async def _query_handle(self, query):
         self.debug('Application: handling query: '+str(query))
         if 'homepage' in self:
             # Delegate "get" query (= http) to homepage, if it exists
@@ -39,7 +44,6 @@ class Application(Container):
         else:
             # Default (very) basic reply
             await self.msg_send(msg['src'], {"dst":query['src'], 'lcid':query['lcid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
-
 
     # async def msg_handle(self, msg):
         # self.debug('Application: handling msg: '+str(msg))

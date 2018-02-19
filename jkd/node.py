@@ -5,32 +5,32 @@ import logging
 
 import xml.etree.ElementTree as ET
 
-class Port:
-    def __init__(self):
-        self.input = asyncio.Queue()
-        # Unused
-        #self.output = asyncio.Queue()
+# class Port:
+    # def __init__(self):
+        # self.input = asyncio.Queue()
+        # # Unused
+        # #self.output = asyncio.Queue()
 
-    # Low level API (but maybe using directly Queue API would be sufficent ?)
-    async def send(self, message):
-        await self.input.put(message)
+    # # Low level API (but maybe using directly Queue API would be sufficent ?)
+    # async def send(self, message):
+        # await self.input.put(message)
 
-    async def recv(self):
-        return await self.output.get()
+    # async def recv(self):
+        # return await self.output.get()
 
-    # High level API
-    async def get(self, address = None):
-        #TODO
-        pass
+    # # High level API
+    # async def get(self, address = None):
+        # #TODO
+        # pass
 
-    async def set(self, value, address = None):
-        #TODO
-        pass
+    # async def set(self, value, address = None):
+        # #TODO
+        # pass
 
-    # conditional / complex get
-    async def request(self, query, address = None):
-        #TODO
-        pass
+    # # conditional / complex get
+    # async def request(self, query, address = None):
+        # #TODO
+        # pass
 
 
 class Node:
@@ -47,8 +47,20 @@ class Node:
         self.input = asyncio.Queue()
         # I/O ports. each port has a entry in the dictionary : 'portname':{properties}
         self.ports = {}
+
         # Per-Query channels
+        # channels segments which this node created
+        # key = lcid of previous/current channel segment (from node source to this one)
+        # 'lcid': local channel id (from this node toward destination). Assigned by next node in the channel.
+        # 'prx_dst' : python node messages have to be sent (next node)
         self.channels = {}
+
+        # channels segments which this node is destination (build on replies)
+        # key = (prx_dst_id, lcid) : python id of the next node, lcid ofthe next segment
+        # 'lcid' : lcid assigned by this node to the previous channel segment
+        # 'prx_src' : python node messages come from (or back messages have to be sent)
+        self.back_channels = {}
+
         self.done = False
         if self.env is not None and hasattr(self.env, 'loop'):
             #self.debug("launching mainloop...")
@@ -75,15 +87,15 @@ class Node:
         await destination.input.put(message)
 
     async def msg_handle(self, msg):
-        # General message handling (including routing)
+        # General message (from input queue) handling (including routing)
         #self.debug(self.name + ' msg_handle '+str(msg))
         if 'query' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:
                 # The node is the final destination
-                await self.query_handle(msg)
+                await self._query_handle(msg)
             else:
-                # Route to next node
+                # Route/delegate to next node
                 name_len = len(self.name)
                 self.warning(self.name + ' : ' + str(name_len) + ' => '+ str(msg['path'][0:name_len + 2]))
                 if msg['path'][0:name_len + 1] == self.name + '/':
@@ -125,6 +137,22 @@ class Node:
             else:
                 # Just route to next node
                 pass
+        elif 'cmd' in msg:
+            # This is a query update
+            self.debug("Query update: " + str(msg))
+            # TODO
+            key = (id(msg['prx_src']), msg['lcid'])
+            self.debug("Query update: key = " + str(key))
+            if key in self.back_channels:
+                self.debug("Query update: key = " + str(key) + "" + str(self.back_channels[key]))
+                if msg['cmd'] == 'close':
+                    # Remove/close connexion
+                    del self.ports[self.back_channels[key]['port']]['connections'][self.back_channels[key]['cnx_idx']]
+                    #TODO: propagate channel closing !!
+                else:
+                    self.warning("Unhandled Query update (unknown command) : " + str(msg))
+            else:
+                self.warning("Unhandled Query update (unknown channel) : " + str(msg))
         elif 'node' in msg and msg['node'] == self.name:
             # This node is the final destination
             # TODO
@@ -191,7 +219,7 @@ class Node:
     async def wait_for_reply(self, lcid, timeout = 10.):
         return await asyncio.wait_for(self.channels[lcid].get(), timeout, loop = self.env.loop)
 
-    async def query_handle(self, query):
+    async def _query_handle(self, query):
         # called when the node is the final destination of the query
         #TODO : port management ??
         #TODO : channel management ??
@@ -200,14 +228,23 @@ class Node:
             port = query['port']
             self.debug(self.name + ": port = " + str(query))
             if query['query'] == 'immediate':
-                reply = {'lcid':query['lcid'], 'reply':self.ports[port]['value']}
+                reply = {'prx_src':self, 'lcid':query['lcid'], 'reply':self.ports[port]['value']}
                 self.debug(self.name + ": immediate reply = " + str(query) + ' ' + str(reply))
                 await self.msg_send(query['prx_src'], reply)
             else:
                 # Subscription
-                self.debug(self.name + ": subscribtion => " + str(query))
-                self.ports[port]['connections'].append({'update':True, 'lcid':query['lcid'], 'prx_dst':query['prx_src']})
-                self.debug(self.name + ": subscribtions = " + str(self.ports[port]['connections']))
+                self.debug(self.name + ": subscription => " + str(query))
+
+                cnx = {'update':True, 'lcid':query['lcid'], 'prx_dst':query['prx_src']}
+
+                # Update back_channels
+                key = (id(query['prx_src']), query['lcid'])
+                self.debug("Updating back_channels " + str(key) + ' : ' +  str(query))
+                self.back_channels[key] = {'port':query['port'], 'cnx_idx':len(self.ports[port]['connections'])}
+
+                # Add connection to the port
+                self.ports[port]['connections'].append(cnx)
+                self.debug(self.name + ": subscriptions = " + str(self.ports[port]['connections']))
 
     async def reply_handle(self, reply):
         # called when the node is the final destination of the reply

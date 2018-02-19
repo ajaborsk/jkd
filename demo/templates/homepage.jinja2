@@ -18,7 +18,8 @@
     <canvas id="chart1" width="800" height="200"></canvas>
   </div>
   <div>
-    <span id="push2">Launch : </span>
+    <span id="start2">*Launch*</span>
+    <span id="stop2" style="display: none">*Stop*</span>
     <span id="result2">Result</span>
   </div>
   <canvas id="chart2" width="800" height="200"></canvas>
@@ -131,9 +132,11 @@ function removeData(chart) {
       null);
    });
 
-  $("#push2").click(function(evt)
+  $("#start2").click(function(evt)
    {
-    env.query('/siggen#output', 'updates',
+    $("#stop2").show();
+    $("#start2").hide();
+    lcid = env.query('/siggen#output', 'updates',
       function(msg, client)
        {
         $('#result2').text(client + ' ' + msg.reply);
@@ -144,7 +147,14 @@ function removeData(chart) {
         addData(myChart2, 'n', msg.reply);
        },
       'popo');
-    $("#push2").off("click");
+    $("#stop2").attr('lcid',lcid);
+   });
+
+  $("#stop2").click(function(evt)
+   {
+    $("#start2").show();
+    $("#stop2").hide();
+    env.send_on_channel(Number($("#stop2").attr('lcid')), {'cmd':'close'});
    });
 
   // Launch jkd environment

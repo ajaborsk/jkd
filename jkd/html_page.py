@@ -27,7 +27,7 @@ class HtmlPage(Node):
             #self.parts.append({'template':self.jinja_env.get_template(part.attrib['template'] + '.jinja2')})
 
 
-    async def query_handle(self, msg):
+    async def _query_handle(self, msg):
         self.debug(self.name + ' : query_handle : '+ str(msg))
         if 'query' in msg and msg['query'] == 'get':
             template = self.jinja_env.get_template(self.name + '.jinja2')

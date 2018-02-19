@@ -20,6 +20,7 @@ class HttpServer(Container):
         self.next_lcid = 0
         self.next_wsid = 0
         self.ws = {}
+        self.ws_channels = {}
         self.web_app = web.Application()
         #self.instances = {} # Running applications
 
@@ -47,8 +48,13 @@ class HttpServer(Container):
         #self.debug("handling reply for ws " + str(msg) + ' client:' + str(client))
         lcid = client['lcid']
         wsid = client['wsid']
+        #self.debug("ids = "+str(lcid)+' '+str(wsid))
+        self.ws_channels[(wsid, lcid)] = {'lcid':msg['lcid'], 'prx_src':msg['prx_src']}
         msg['lcid'] = lcid
+        del msg['prx_src'] # remove non serializable tag
+        #self.debug("ids = "+str(lcid)+' '+str(wsid))
         await self.ws_send(wsid, msg)
+        #self.debug("handled reply for ws " + str(msg) + ' client:' + str(client))
 
     async def ws_handler(self, request):
         wsid = self.next_wsid
@@ -63,12 +69,16 @@ class HttpServer(Container):
                     await self.ws[wsid].close()
                 else:
                     msg = json.loads(message.data);
-                    if 'dst' in msg:
-                        appname = msg['appname']
-                        await self.query(self[appname], msg)
+                    self.debug('WS message received : '+str(msg))
+                    if 'lcid' in msg and (wsid, msg['lcid']) in self.ws_channels:
+                        self.debug("Send on existing channel "+str(msg))
+                        channel = self.ws_channels[(wsid, msg['lcid'])]
+                        msg['lcid'] = channel['lcid']
+                        msg['prx_src'] = self
+                        await self.msg_send(channel['prx_src'], msg)
                     elif 'url' in msg:
                         appname = msg['url'][1:].split('/')[0]
-                        await self.query(self[appname], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
+                        lcid = await self.query(self[appname], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
                     elif msg['lcid'] == "q1":
                         reply = await self.ext_app.aget(msg['lcid'])
                     elif msg['lcid'] == "q2":

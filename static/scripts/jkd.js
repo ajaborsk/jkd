@@ -21,7 +21,7 @@ class JkdEnv
     this.next_lcid = 1000;
     this.ws_url = ws_url;
     this.from = from;
-    this.queries = {};
+    this.channels = {};
    }
 
    // send a message
@@ -34,16 +34,23 @@ class JkdEnv
     var lcid = this.next_lcid;
     this.next_lcid++;
 
-    this.queries[lcid] = {'cb':callback, 'client':client};
+    this.channels[lcid] = {'cb':callback, 'client':client};
 
     console.log(typeof(callback));
-    console.log(typeof(this.queries[lcid]['cb']));
+    console.log(typeof(this.channels[lcid]['cb']));
 
     var msg = { 'url'   : '/demo' + url,
                 'src'   : '/demo/homepage',
                 'from'  : this.from,
                 'lcid'   : lcid,
                 'query' : query };
+    this.websocket.send(JSON.stringify(msg));
+    return lcid;
+   }
+
+  send_on_channel(lcid, msg)
+   {
+    msg['lcid'] = lcid;
     this.websocket.send(JSON.stringify(msg));
    }
 
@@ -64,11 +71,11 @@ class JkdEnv
         var lcid = msg['lcid'];
         //if (!(self.queries[lcid]['cb'] === undefined))
          {
-          self.queries[lcid]['cb'](msg, self.queries[lcid]['client']);
+          self.channels[lcid]['cb'](msg, self.channels[lcid]['client']);
          }
         if (msg['eoq'] == true)
          {
-          delete self.queries[lcid];
+          delete self.channels[lcid];
          }
        }
    }
