@@ -138,7 +138,10 @@ class Environment(Container):
         self.loggers = {'main':logger_main, "msg":logger_msg}
         super().__init__(env=self)
         self.loop = asyncio.get_event_loop()
+        # Manually launch mainloop since self.loop was not initialized on Node class initialization
+        self.loop_task = self.env.loop.create_task(self.mainloop())
         self.registry = registry
+
 
     def run(self):
         # default
@@ -154,6 +157,7 @@ class EnvSubApplication(Environment):
         self.root_name = '/'.join(root_name.split('/')[:-1])
         super().__init__(**kwargs)
         self.done = False
+        self.pipe_channels = {}
 
         self.root = Container(env = self, parent = self, name = root_name.split('/')[-1], elt = tree, **kwargs)
         if tree is not None:
@@ -169,7 +173,7 @@ class EnvSubApplication(Environment):
     def fqn(self):
         return self.root_name
 
-    def send(self, msg):
+    def pipe_send(self, msg):
         self.debug("SubApplication {}: Sending message : {}".format(self.root_name, str(msg)), 'msg')
         line = jkd_serialize(msg) + b'\n'
         #self.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
@@ -177,41 +181,61 @@ class EnvSubApplication(Environment):
         sys.stdout.buffer.raw.write(line)
         #self.debug("SubApplication {}s: message sent".format(self.appname))
 
-    async def handler(self, msg):
-        self.debug("SubApplication {}: Handling message : {}".format(self.root_name, str(msg)), 'msg')
-        if 'cmd' in msg and msg['cmd'] == 'get':
-            lcid = msg['lcid']
-            self.reply = {'reply':'This is the reply from the subprocess application.'}
-            self.send(self.reply)
-            # a fully synchronous code part...
-            parts = 10
-            for i in range(parts):
-                self.send({"lcid":lcid, "ratio":i / parts})
-                time.sleep(0.05)
-            for i in range(parts):
-                self.send({"lcid":lcid, "part": i, "parts": parts})
-                time.sleep(0.05)
-        elif 'cmd' in msg and msg['cmd'] == 'exit':
-            self.reply = {'reply':'exited'}
-            self.send(self.reply)
-            self.done = True
-            self.loop.exit()
-        elif 'query' in msg and msg['query'] == 'data':
-            self.debug('data query requested', 'msg')
-            lcid = msg['lcid']
-            self.reply = {'lcid':lcid, 'reply':'This is the data reply from the subprocess application.'}
-            self.send(self.reply)
-        else:
-            self.warning('Unhandled message: '+str(msg), 'msg')
+    async def msg_handle(self, msg):
+        self.debug("Handling queue message: {}".format(str(msg)), 'msg')
+        if 'query' in msg:
+            pass
+        elif 'reply' in msg:
+            pipe_lcid = self.channels[msg['lcid']]['lcid']
+            msg['lcid'] = pipe_lcid
+            del msg['prx_src'] # not serializable entry
+            self.pipe_send(msg)
 
+    async def pipe_handle(self, msg):
+        self.debug("Handling pipe message: {}".format(str(msg)), 'msg')
+        if 'query' in msg:
+            self.debug(" Query message", 'msg')
+            lcid = self.next_lcid
+            self.next_lcid += 1
+            # queue lcid       ...        pipe lcid
+            self.channels[lcid] = {'lcid':msg['lcid']}
+            msg['lcid'] = lcid
+            msg['prx_src'] = self
+            await self.msg_send(self.root, msg)
+        else:
+            self.warning('Unhandled message: ' + str(msg), 'msg')
+        # if 'cmd' in msg and msg['cmd'] == 'get':
+            # lcid = msg['lcid']
+            # self.reply = {'reply':'This is the reply from the subprocess application.'}
+            # self.send(self.reply)
+            # # a fully synchronous code part...
+            # parts = 10
+            # for i in range(parts):
+                # self.send({"lcid":lcid, "ratio":i / parts})
+                # time.sleep(0.05)
+            # for i in range(parts):
+                # self.send({"lcid":lcid, "part": i, "parts": parts})
+                # time.sleep(0.05)
+        # elif 'cmd' in msg and msg['cmd'] == 'exit':
+            # self.reply = {'reply':'exited'}
+            # self.send(self.reply)
+            # self.done = True
+            # self.loop.exit()
+        # elif 0:
+            # self.debug('data query requested', 'msg')
+            # lcid = msg['lcid']
+            # self.reply = {'lcid':lcid, 'reply':'This is the data reply from the subprocess application.'}
+            # self.pipe_send(self.reply)
+        # else:
+            # self.warning('Unhandled message: '+str(msg), 'msg')
 
     async def aio_readline(self):
         # The mainloop
         while not self.done:
-            self.debug("SubApplication {}s: Waiting...".format(self.root_name), 'msg')
+            self.debug("SubApplication {}: Waiting...".format(self.root_name), 'msg')
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
-            await self.handler(msg)
+            await self.pipe_handle(msg)
 
 
 from .http_server import *

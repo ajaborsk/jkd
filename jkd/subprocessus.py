@@ -73,6 +73,22 @@ class Subprocessus(Node):
         msg = jkd_deserialize(line[:-1])
         return msg
 
+    async def msg_handle(self, msg):
+        self.debug("msg_handle: "+str(msg), 'msg')
+        pipe_lcid = self.next_pipe_lcid
+        self.next_pipe_lcid += 1
+
+        if 'query' in msg:
+            if self.subprocess is None:
+                await self.launch()
+                self.bg = self.env.loop.create_task(self.loop())
+
+            self.pipe_channels[pipe_lcid] = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid']} # reply_to
+            msg['lcid'] = pipe_lcid
+            del msg['prx_src']
+            self.debug("subprocessus.sending to process: " + str(msg), 'msg')
+            self.send(msg)
+
     async def _query_handle(self, msg):
         "Handle message from python queue input"
         self.debug("subprocessus.query_handle: " + str(msg), 'msg')
@@ -84,8 +100,10 @@ class Subprocessus(Node):
             if self.subprocess is None:
                 await self.launch()
                 self.bg = self.env.loop.create_task(self.loop())
+
         self.debug("subprocessus.sending to process: " + str({'lcid':msg['lcid'], 'query':'data'}), 'msg')
         self.pipe_channels[pipe_lcid] = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid']} # reply_to
+
         self.send({'lcid':pipe_lcid, 'query':'data'})
         #return self.reply
 

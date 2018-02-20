@@ -75,10 +75,10 @@ class Node:
             return self.parent.fqn() + '/' + self.name
 
     async def mainloop(self):
-        #self.debug(str(self.__class__)+self.name + ": Entering mainloop...")
+        self.debug("Entering mainloop...")
         while not self.done:
             msg = await self.input.get()
-            #self.debug(str(self.__class__) + self.name + ": Handling msg: " + str(msg))
+            self.debug("Received msg: " + str(msg))
             await self.msg_handle(msg)
 
     async def msg_send(self, destination, message):
@@ -88,7 +88,7 @@ class Node:
 
     async def msg_handle(self, msg):
         # General message (from input queue) handling (including routing)
-        #self.debug(self.name + ' msg_handle '+str(msg))
+        self.debug('queue msg handle: ' + str(msg))
         if 'query' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:
@@ -104,7 +104,7 @@ class Node:
                     msg['path'] = msg['path'][name_len + 2:]
                 elt = msg['path'].split('/')[0]
                 if elt in self:
-                    await self.delegate(self[elt], msg)
+                    await self.reroute(self[elt], msg)
                 else:
                     self.warning('No route for '+str(msg), 'msg')
         elif 'reply' in msg:
@@ -213,6 +213,10 @@ class Node:
     async def delegate(self, destination, query):
         self.debug("Delegating to " + str(destination)+' : '+str(query), 'msg')
         query['path'] = destination.name
+        await self.msg_send(destination, query)
+
+    async def reroute(self, destination, query):
+        self.debug("Rerouting to " + str(destination)+' : '+str(query), 'msg')
         await self.msg_send(destination, query)
 
     async def wait_for_reply(self, lcid, timeout = 10.):

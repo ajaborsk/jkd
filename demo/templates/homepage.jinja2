@@ -136,7 +136,7 @@ function removeData(chart) {
    {
     $("#stop2").show();
     $("#start2").hide();
-    lcid = env.query('/siggen#output', 'updates',
+    lcid = env.query('/heavyproc/siggen_ext#output', 'updates',
       function(msg, client)
        {
         $('#result2').text(client + ' ' + msg.reply);
