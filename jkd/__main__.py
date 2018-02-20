@@ -5,11 +5,11 @@ from jkd.logging import *
 
 import logging
 log_handler = logging.StreamHandler()
-log_handler.setFormatter(logging.Formatter("%(asctime)s:[%(process)s] {%(name)s} jkd.%(module)s - %(levelname)s : %(message)s"))
+log_handler.setFormatter(logging.Formatter("%(asctime)s:[%(process)s] {%(name)s}/%(levelname)s : %(message)s"))
 logger_main.addHandler(log_handler)
 logger_main.setLevel(logging.INFO)
 logger_msg.addHandler(log_handler)
-logger_msg.setLevel(logging.INFO)
+logger_msg.setLevel(logging.DEBUG)
 
 from .node import *
 

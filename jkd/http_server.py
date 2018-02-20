@@ -41,8 +41,17 @@ class HttpServer(Container):
         #self['demo'] = DemoApplication(env = self.env, name="demo")
 
     async def ws_send(self, wsid, message):
-        if self.ws[wsid] is not None:
-            await self.ws[wsid].send_str(json.dumps(message))
+        if self.ws[wsid] is not None and self.ws[wsid].closed == False:
+            await self.ws[wsid].send_json(message)
+        else:
+            self.info('Trying to send message '+str(message)+' to WS'+str(wsid)+' while it is closed => closing channel', 'msg')
+            # Closing channel
+            #TODO
+            # Send back a 'stop' query update
+            channel = self.ws_channels[(wsid, message['lcid'])]
+            msg = {'lcid':channel['lcid'], 'prx_src':self, 'prx_dst':channel['prx_src'], 'cmd':'close'}
+            await self.msg_send(channel['prx_src'], msg)
+            del self.ws_channels[(wsid, message['lcid'])]
 
     async def reply_for_ws(self, msg, client = None):
         #self.debug("handling reply for ws " + str(msg) + ' client:' + str(client), 'msg')
@@ -90,6 +99,8 @@ class HttpServer(Container):
                         await self.ws_send(wsid, {"reply": reply})
             elif message.type == aiohttp.WSMsgType.ERROR:
                 self.warning('websocket connection {} closed with exception {}'.format(wsid, self.ws[wsid].exception()), 'msg')
+            else:
+                self.warning('websocket connection {} unhandled message {} '.format(wsid, message), 'msg')
         self.debug('websocket connection {} closed'.format(wsid), 'msg')
         return self.ws[wsid] #useless ?
 
