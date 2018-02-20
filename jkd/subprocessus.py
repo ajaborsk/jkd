@@ -24,12 +24,15 @@ class Subprocessus(Node):
 
     async def launch(self):
         self.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
-        #test_xml = '<ooi att="poki"></po>' * 4000
+        test_xml = b'"' + self.xml_contents.replace(b'"', b'\"') + b'"'
+        self.debug(test_xml.decode('utf8'))
         try:
-            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.fqn(), self.xml_contents, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+            #self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.fqn(), '"' + self.xml_contents.replace('"', '\\"') + '"', loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.fqn(), test_xml.decode('utf8'), loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
             self.done = False
             self.reply = ''
         except Exception as ex:
+            self.subprocess = None
             self.warning("Unable to launch subprocess: " + str(ex))
 
     async def loop(self):
