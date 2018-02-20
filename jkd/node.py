@@ -97,7 +97,7 @@ class Node:
             else:
                 # Route/delegate to next node
                 name_len = len(self.name)
-                self.warning(self.name + ' : ' + str(name_len) + ' => '+ str(msg['path'][0:name_len + 2]))
+                self.debug(self.name + ' : ' + str(name_len) + ' => '+ str(msg['path'][0:name_len + 2]), 'msg')
                 if msg['path'][0:name_len + 1] == self.name + '/':
                     msg['path'] = msg['path'][name_len + 1:]
                 if msg['path'][0:name_len + 2] == '/' + self.name + '/':
@@ -106,23 +106,23 @@ class Node:
                 if elt in self:
                     await self.delegate(self[elt], msg)
                 else:
-                    self.warning('No route for '+str(msg))
+                    self.warning('No route for '+str(msg), 'msg')
         elif 'reply' in msg:
             # This is a reply
-            #self.debug(self.name + ' reply catched : ' + str(msg))
+            #self.debug(self.name + ' reply catched : ' + str(msg), 'msg')
             lcid = msg['lcid']
             if lcid in self.channels:
                 if isinstance(self.channels[lcid], asyncio.Queue):
-                    #self.debug(self.name + ' reply queue mode : ' + str(msg))
+                    #self.debug(self.name + ' reply queue mode : ' + str(msg), 'msg')
                     # The node is the final destination (queue mode)
                     await self.channels[lcid].put(msg)
                 elif isinstance(self.channels[lcid], tuple):
-                    #self.debug(self.name + ' reply coro mode : ' + str(msg))
+                    #self.debug(self.name + ' reply coro mode : ' + str(msg), 'msg')
                     # The node is the final destination (coroutine mode)
                     await self.channels[lcid][0](msg, self.channels[lcid][1])
                 else:
                     # Just route to next node
-                    #self.debug(self.name + ' reply reroute mode : ' + str(msg))
+                    #self.debug(self.name + ' reply reroute mode : ' + str(msg), 'msg')
                     msg['lcid'] = self.channels[lcid]['lcid']
                     msg['prx_src'] = self
                     await self.msg_send(self.channels[lcid]['prx_dst'], msg)
@@ -139,20 +139,19 @@ class Node:
                 pass
         elif 'cmd' in msg:
             # This is a query update
-            self.debug("Query update: " + str(msg))
-            # TODO
+            self.debug("Query update: " + str(msg), "msg")
             key = (id(msg['prx_src']), msg['lcid'])
-            self.debug("Query update: key = " + str(key))
+            self.debug("Query update: key = " + str(key), 'msg')
             if key in self.back_channels:
-                self.debug("Query update: key = " + str(key) + "" + str(self.back_channels[key]))
+                self.debug("Query update: key = " + str(key) + "" + str(self.back_channels[key]), 'msg')
                 if msg['cmd'] == 'close':
                     # Remove/close connexion
                     del self.ports[self.back_channels[key]['port']]['connections'][self.back_channels[key]['cnx_idx']]
                     #TODO: propagate channel closing !!
                 else:
-                    self.warning("Unhandled Query update (unknown command) : " + str(msg))
+                    self.warning("Unhandled Query update (unknown command) : " + str(msg), 'msg')
             else:
-                self.warning("Unhandled Query update (unknown channel) : " + str(msg))
+                self.warning("Unhandled Query update (unknown channel) : " + str(msg), 'msg')
         elif 'node' in msg and msg['node'] == self.name:
             # This node is the final destination
             # TODO
@@ -166,9 +165,9 @@ class Node:
                     # last message of the reply (eoq = End Of Query), so remove internal dedicated queue
                     del self.channels[lcid]
             else:
-                self.warning('No registred query id '+str(lcid))
+                self.warning('No registred query id '+str(lcid), 'msg')
         else:
-            self.warning(str(self.__class__) + self.name + ": Unhandled msg: " + str(msg))
+            self.warning(str(self.__class__) + self.name + ": Unhandled msg: " + str(msg), 'msg')
 
     def get_etnode(self):
         return ET.Element()
@@ -186,7 +185,7 @@ class Node:
                 # Add a callback and its client data for this channel id
                 self.channels[chan_id] = (coro, client)
             url = urlparse(query['url'])
-            self.debug(self.name+': '+"Url = " + str(url))
+            self.debug(self.name+': '+"Url = " + str(url), 'msg')
             query.update({'path':url.path, 'port':url.fragment, 'lcid':chan_id, 'prx_src':self})
             await self.msg_send(destination, query)
             return chan_id
@@ -208,11 +207,11 @@ class Node:
 #            await destination.input.put(query)
             # Return the query id
         else:
-            self.warning('No url for query' + str(query))
+            self.warning('No url for query' + str(query), 'msg')
             return None
 
     async def delegate(self, destination, query):
-        self.debug("Delegating to " + str(destination)+' : '+str(query))
+        self.debug("Delegating to " + str(destination)+' : '+str(query), 'msg')
         query['path'] = destination.name
         await self.msg_send(destination, query)
 
@@ -223,28 +222,28 @@ class Node:
         # called when the node is the final destination of the query
         #TODO : port management ??
         #TODO : channel management ??
-        self.debug(self.name + ": generic query handle" + str(query))
+        self.debug(self.name + ": generic query handle" + str(query), 'msg')
         if 'port' in query and query['port'] in self.ports:
             port = query['port']
-            self.debug(self.name + ": port = " + str(query))
+            self.debug(self.name + ": port = " + str(query), 'msg')
             if query['query'] == 'immediate':
                 reply = {'prx_src':self, 'lcid':query['lcid'], 'reply':self.ports[port]['value']}
-                self.debug(self.name + ": immediate reply = " + str(query) + ' ' + str(reply))
+                self.debug(self.name + ": immediate reply = " + str(query) + ' ' + str(reply), 'msg')
                 await self.msg_send(query['prx_src'], reply)
             else:
                 # Subscription
-                self.debug(self.name + ": subscription => " + str(query))
+                self.debug(self.name + ": subscription => " + str(query), 'msg')
 
                 cnx = {'update':True, 'lcid':query['lcid'], 'prx_dst':query['prx_src']}
 
                 # Update back_channels
                 key = (id(query['prx_src']), query['lcid'])
-                self.debug("Updating back_channels " + str(key) + ' : ' +  str(query))
+                self.debug("Updating back_channels " + str(key) + ' : ' +  str(query), 'msg')
                 self.back_channels[key] = {'port':query['port'], 'cnx_idx':len(self.ports[port]['connections'])}
 
                 # Add connection to the port
                 self.ports[port]['connections'].append(cnx)
-                self.debug(self.name + ": subscriptions = " + str(self.ports[port]['connections']))
+                self.debug(self.name + ": subscriptions = " + str(self.ports[port]['connections']), 'msg')
 
     async def reply_handle(self, reply):
         # called when the node is the final destination of the reply

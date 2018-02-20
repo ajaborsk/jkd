@@ -135,7 +135,7 @@ class HtmlReport(Node):
 class Environment(Container):
 
     def __init__(self):
-        self.loggers = {'main':logger_main}
+        self.loggers = {'main':logger_main, "msg":logger_msg}
         super().__init__(env=self)
         self.loop = asyncio.get_event_loop()
         self.registry = registry
@@ -170,7 +170,7 @@ class EnvSubApplication(Environment):
         return self.root_name
 
     def send(self, msg):
-        self.debug("SubApplication {}: Sending message : {}".format(self.root_name, str(msg)))
+        self.debug("SubApplication {}: Sending message : {}".format(self.root_name, str(msg)), 'msg')
         line = jkd_serialize(msg) + b'\n'
         #self.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
         # To be sure to write binary data to stdout, use .buffer.raw
@@ -178,7 +178,7 @@ class EnvSubApplication(Environment):
         #self.debug("SubApplication {}s: message sent".format(self.appname))
 
     async def handler(self, msg):
-        self.debug("SubApplication {}: Handling message : {}".format(self.root_name, str(msg)))
+        self.debug("SubApplication {}: Handling message : {}".format(self.root_name, str(msg)), 'msg')
         if 'cmd' in msg and msg['cmd'] == 'get':
             lcid = msg['lcid']
             self.reply = {'reply':'This is the reply from the subprocess application.'}
@@ -197,18 +197,18 @@ class EnvSubApplication(Environment):
             self.done = True
             self.loop.exit()
         elif 'query' in msg and msg['query'] == 'data':
-            self.debug('data query requested')
+            self.debug('data query requested', 'msg')
             lcid = msg['lcid']
             self.reply = {'lcid':lcid, 'reply':'This is the data reply from the subprocess application.'}
             self.send(self.reply)
         else:
-            self.warning('Unhandled message: '+str(msg))
+            self.warning('Unhandled message: '+str(msg), 'msg')
 
 
     async def aio_readline(self):
         # The mainloop
         while not self.done:
-            self.debug("SubApplication {}s: Waiting...".format(self.root_name))
+            self.debug("SubApplication {}s: Waiting...".format(self.root_name), 'msg')
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
             await self.handler(msg)

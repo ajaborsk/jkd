@@ -24,7 +24,7 @@ class Subprocessus(Node):
 
     async def launch(self):
         self.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
-        test_xml = '<ooi att="poki"></po>' * 4000
+        #test_xml = '<ooi att="poki"></po>' * 4000
         try:
             self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.fqn(), self.xml_contents, loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
             self.done = False
@@ -37,12 +37,13 @@ class Subprocessus(Node):
             #self.debug("Subprocessus {}s : Waiting for messages...".format(self.appname))
             #print("Waiting...", file=sys.stderr, flush=True)
             msg = await self.recv()
-            self.debug("Subprocessus {} : Handling message : {}".format(self.appname, str(msg)))
+            self.debug("Subprocessus {} : Handling message : {}".format(self.appname, str(msg)), 'msg')
 
             if 'lcid' in msg and msg['lcid'] in self.pipe_channels:
                 channel = self.pipe_channels[msg['lcid']]
                 msg.update({'lcid':channel['lcid']})
-                self.debug('reply_to'+str(channel['prx_dst']))
+                msg.update({'prx_src':self})
+                self.debug('reply_to'+str(channel['prx_dst']), 'msg')
                 await self.msg_send(channel['prx_dst'], msg)
 
 #            if 0:#msg['reply'] == 'exited':
@@ -69,9 +70,9 @@ class Subprocessus(Node):
         msg = jkd_deserialize(line[:-1])
         return msg
 
-    async def query_handle(self, msg):
+    async def _query_handle(self, msg):
         "Handle message from python queue input"
-        self.debug("subprocessus.query_handle: " + str(msg))
+        self.debug("subprocessus.query_handle: " + str(msg), 'msg')
 
         pipe_lcid = self.next_pipe_lcid
         self.next_pipe_lcid += 1
@@ -80,7 +81,7 @@ class Subprocessus(Node):
             if self.subprocess is None:
                 await self.launch()
                 self.bg = self.env.loop.create_task(self.loop())
-        self.debug("subprocessus.sending to process: " + str({'lcid':msg['lcid'], 'query':'data'}))
+        self.debug("subprocessus.sending to process: " + str({'lcid':msg['lcid'], 'query':'data'}), 'msg')
         self.pipe_channels[pipe_lcid] = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid']} # reply_to
         self.send({'lcid':pipe_lcid, 'query':'data'})
         #return self.reply

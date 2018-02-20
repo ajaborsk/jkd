@@ -1,7 +1,8 @@
 
 import logging
 
-logger_main = logging.getLogger(__name__)
+logger_main = logging.getLogger("main")
+logger_msg = logging.getLogger("msg")
 
 
 def debug(*args):

@@ -37,7 +37,7 @@ class Application(Container):
         return '/' + self.name
 
     async def _query_handle(self, query):
-        self.debug('Application: handling query: '+str(query))
+        self.debug('Application: handling query: '+str(query), 'msg')
         if 'homepage' in self:
             # Delegate "get" query (= http) to homepage, if it exists
             await self.delegate(self['homepage'], query)

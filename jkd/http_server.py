@@ -45,7 +45,7 @@ class HttpServer(Container):
             await self.ws[wsid].send_str(json.dumps(message))
 
     async def reply_for_ws(self, msg, client = None):
-        #self.debug("handling reply for ws " + str(msg) + ' client:' + str(client))
+        #self.debug("handling reply for ws " + str(msg) + ' client:' + str(client), 'msg')
         lcid = client['lcid']
         wsid = client['wsid']
         #self.debug("ids = "+str(lcid)+' '+str(wsid))
@@ -61,7 +61,7 @@ class HttpServer(Container):
         self.next_wsid += 1
         self.ws[wsid] = web.WebSocketResponse()
         await self.ws[wsid].prepare(request)
-        self.info("websocket connection {} opened".format(wsid))
+        self.info("websocket connection {} opened".format(wsid), 'msg')
         async for message in self.ws[wsid]:
             if message.type == aiohttp.WSMsgType.TEXT:
                 if message.data == 'close':
@@ -69,9 +69,9 @@ class HttpServer(Container):
                     await self.ws[wsid].close()
                 else:
                     msg = json.loads(message.data);
-                    self.debug('WS message received : '+str(msg))
+                    self.debug('WS message received : '+str(msg), "msg")
                     if 'lcid' in msg and (wsid, msg['lcid']) in self.ws_channels:
-                        self.debug("Send on existing channel "+str(msg))
+                        self.debug("Send on existing channel "+str(msg), 'msg')
                         channel = self.ws_channels[(wsid, msg['lcid'])]
                         msg['lcid'] = channel['lcid']
                         msg['prx_src'] = self
@@ -89,8 +89,8 @@ class HttpServer(Container):
 #                    await self.ws_send({"reply": message['data'] + '/answer'})
                         await self.ws_send(wsid, {"reply": reply})
             elif message.type == aiohttp.WSMsgType.ERROR:
-                self.warning('websocket connection {} closed with exception {}'.format(wsid, self.ws[wsid].exception()))
-        self.debug('websocket connection {} closed'.format(wsid))
+                self.warning('websocket connection {} closed with exception {}'.format(wsid, self.ws[wsid].exception()), 'msg')
+        self.debug('websocket connection {} closed'.format(wsid), 'msg')
         return self.ws[wsid] #useless ?
 
     @aiohttp_jinja2.template('tmpl.jinja2')
