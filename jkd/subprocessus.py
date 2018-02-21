@@ -35,18 +35,22 @@ class Subprocessus(Node):
             self.subprocess = None
             self.warning("Unable to launch subprocess: " + str(ex))
 
-    async def loop(self):
+    async def msg_pipe_loop(self):
         while not self.done:
             #self.debug("Subprocessus {}s : Waiting for messages...".format(self.appname))
             #print("Waiting...", file=sys.stderr, flush=True)
-            msg = await self.recv()
-            self.debug("Subprocessus {} : Handling message : {}".format(self.appname, str(msg)), 'msg')
+            msg = await self.msg_pipe_recv()
+            #self.debug("Subprocessus {} : Handling message : {}".format(self.appname, str(msg)), 'msg')
 
             if 'lcid' in msg and msg['lcid'] in self.pipe_channels:
+                # Get the pipe channel stored at creation
                 channel = self.pipe_channels[msg['lcid']]
+
+                # Get the queue channel id and create a queue channel reference
+                #self.channels[channel['lcid']] =
                 msg.update({'lcid':channel['lcid']})
                 msg.update({'prx_src':self})
-                self.debug('reply_to'+str(channel['prx_dst']), 'msg')
+                #self.debug('reply_to'+str(channel['prx_dst']), 'msg')
                 await self.msg_send(channel['prx_dst'], msg)
 
 #            if 0:#msg['reply'] == 'exited':
@@ -61,13 +65,12 @@ class Subprocessus(Node):
         await self.bg
         self.subprocess = None
 
-    def send(self, msg):
+    def msg_pipe_send(self, msg):
         "Send message to subprocess pipe"
-        #self.debug("Subprocessus {}s : Sending : {}".format(self.appname, str(msg)))
-        #print("Sending : ", str(msg), file=sys.stderr, flush=True)
+        #self.debug("Sending : {}".format(self.appname, str(msg)))
         self.subprocess.stdin.write(jkd_serialize(msg) + b'\n')
 
-    async def recv(self):
+    async def msg_pipe_recv(self):
         "Get message from subprocess pipe"
         line = await self.subprocess.stdout.readline()
         msg = jkd_deserialize(line[:-1])
@@ -75,49 +78,53 @@ class Subprocessus(Node):
 
     async def msg_handle(self, msg):
         self.debug("msg_handle: "+str(msg), 'msg')
-        pipe_lcid = self.next_pipe_lcid
-        self.next_pipe_lcid += 1
 
         if 'query' in msg:
             if self.subprocess is None:
                 await self.launch()
-                self.bg = self.env.loop.create_task(self.loop())
+                self.bg = self.env.loop.create_task(self.msg_pipe_loop())
 
+            pipe_lcid = self.next_pipe_lcid
+            self.next_pipe_lcid += 1
             self.pipe_channels[pipe_lcid] = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid']} # reply_to
             msg['lcid'] = pipe_lcid
             del msg['prx_src']
             self.debug("subprocessus.sending to process: " + str(msg), 'msg')
-            self.send(msg)
+            self.msg_pipe_send(msg)
+        elif 'cmd' in msg:
+            pipe_lcid = self.channels[msg['lcid']]
+        else:
+            self.warning('Unhandled (queue) incoming message: ' + str(msg), 'msg')
 
-    async def _query_handle(self, msg):
-        "Handle message from python queue input"
-        self.debug("subprocessus.query_handle: " + str(msg), 'msg')
+    # async def _query_handle(self, msg):
+        # "Handle message from python queue input"
+        # self.debug("subprocessus.query_handle: " + str(msg), 'msg')
 
-        pipe_lcid = self.next_pipe_lcid
-        self.next_pipe_lcid += 1
 
-        if 'query' in msg:
-            if self.subprocess is None:
-                await self.launch()
-                self.bg = self.env.loop.create_task(self.loop())
+        # if 'query' in msg:
+            # if self.subprocess is None:
+                # await self.launch()
+                # self.bg = self.env.loop.create_task(self.loop())
+            # pipe_lcid = self.next_pipe_lcid
+            # self.next_pipe_lcid += 1
 
-        self.debug("subprocessus.sending to process: " + str({'lcid':msg['lcid'], 'query':'data'}), 'msg')
-        self.pipe_channels[pipe_lcid] = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid']} # reply_to
+            # #self.debug("subprocessus.sending to process: " + str({'lcid':msg['lcid'], 'query':'data'}), 'msg')
+            # self.pipe_channels[pipe_lcid] = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid']} # reply_to
 
-        self.send({'lcid':pipe_lcid, 'query':'data'})
-        #return self.reply
+        # self.send({'lcid':pipe_lcid, 'query':'data'})
+        # #return self.reply
 
     # Initiate a query (launching subprocess if not already running)
-    async def aget(self, lcid = None):
-        if self.subprocess is None:
-            await self.launch()
-            self.bg = self.env.loop.create_task(self.loop())
-        #self.debug("Subprocessus {}s: Running on...".format(self.appname))
-        #print("Running on...", file=sys.stderr, flush=True)
-        # Try to write...
-        self.send({'lcid':lcid, 'cmd':'get'})
-        #TODO: Wait a little bit for the message reply !
-        #await asyncio.sleep(1)
+    # async def aget(self, lcid = None):
+        # if self.subprocess is None:
+            # await self.launch()
+            # self.bg = self.env.loop.create_task(self.loop())
+        # #self.debug("Subprocessus {}s: Running on...".format(self.appname))
+        # #print("Running on...", file=sys.stderr, flush=True)
+        # # Try to write...
+        # self.send({'lcid':lcid, 'cmd':'get'})
+        # #TODO: Wait a little bit for the message reply !
+        # #await asyncio.sleep(1)
 
-        return self.reply
+        # return self.reply
 

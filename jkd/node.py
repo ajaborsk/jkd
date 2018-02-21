@@ -78,7 +78,7 @@ class Node:
         self.debug("Entering mainloop...")
         while not self.done:
             msg = await self.input.get()
-            self.debug("Received msg: " + str(msg))
+            #self.debug("Received msg: " + str(msg))
             await self.msg_handle(msg)
 
     async def msg_send(self, destination, message):
@@ -88,7 +88,7 @@ class Node:
 
     async def msg_handle(self, msg):
         # General message (from input queue) handling (including routing)
-        self.debug('queue msg handle: ' + str(msg))
+        #self.debug('(generic) queue msg handle: ' + str(msg))
         if 'query' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:

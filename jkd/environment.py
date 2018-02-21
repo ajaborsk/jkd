@@ -167,14 +167,14 @@ class EnvSubApplication(Environment):
                 self.debug("  subnode " + str(elt.tag))
 
         # Launch the reading/handle mainloop task
-        self.reader_t = self.loop.create_task(self.aio_readline())
+        self.reader_t = self.loop.create_task(self.msg_pipe_loop())
         self.debug("subapplication initialized")
 
     def fqn(self):
         return self.root_name
 
-    def pipe_send(self, msg):
-        self.debug("SubApplication {}: Sending message : {}".format(self.root_name, str(msg)), 'msg')
+    def msg_pipe_send(self, msg):
+        #self.debug("SubApplication {}: Sending message : {}".format(self.root_name, str(msg)), 'msg')
         line = jkd_serialize(msg) + b'\n'
         #self.debug("SubApplication {}s: Serialized message : {}".format(self.appname, line))
         # To be sure to write binary data to stdout, use .buffer.raw
@@ -182,16 +182,16 @@ class EnvSubApplication(Environment):
         #self.debug("SubApplication {}s: message sent".format(self.appname))
 
     async def msg_handle(self, msg):
-        self.debug("Handling queue message: {}".format(str(msg)), 'msg')
+        #self.debug("Handling queue message: {}".format(str(msg)), 'msg')
         if 'query' in msg:
             pass
         elif 'reply' in msg:
             pipe_lcid = self.channels[msg['lcid']]['lcid']
             msg['lcid'] = pipe_lcid
             del msg['prx_src'] # not serializable entry
-            self.pipe_send(msg)
+            self.msg_pipe_send(msg)
 
-    async def pipe_handle(self, msg):
+    async def msg_pipe_handle(self, msg):
         self.debug("Handling pipe message: {}".format(str(msg)), 'msg')
         if 'query' in msg:
             self.debug(" Query message", 'msg')
@@ -202,6 +202,8 @@ class EnvSubApplication(Environment):
             msg['lcid'] = lcid
             msg['prx_src'] = self
             await self.msg_send(self.root, msg)
+        elif 'cmd' in msg:
+            self.debug(" Cmd (query update) message", "msg")
         else:
             self.warning('Unhandled message: ' + str(msg), 'msg')
         # if 'cmd' in msg and msg['cmd'] == 'get':
@@ -229,13 +231,13 @@ class EnvSubApplication(Environment):
         # else:
             # self.warning('Unhandled message: '+str(msg), 'msg')
 
-    async def aio_readline(self):
+    async def msg_pipe_loop(self):
         # The mainloop
         while not self.done:
-            self.debug("SubApplication {}: Waiting...".format(self.root_name), 'msg')
+            #self.debug("SubApplication {}: Waiting...".format(self.root_name), 'msg')
             line = await self.loop.run_in_executor(None, sys.stdin.readline)
             msg = jkd_deserialize(line[:-1])
-            await self.pipe_handle(msg)
+            await self.msg_pipe_handle(msg)
 
 
 from .http_server import *
