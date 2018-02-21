@@ -139,7 +139,7 @@ class Environment(Container):
         super().__init__(env=self)
         self.loop = asyncio.get_event_loop()
         # Manually launch mainloop since self.loop was not initialized on Node class initialization
-        self.loop_task = self.env.loop.create_task(self.mainloop())
+        self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
         self.registry = registry
 
 

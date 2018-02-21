@@ -3,6 +3,7 @@ import inspect
 import asyncio
 import logging
 
+
 import xml.etree.ElementTree as ET
 
 # class Port:
@@ -63,8 +64,8 @@ class Node:
 
         self.done = False
         if self.env is not None and hasattr(self.env, 'loop'):
-            #self.debug("launching mainloop...")
-            self.loop_task = self.env.loop.create_task(self.mainloop())
+            #self.debug("launching msg_queue_loop()...")
+            self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
 
     #TODO:  An API to add/remove/configure ports
 
@@ -74,8 +75,8 @@ class Node:
         else:
             return self.parent.fqn() + '/' + self.name
 
-    async def mainloop(self):
-        self.debug("Entering mainloop...")
+    async def msg_queue_loop(self):
+        self.debug("Entering msg_queue_loop...")
         while not self.done:
             msg = await self.input.get()
             #self.debug("Received msg: " + str(msg))
@@ -270,7 +271,9 @@ class Node:
     def log(self, level, message, logger='main'):
         if len(message) > 255:
             message = message[:252] + '...'
-        self.env.loggers[logger].log(level, self.fqn() + ': ' + message)
+        f = inspect.stack()
+        #print(f[2])
+        self.env.loggers[logger].log(level, self.fqn() + '.' + f[2][3] + '(): ' + message)
 
     def debug(self, message, logger='main'):
         self.log(logging.DEBUG, message, logger)
