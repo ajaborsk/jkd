@@ -119,3 +119,20 @@ msg_xxx_reroute(dest, msg) => envoie un message vers un destinataire sans laisse
 msg_xxx_transmit(dest, msg) => envoie un message vers un destinataire en gérant la trace (selon les drapeaux du message)
 msg_xxx_receive(msg) =>
 
+
+Liens et politiques :
+---------------------
+Chaque port d'entrée d'un noeud "complet" a un lien vers un port de sortie d'un autre noeud
+Ce lien n'est que descriptif
+Les connections / canaux sont créés si nécessaire en utilisant les liens et une "politique" (policy)
+Exemples de politiques
+- A la demande (query/response)
+- Continu dès mise à jour (Subscription)
+- Périodique (autre forme de subscription)
+Les politiques peuvent avoir des propriétés :
+- comportement en cas de rupture d'un maillon
+   (essai de reconnexion ? pendant combien de temps? etc.)
+- délais/période de mise à jour (indicatif, pour configurer les canaux)
+- nécessité de surveillance (ping/pong sur les canaux)
+
+
