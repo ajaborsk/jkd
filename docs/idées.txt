@@ -9,6 +9,7 @@ Exemples d'applications
 
 Une application est un fichier (xml ?) qui décrit le graphe (noeuds et arcs).
 
+
 Types de noeuds :
  - Source de données (brutes)
      - Base de données
@@ -19,13 +20,25 @@ Types de noeuds :
  - Transformateurs de données (import / export)
  - Table
  - Rapport (pdf/html/dhtml/svg...)
+ - noeuds de calcul
+
+Certains noeuds (notamment de calcul) peuvent comporter du code (python par exemple).
+Attention dans ce cas à la sécurité (fake root ? virtualenv ?)
+Le code est une donnée (sa mise à jour peut entraîner, en temps réel,la mise à jour de toute l'application)
+Prévoir un debugger intégré (avec les fonctions classiques : watch, breakpoints)
+Imaginer un debugger de flux = points du code où on envoie dans un
+  flux des données (valeurs de variables), avec les infos de contexte. Un sorte de
+  "printf" de debugage mais avec des fonctions évoluées : catégories, caché (pas de code explicite visible), désactivation semi-automatique, etc.
+  La visualisation/navigation se ferait aussi avec des filtres, de la colorisation, etc.
+Prévoir aussi un debugger de flux (du même genre) sur un lien/channel
+
 
 
 Tests à prévoir :
 - Tous les Nodes doivent être sérialisables
 
 Pour le serveur WEB, typologie des adresses :
-  /application/node/subnode/subsubnode/port.[html/xls/pdf/csv/svg]
+  /application/node/subnode/subsubnode#port.[html/xls/pdf/csv/svg]
 
 Un rapport peut être :
   Offline (contient toutes les données) ou Online (va chercher des données dynamiquement)
@@ -91,6 +104,18 @@ Routage Aller d'un message :
             gérer (ultérieurement) les droits d'accès
 
 Routage Retour d'un message :
- - Utiliser les prox_lcid => facile
+ - Utiliser les prx_lcid => facile
 
+Un message a trois drapeaux possibles de propagation (bas niveau). c et f sont exclusifs l'un de l'autre.
+'d' peut accompagner n'importe quel message sauf 'c' :
+
+ 'c' Create => trace son passage - aller - (sauf délégations), pour les Queries
+ 'f' First Use => pour le premier Reply => Crée un channel (retour)
+ ##USELESS 'u' Use => Utilise les traces du channel => utilise un channel
+ 'd' Delete => Supprime les traces après son passage (Query immediate, reply immediate, 'close'...) => Supprime un channel
+
+msg_xxx_deleguate(dest, msg) => envoie un message vers un destinataire (en le forçant) sans laisser de trace (uniquement mode 'c')
+msg_xxx_reroute(dest, msg) => envoie un message vers un destinataire sans laisser de trace (uniquement mode 'c')
+msg_xxx_transmit(dest, msg) => envoie un message vers un destinataire en gérant la trace (selon les drapeaux du message)
+msg_xxx_receive(msg) =>
 

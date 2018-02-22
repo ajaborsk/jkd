@@ -36,7 +36,7 @@ class Application(Container):
     def fqn(self):
         return '/' + self.name
 
-    async def _query_handle(self, query):
+    async def msg_query_handle(self, query):
         self.debug('Application: handling query: '+str(query), 'msg')
         if 'homepage' in self:
             # Delegate "get" query (= http) to homepage, if it exists

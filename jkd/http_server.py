@@ -22,34 +22,25 @@ class HttpServer(Container):
         self.ws = {}
         self.ws_channels = {}
         self.web_app = web.Application()
-        #self.instances = {} # Running applications
 
         self.web_app.router.add_get('/', self.http_handler)
         self.web_app.router.add_static('/static', 'static/')
         self.web_app.router.add_get('/ws', self.ws_handler)
-        self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
+#        self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
         self.web_app.router.add_get('/{app}', self.http_handler)
         self.web_app.router.add_get('/{app}/{address}', self.http_handler)
 
         aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
-        self.ext_app = Subprocessus('heavyapp', env = self.env)
-        self.ext_app.subscribe(self.ws_send)
-        self.ext_app2 = Subprocessus('heavyapp2', env = self.env)
-        self.ext_app2.subscribe(self.ws_send)
-
-        #self['demo'] = DemoApplication(env = self.env, name="demo")
-
-    async def ws_send(self, wsid, message):
+    async def msg_ws_send(self, wsid, message):
         if self.ws[wsid] is not None and self.ws[wsid].closed == False:
             await self.ws[wsid].send_json(message)
         else:
             self.info('Trying to send message '+str(message)+' to WS'+str(wsid)+' while it is closed => closing channel', 'msg')
             # Closing channel
-            #TODO
             # Send back a 'stop' query update
             channel = self.ws_channels[(wsid, message['lcid'])]
-            msg = {'lcid':channel['lcid'], 'prx_src':self, 'prx_dst':channel['prx_src'], 'cmd':'close'}
+            msg = {'lcid':channel['lcid'], 'prx_src':self, 'prx_dst':channel['prx_src'], 'cmd':'close', 'flags':'d'}
             await self.msg_send(channel['prx_src'], msg)
             del self.ws_channels[(wsid, message['lcid'])]
 
@@ -62,7 +53,7 @@ class HttpServer(Container):
         msg['lcid'] = lcid
         del msg['prx_src'] # remove non serializable tag
         #self.debug("ids = "+str(lcid)+' '+str(wsid))
-        await self.ws_send(wsid, msg)
+        await self.msg_ws_send(wsid, msg)
         #self.debug("handled reply for ws " + str(msg) + ' client:' + str(client))
 
     async def ws_handler(self, request):
@@ -95,8 +86,8 @@ class HttpServer(Container):
                     else:
                     # test echo reply
                         reply = await self.ext_app.aget("other")
-#                    await self.ws_send({"reply": message['data'] + '/answer'})
-                        await self.ws_send(wsid, {"reply": reply})
+#                    await self.msg_ws_send({"reply": message['data'] + '/answer'})
+                        await self.msg_ws_send(wsid, {"reply": reply})
             elif message.type == aiohttp.WSMsgType.ERROR:
                 self.warning('websocket connection {} closed with exception {}'.format(wsid, self.ws[wsid].exception()), 'msg')
             else:
@@ -104,9 +95,9 @@ class HttpServer(Container):
         self.debug('websocket connection {} closed'.format(wsid), 'msg')
         return self.ws[wsid] #useless ?
 
-    @aiohttp_jinja2.template('tmpl.jinja2')
-    def tmpl_handler(self, request):
-        return {'name': 'Andrew', 'surname': 'Svetlov'}
+    # @aiohttp_jinja2.template('tmpl.jinja2')
+    # def tmpl_handler(self, request):
+        # return {'name': 'Andrew', 'surname': 'Svetlov'}
 
     async def http_handler(self, request):
         name = request.match_info.get('app', "Anonymous")

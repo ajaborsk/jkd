@@ -42,7 +42,8 @@ class JkdEnv
     var msg = { 'url'   : '/demo' + url,
                 'src'   : '/demo/homepage',
                 'from'  : this.from,
-                'lcid'   : lcid,
+                'lcid'  : lcid,
+                'flags' : 'c',
                 'query' : query };
     this.websocket.send(JSON.stringify(msg));
     return lcid;

@@ -144,7 +144,7 @@ function removeData(chart) {
          {
           removeData(myChart2);
          }
-        addData(myChart2, 'n', msg.reply);
+        addData(myChart2, msg.reply[0], msg.reply[1]);
        },
       'popo');
     $("#stop2").attr('lcid',lcid);
@@ -154,7 +154,7 @@ function removeData(chart) {
    {
     $("#start2").show();
     $("#stop2").hide();
-    env.send_on_channel(Number($("#stop2").attr('lcid')), {'cmd':'close'});
+    env.send_on_channel(Number($("#stop2").attr('lcid')), {'flags':'d', 'cmd':'close'});
    });
 
   // Launch jkd environment

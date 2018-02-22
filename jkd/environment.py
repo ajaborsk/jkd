@@ -136,7 +136,7 @@ class Environment(Container):
 
     def __init__(self):
         self.loggers = {'main':logger_main, "msg":logger_msg}
-        super().__init__(env=self)
+        super().__init__(env=self, name='/env')
         self.loop = asyncio.get_event_loop()
         # Manually launch mainloop since self.loop was not initialized on Node class initialization
         self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
@@ -156,6 +156,7 @@ class EnvSubApplication(Environment):
     def __init__(self, root_name, tree = None, **kwargs):
         self.root_name = '/'.join(root_name.split('/')[:-1])
         super().__init__(**kwargs)
+        self.name = 'env'
         self.done = False
         self.pipe_channels = {}
 
@@ -181,7 +182,7 @@ class EnvSubApplication(Environment):
         sys.stdout.buffer.raw.write(line)
         #self.debug("SubApplication {}s: message sent".format(self.appname))
 
-    async def msg_handle(self, msg):
+    async def msg_queue_handle(self, msg):
         #self.debug("Handling queue message: {}".format(str(msg)), 'msg')
         if 'query' in msg:
             pass
@@ -246,7 +247,6 @@ class EnvHttpServer(Environment):
     def __init__(self):
         super().__init__()
         self.http_server = HttpServer(env = self, parent = self, name = 'httpd')
-        self.name = ''
 
         self.loop = self.http_server.web_app.loop
         if self.loop is None:

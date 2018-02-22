@@ -76,7 +76,7 @@ class Subprocessus(Node):
         msg = jkd_deserialize(line[:-1])
         return msg
 
-    async def msg_handle(self, msg):
+    async def msg_queue_handle(self, msg):
         self.debug("msg_handle: "+str(msg), 'msg')
 
         if 'query' in msg:
@@ -96,7 +96,7 @@ class Subprocessus(Node):
         else:
             self.warning('Unhandled (queue) incoming message: ' + str(msg), 'msg')
 
-    # async def _query_handle(self, msg):
+    # async def msg_query_handle(self, msg):
         # "Handle message from python queue input"
         # self.debug("subprocessus.query_handle: " + str(msg), 'msg')
 

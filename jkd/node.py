@@ -70,31 +70,51 @@ class Node:
     #TODO:  An API to add/remove/configure ports
 
     def fqn(self):
+        "Fully Qualified Name"
         if self.parent is None:
             return(self.name)
         else:
             return self.parent.fqn() + '/' + self.name
+
+    async def msg_queue_transmit(self, destination, msg):
+        "Low level queue message API"
+        #message.update({'prx_src':self})
+        if 'c' in msg['flags']:
+            # Create a new outgoing channel
+            msg['lcid'] = self.next_lcid
+            self.next_lcid += 1
+        else:
+            # Use previously set lcid
+            pass
+        # Always set the proxy source (which is this node)
+        msg['prx_src'] = self
+        await destination.input.put(msg)
+        if 'd' in msg['flags']:
+            # remove channel
+            del self.channels['lcid']
 
     async def msg_queue_loop(self):
         self.debug("Entering msg_queue_loop...")
         while not self.done:
             msg = await self.input.get()
             #self.debug("Received msg: " + str(msg))
-            await self.msg_handle(msg)
+            await self.msg_queue_handle(msg)
 
     async def msg_send(self, destination, message):
         "Low level message API"
         #message.update({'prx_src':self})
         await destination.input.put(message)
+        # Default transmission mode is python queue
+#        await self.msg_queue_transmit(self, destination, message)
 
-    async def msg_handle(self, msg):
+    async def msg_queue_handle(self, msg):
         # General message (from input queue) handling (including routing)
         #self.debug('(generic) queue msg handle: ' + str(msg))
         if 'query' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:
                 # The node is the final destination
-                await self._query_handle(msg)
+                await self.msg_query_handle(msg)
             else:
                 # Route/delegate to next node
                 name_len = len(self.name)
@@ -153,20 +173,20 @@ class Node:
                     self.warning("Unhandled Query update (unknown command) : " + str(msg), 'msg')
             else:
                 self.warning("Unhandled Query update (unknown channel) : " + str(msg), 'msg')
-        elif 'node' in msg and msg['node'] == self.name:
-            # This node is the final destination
-            # TODO
-            pass
-        elif 'query' not in msg:
-            # This is a reply
-            lcid = msg['lcid']
-            if lcid in self.channels:
-                await self.channels[lcid].put(msg)
-                if 'eoq' in msg and msg['eoq'] == True:
-                    # last message of the reply (eoq = End Of Query), so remove internal dedicated queue
-                    del self.channels[lcid]
-            else:
-                self.warning('No registred query id '+str(lcid), 'msg')
+        # elif 'node' in msg and msg['node'] == self.name:
+            # # This node is the final destination
+            # # TODO
+            # pass
+        # elif 'query' not in msg:
+            # # This is a reply
+            # lcid = msg['lcid']
+            # if lcid in self.channels:
+                # await self.channels[lcid].put(msg)
+                # if 'eoq' in msg and msg['eoq'] == True:
+                    # # last message of the reply (eoq = End Of Query), so remove internal dedicated queue
+                    # del self.channels[lcid]
+            # else:
+                # self.warning('No registred query id '+str(lcid), 'msg')
         else:
             self.warning(str(self.__class__) + self.name + ": Unhandled msg: " + str(msg), 'msg')
 
@@ -187,7 +207,7 @@ class Node:
                 self.channels[chan_id] = (coro, client)
             url = urlparse(query['url'])
             self.debug(self.name+': '+"Url = " + str(url), 'msg')
-            query.update({'path':url.path, 'port':url.fragment, 'lcid':chan_id, 'prx_src':self})
+            query.update({'path':url.path, 'port':url.fragment, 'lcid':chan_id, 'prx_src':self, 'mode':'c'})
             await self.msg_send(destination, query)
             return chan_id
         # elif 'node' in query:
@@ -223,7 +243,7 @@ class Node:
     async def wait_for_reply(self, lcid, timeout = 10.):
         return await asyncio.wait_for(self.channels[lcid].get(), timeout, loop = self.env.loop)
 
-    async def _query_handle(self, query):
+    async def msg_query_handle(self, query):
         # called when the node is the final destination of the query
         #TODO : port management ??
         #TODO : channel management ??
@@ -264,15 +284,14 @@ class Node:
         """
         pass
 
-    def connect(self, dest, **kwargs):
-        #TODO: whole thing...
-        pass
+    # def connect(self, dest, **kwargs):
+        # #TODO: whole thing...
+        # pass
 
     def log(self, level, message, logger='main'):
         if len(message) > 255:
             message = message[:252] + '...'
         f = inspect.stack()
-        #print(f[2])
         self.env.loggers[logger].log(level, self.fqn() + '.' + f[2][3] + '(): ' + message)
 
     def debug(self, message, logger='main'):

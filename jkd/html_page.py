@@ -27,14 +27,14 @@ class HtmlPage(Node):
             #self.parts.append({'template':self.jinja_env.get_template(part.attrib['template'] + '.jinja2')})
 
 
-    async def _query_handle(self, msg):
-        self.debug('query_handle : '+ str(msg), 'msg')
+    async def msg_query_handle(self, msg):
+        self.debug(str(msg), 'msg')
         if 'query' in msg and msg['query'] == 'get':
             template = self.jinja_env.get_template(self.name + '.jinja2')
             html_page = template.render({'pagetitle':self.pagetitle, 'name':'Joris'})
             self.debug("handling"+str(msg), 'msg')
             self.debug("Reply to " + str(msg['src']) + " / lcid=" + str(msg['lcid']), 'msg')
-            rep = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':html_page}
+            rep = {'flags':'', 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':html_page}
             self.debug("Reply = " + str(rep), 'msg')
             #self.debug("Queue = " + str(msg['src'].input))
             await self.msg_send(msg['prx_src'], rep)
