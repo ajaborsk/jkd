@@ -91,8 +91,6 @@ Liens, connexions et messages :
   *prox_src* : envoyeur (sous un format qui dépend du type de connection)
   *prox_dst* : destinataire (idem).
 
-
-
 Trame d'un message :
  - src : id du noeud d'envoi (adresse hiérarchique ?)
  - dst : id du noeud destination (adresse hiérarchique ?)
@@ -105,6 +103,32 @@ Routage Aller d'un message :
 
 Routage Retour d'un message :
  - Utiliser les prx_lcid => facile
+
+Création d'un canal :
+---------------------
+
+à l'aller (flags = 'c'):
+  Noter dans self.channels[lcid] ce qu'il faut faire lors de la réception de la réponse. C'est à dire :
+  - le lcid et éventuellement (si queue interne : prx_src, si websocket l'id de ws) la destination (en cas de routage)
+  - la coroutine et le client_data pour le noeud qui a lancé la requête (query)
+  - Format (NE PAS UTILISER DE {dict} comme valeur car ce n'est pas serialisable) :
+    - lors d'une requête (query) :
+          self.channels[lcid] = (coroutine_traitement_reponse, client_data)
+    - lors d'un routage http (GET or PUT):
+          self.channels[lcid] = private_async_queue
+    - lors d'un routage ws:
+          self.channels[lcid] = (wsid, ws_lcid)
+    - lors d'un routage pipe:
+          self.channels[lcid] = pipe_lcid
+    - lors d'un routage queue:
+          self.channels[lcid] = (sender, lcid)
+  - Cet enregistrement est fait dans la (co)routine qui appelle msg_send(), ce dernier
+     renvoyant lcid si création (None sinon)
+
+au retour (flags = 'f'):
+  Noter dans self.back_channels[(incoming lcid, incoming node)] le lcid (déjà créé lors de l'étape 'c')
+  Cela permettra de rerouter les messages query_update
+
 
 Un message a trois drapeaux possibles de propagation (bas niveau). c et f sont exclusifs l'un de l'autre.
 'd' peut accompagner n'importe quel message sauf 'c' :

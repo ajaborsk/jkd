@@ -9,7 +9,7 @@ class Subprocessus(Node):
         super().__init__(**kwargs)
         self.subprocess = None
         self.appname = appname
-        self.next_pipe_lcid = 0
+        self.next_pipe_lcid = 2000
         self.reply = None
         #self.subscription = None
         self.pipe_channels = {}
@@ -23,7 +23,7 @@ class Subprocessus(Node):
         self.subscription = coro
 
     async def launch(self):
-        self.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
+        #self.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
         test_xml = b'"' + self.xml_contents.replace(b'"', b'\"') + b'"'
         self.debug(test_xml.decode('utf8'))
         try:
@@ -44,14 +44,17 @@ class Subprocessus(Node):
 
             if 'lcid' in msg and msg['lcid'] in self.pipe_channels:
                 # Get the pipe channel stored at creation
-                channel = self.pipe_channels[msg['lcid']]
-
+                pipe_channel = self.pipe_channels[msg['lcid']]
+                #self.debug('pipe_channel = '+str(pipe_channel),'msg')
+                if 'f' in msg['flags']:
+                    self.back_channels[(id(pipe_channel['prx_dst']), pipe_channel['lcid'])] = msg['lcid']
+                    self.debug('subp:back_channels['+str((id(pipe_channel['prx_dst']), pipe_channel['lcid']))+'] = '+str(self.back_channels[(id(pipe_channel['prx_dst']), pipe_channel['lcid'])]), 'msg')
                 # Get the queue channel id and create a queue channel reference
                 #self.channels[channel['lcid']] =
-                msg.update({'lcid':channel['lcid']})
+                msg.update({'lcid':pipe_channel['lcid']})
                 msg.update({'prx_src':self})
                 #self.debug('reply_to'+str(channel['prx_dst']), 'msg')
-                await self.msg_send(channel['prx_dst'], msg)
+                await self.msg_send(pipe_channel['prx_dst'], msg)
 
 #            if 0:#msg['reply'] == 'exited':
 #                self.done = True
@@ -77,9 +80,9 @@ class Subprocessus(Node):
         return msg
 
     async def msg_queue_handle(self, msg):
-        self.debug("msg_handle: "+str(msg), 'msg')
+        #self.debug("msg_handle: "+str(msg), 'msg')
 
-        if 'query' in msg:
+        if 'c' in msg['flags']:
             if self.subprocess is None:
                 await self.launch()
                 self.bg = self.env.loop.create_task(self.msg_pipe_loop())
@@ -87,14 +90,37 @@ class Subprocessus(Node):
             pipe_lcid = self.next_pipe_lcid
             self.next_pipe_lcid += 1
             self.pipe_channels[pipe_lcid] = {'prx_dst':msg['prx_src'], 'lcid':msg['lcid']} # reply_to
+            self.debug("pipe_channels["+str(pipe_lcid)+"] = "+str(self.pipe_channels[pipe_lcid]), 'msg')
             msg['lcid'] = pipe_lcid
             del msg['prx_src']
-            self.debug("subprocessus.sending to process: " + str(msg), 'msg')
+            #self.debug("subprocessus.sending to process: " + str(msg), 'msg')
             self.msg_pipe_send(msg)
-        elif 'cmd' in msg:
-            pipe_lcid = self.channels[msg['lcid']]
+        elif 'f' in msg['flags']:
+            #TODO
+            pass
         else:
-            self.warning('Unhandled (queue) incoming message: ' + str(msg), 'msg')
+            key = (id(msg['prx_src']), msg['lcid'])
+            #self.debug("USE: key = "+str(key)+' msg='+str(msg), "msg")
+            if key in self.back_channels:
+                #self.debug("USE1: ", "msg")
+                pipe_lcid = self.back_channels[key]
+                msg['lcid'] = pipe_lcid
+                #self.debug("USE2: pipe_lcid = "+str(pipe_lcid)+' msg='+str(msg), "msg")
+                #self.debug("subprocessus.sending to process: " + str(msg), 'msg')
+                del msg['prx_src'] # remove non serializable (and useless) part
+                self.msg_pipe_send(msg)
+                #self.debug("USE3: msg="+str(msg), "msg")
+                if 'd' in msg['flags']:
+                    del self.back_channels[key]
+                    self.debug('Removing back channels for key = ' + str(key), 'msg')
+                    del self.pipe_channels[pipe_lcid]
+                    self.debug('Removing pipe channels for pipe_lcid = ' + str(pipe_lcid), 'msg')
+            else:
+                self.warning('pipe channel not found for source'+str(), 'msg')
+
+
+        # else:
+            # self.warning('Unhandled (queue) incoming message: ' + str(msg), 'msg')
 
     # async def msg_query_handle(self, msg):
         # "Handle message from python queue input"

@@ -27,6 +27,7 @@ class HttpServer(Container):
         self.web_app.router.add_static('/static', 'static/')
         self.web_app.router.add_get('/ws', self.ws_handler)
 #        self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
+        self.web_app.router.add_get('/view/{app}', self.http_view_handler)
         self.web_app.router.add_get('/{app}', self.http_handler)
         self.web_app.router.add_get('/{app}/{address}', self.http_handler)
 
@@ -40,16 +41,19 @@ class HttpServer(Container):
             # Closing channel
             # Send back a 'stop' query update
             channel = self.ws_channels[(wsid, message['lcid'])]
-            msg = {'lcid':channel['lcid'], 'prx_src':self, 'prx_dst':channel['prx_src'], 'cmd':'close', 'flags':'d'}
+            msg = {'lcid':channel['lcid'], 'prx_src':self, 'cmd':'close', 'flags':'d'}
             await self.msg_send(channel['prx_src'], msg)
             del self.ws_channels[(wsid, message['lcid'])]
+            self.debug('ws_channels['+str((wsid, message['lcid']))+'] deleted', 'msg')
 
     async def reply_for_ws(self, msg, client = None):
         #self.debug("handling reply for ws " + str(msg) + ' client:' + str(client), 'msg')
         lcid = client['lcid']
         wsid = client['wsid']
         #self.debug("ids = "+str(lcid)+' '+str(wsid))
-        self.ws_channels[(wsid, lcid)] = {'lcid':msg['lcid'], 'prx_src':msg['prx_src']}
+        if 'f' in msg['flags']:
+            self.ws_channels[(wsid, lcid)] = {'lcid':msg['lcid'], 'prx_src':msg['prx_src']}
+            self.debug('ws_channels['+str((wsid, lcid))+'] = '+str({'lcid':msg['lcid'], 'prx_src':msg['prx_src']}), 'msg')
         msg['lcid'] = lcid
         del msg['prx_src'] # remove non serializable tag
         #self.debug("ids = "+str(lcid)+' '+str(wsid))
@@ -69,16 +73,17 @@ class HttpServer(Container):
                     await self.ws[wsid].close()
                 else:
                     msg = json.loads(message.data);
-                    self.debug('WS message received : '+str(msg), "msg")
+                    #self.debug('WS message received : '+str(msg), "msg")
                     if 'lcid' in msg and (wsid, msg['lcid']) in self.ws_channels:
-                        self.debug("Send on existing channel "+str(msg), 'msg')
+                        # This is a message for a existing channel
+                        #self.debug("Send on existing channel "+str(msg), 'msg')
                         channel = self.ws_channels[(wsid, msg['lcid'])]
                         msg['lcid'] = channel['lcid']
                         msg['prx_src'] = self
                         await self.msg_send(channel['prx_src'], msg)
                     elif 'url' in msg:
                         appname = msg['url'][1:].split('/')[0]
-                        lcid = await self.query(self[appname], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
+                        lcid = await self.msg_query(self[appname], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
                     elif msg['lcid'] == "q1":
                         reply = await self.ext_app.aget(msg['lcid'])
                     elif msg['lcid'] == "q2":
@@ -92,7 +97,7 @@ class HttpServer(Container):
                 self.warning('websocket connection {} closed with exception {}'.format(wsid, self.ws[wsid].exception()), 'msg')
             else:
                 self.warning('websocket connection {} unhandled message {} '.format(wsid, message), 'msg')
-        self.debug('websocket connection {} closed'.format(wsid), 'msg')
+        #self.debug('websocket connection {} closed'.format(wsid), 'msg')
         return self.ws[wsid] #useless ?
 
     # @aiohttp_jinja2.template('tmpl.jinja2')
@@ -103,7 +108,7 @@ class HttpServer(Container):
         name = request.match_info.get('app', "Anonymous")
 
         if name == "Anonymous":
-            text = "<html><body><p>Count = {}</p></body></html>".format(self.count)
+            text = "<html><body><p>Default (empty) page</p></body></html>"
 
         else:
             #self.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
@@ -117,12 +122,10 @@ class HttpServer(Container):
                 app = self[name]
 
             if app is not None:
-                lcid = await self.query(app, {'query':'get', 'src':self.fqn(), 'url':name})
-                #self.debug("Query launched "+str(lcid))
-                #self.next_lcid += 1
+                lcid = await self.msg_query(app, {'query':'get', 'src':self.fqn(), 'url':name})
+                #self.debug("Query launched lcid=" + str(lcid))
                 text = "Timeout."
                 try:
-#                    text = await asyncio.shield(self.wait_for_reply(lcid, timeout = 0.1))
                     msg = await self.wait_for_reply(lcid, timeout = 5.)
                     text = msg['reply']
                 except asyncio.TimeoutError:
@@ -135,6 +138,14 @@ class HttpServer(Container):
                 text = 'Application Not found'
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
+        return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
+
+    async def http_view_handler(self, request):
+        app_name = request.match_info.get('app', "")
+        if app_name in self:
+            text = "Viewing application {} : (TODO)".format(app_name)
+        else:
+            text = "Application {} Not found".format(app_name)
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
     def run(self):

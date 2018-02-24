@@ -76,36 +76,61 @@ class Node:
         else:
             return self.parent.fqn() + '/' + self.name
 
-    async def msg_queue_transmit(self, destination, msg):
+    async def msg_queue_transmit(self, destination, msg, delegate = False):
         "Low level queue message API"
-        #message.update({'prx_src':self})
+        #self.debug("transmit to " + str(destination) + ': ' + str(msg), 'msg')
         if 'c' in msg['flags']:
             # Create a new outgoing channel
             msg['lcid'] = self.next_lcid
             self.next_lcid += 1
         else:
-            # Use previously set lcid
             pass
+            # Use previously set lcid
+            ##channel = self.back_channels[(id(msg['prx_src']), msg['lcid'])]
+            ##msg.update({'prx_src':self, 'lcid':channel['lcid']})
         # Always set the proxy source (which is this node)
         msg['prx_src'] = self
         await destination.input.put(msg)
         if 'd' in msg['flags']:
             # remove channel
-            del self.channels['lcid']
+            lcid = msg['lcid'] # only for debug purpose
+            del self.channels[msg['lcid']]
+            self.debug("removed channel lcid: "+str(lcid), 'msg')
+            return None
+        else:
+            return msg['lcid']
 
     async def msg_queue_loop(self):
-        self.debug("Entering msg_queue_loop...")
+        #self.debug("Entering msg_queue_loop...")
         while not self.done:
             msg = await self.input.get()
             #self.debug("Received msg: " + str(msg))
+            if 'c' in msg['flags']:
+                # Simple route
+                #TODO
+                pass
+            elif 'f' in msg['flags']:
+                # Update back_channels
+                lcid = msg['lcid']
+                # test for "hashability"
+                try:
+                    hash(self.channels[lcid])
+                    trace_it = True
+                except TypeError:
+                    trace_it = False
+                if trace_it:
+                    key = self.channels[lcid]
+                    #self.debug("Updating back_channels " + str(key) + ' : ' +  str((lcid, msg['prx_src'])), 'msg')
+                    self.back_channels[key] = {'lcid':lcid, 'prx_dst':msg['prx_src']}
+                    self.debug("Updated back_channels " + str(key) + ' : ' +  str(self.back_channels[key]), 'msg')
             await self.msg_queue_handle(msg)
 
-    async def msg_send(self, destination, message):
+    async def msg_send(self, destination, message, delegate = False):
         "Low level message API"
         #message.update({'prx_src':self})
-        await destination.input.put(message)
+#        return await destination.input.put(message)
         # Default transmission mode is python queue
-#        await self.msg_queue_transmit(self, destination, message)
+        return await self.msg_queue_transmit(destination, message, delegate = delegate)
 
     async def msg_queue_handle(self, msg):
         # General message (from input queue) handling (including routing)
@@ -160,11 +185,11 @@ class Node:
                 pass
         elif 'cmd' in msg:
             # This is a query update
-            self.debug("Query update: " + str(msg), "msg")
+            #self.debug("Query update: " + str(msg), "msg")
             key = (id(msg['prx_src']), msg['lcid'])
-            self.debug("Query update: key = " + str(key), 'msg')
+            #self.debug("Query update: key = " + str(key), 'msg')
             if key in self.back_channels:
-                self.debug("Query update: key = " + str(key) + "" + str(self.back_channels[key]), 'msg')
+                #self.debug("Query update: key = " + str(key) + "" + str(self.back_channels[key]), 'msg')
                 if msg['cmd'] == 'close':
                     # Remove/close connexion
                     del self.ports[self.back_channels[key]['port']]['connections'][self.back_channels[key]['cnx_idx']]
@@ -194,51 +219,34 @@ class Node:
         return ET.Element()
 
     # Outgoing query
-    async def query(self, destination, query, coro = None, client = None):
-        # get next query id (lcid) and increment counter for next time
-        chan_id = self.next_lcid
-        self.next_lcid += 1
+    async def msg_query(self, destination, query, coro = None, client = None):
         if 'url' in query:
-            if coro is None:
-                # Add a internal dedicated queue for this channel id
-                self.channels[chan_id] = asyncio.Queue()
-            else:
-                # Add a callback and its client data for this channel id
-                self.channels[chan_id] = (coro, client)
             url = urlparse(query['url'])
-            self.debug(self.name+': '+"Url = " + str(url), 'msg')
-            query.update({'path':url.path, 'port':url.fragment, 'lcid':chan_id, 'prx_src':self, 'mode':'c'})
-            await self.msg_send(destination, query)
-            return chan_id
-        # elif 'node' in query:
-            # # New protocol
-            # if 'prox_src' in query:
-                # prox_dst = query['prox_src']
-            # else:
-                # prox_dst = query['src']
-            # self.current_queries[lcid] = {'lcid': query['lcid'], 'prox_dst': prox_dst}
-            # query.update({'lcid':lcid, 'prox_src':self})
-            # await destination.input.put(query)
-#        else:
-#            # Add a internal dedicated queue for this query id
-#            self.channels[chan_id] = asyncio.Queue()
-#            # Update message with lcid and source reference (as python object for now)
-#            query.update({'lcid':chan_id, 'src':self})
-#            # Put the message into the destination (global) queue
-#            await destination.input.put(query)
-            # Return the query id
+            #self.debug(self.name+': '+"Url = " + str(url), 'msg')
+            query.update({'path':url.path, 'port':url.fragment, 'flags':'c'})
         else:
             self.warning('No url for query' + str(query), 'msg')
-            return None
+        lcid = await self.msg_send(destination, query)
+        if coro is None:
+            # Add a internal dedicated queue for this channel id
+            self.channels[lcid] = asyncio.Queue()
+            self.debug('channels['+str(lcid)+'] = '+str(self.channels[lcid]), 'msg')
+        else:
+            # Add a callback and its client data for this channel id
+            self.channels[lcid] = (coro, client)
+            self.debug('channels['+str(lcid)+'] = '+str(self.channels[lcid]), 'msg')
+        return lcid
 
-    async def delegate(self, destination, query):
-        self.debug("Delegating to " + str(destination)+' : '+str(query), 'msg')
+    async def msg_queue_delegate(self, destination, query):
+        #self.debug("Delegating to " + str(destination)+' : '+str(query), 'msg')
         query['path'] = destination.name
-        await self.msg_send(destination, query)
+#        await self.msg_send(destination, query, delegate = True)
+        await destination.input.put(query)
 
     async def reroute(self, destination, query):
-        self.debug("Rerouting to " + str(destination)+' : '+str(query), 'msg')
-        await self.msg_send(destination, query)
+        #self.debug("Rerouting to " + str(destination)+' : '+str(query), 'msg')
+#        await self.msg_send(destination, query, delegate = True)
+        await destination.input.put(query)
 
     async def wait_for_reply(self, lcid, timeout = 10.):
         return await asyncio.wait_for(self.channels[lcid].get(), timeout, loop = self.env.loop)
@@ -247,24 +255,24 @@ class Node:
         # called when the node is the final destination of the query
         #TODO : port management ??
         #TODO : channel management ??
-        self.debug(self.name + ": generic query handle" + str(query), 'msg')
+        #self.debug("generic msg query handle" + str(query), 'msg')
         if 'port' in query and query['port'] in self.ports:
             port = query['port']
-            self.debug(self.name + ": port = " + str(query), 'msg')
+            #self.debug(self.name + ": port = " + str(query), 'msg')
             if query['query'] == 'immediate':
                 reply = {'prx_src':self, 'lcid':query['lcid'], 'reply':self.ports[port]['value']}
-                self.debug(self.name + ": immediate reply = " + str(query) + ' ' + str(reply), 'msg')
+                #self.debug(self.name + ": immediate reply = " + str(query) + ' ' + str(reply), 'msg')
                 await self.msg_send(query['prx_src'], reply)
             else:
                 # Subscription
-                self.debug(self.name + ": subscription => " + str(query), 'msg')
+                #self.debug(self.name + ": subscription => " + str(query), 'msg')
 
                 cnx = {'update':True, 'lcid':query['lcid'], 'prx_dst':query['prx_src']}
 
                 # Update back_channels
                 key = (id(query['prx_src']), query['lcid'])
-                self.debug("Updating back_channels " + str(key) + ' : ' +  str(query), 'msg')
                 self.back_channels[key] = {'port':query['port'], 'cnx_idx':len(self.ports[port]['connections'])}
+                self.debug("Updated back_channels " + str(key) + ' : ' +  str(self.back_channels[key]), 'msg')
 
                 # Add connection to the port
                 self.ports[port]['connections'].append(cnx)
@@ -283,6 +291,9 @@ class Node:
         """
         """
         pass
+
+    async def introspect(self):
+        return {}
 
     # def connect(self, dest, **kwargs):
         # #TODO: whole thing...

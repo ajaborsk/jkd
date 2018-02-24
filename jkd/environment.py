@@ -169,7 +169,7 @@ class EnvSubApplication(Environment):
 
         # Launch the reading/handle mainloop task
         self.reader_t = self.loop.create_task(self.msg_pipe_loop())
-        self.debug("subapplication initialized")
+        #self.debug("subapplication initialized")
 
     def fqn(self):
         return self.root_name
@@ -185,28 +185,41 @@ class EnvSubApplication(Environment):
     async def msg_queue_handle(self, msg):
         #self.debug("Handling queue message: {}".format(str(msg)), 'msg')
         if 'query' in msg:
+            #TODO: Transmit query from subprocess node to parent process
             pass
         elif 'reply' in msg:
-            pipe_lcid = self.channels[msg['lcid']]['lcid']
+            pipe_lcid = self.channels[msg['lcid']]
             msg['lcid'] = pipe_lcid
             del msg['prx_src'] # not serializable entry
             self.msg_pipe_send(msg)
 
     async def msg_pipe_handle(self, msg):
-        self.debug("Handling pipe message: {}".format(str(msg)), 'msg')
-        if 'query' in msg:
-            self.debug(" Query message", 'msg')
-            lcid = self.next_lcid
-            self.next_lcid += 1
+        #self.debug("Handling pipe message: {}".format(str(msg)), 'msg')
+        if 'c' in msg['flags']:
+            #self.debug(" Query message", 'msg')
             # queue lcid       ...        pipe lcid
-            self.channels[lcid] = {'lcid':msg['lcid']}
-            msg['lcid'] = lcid
-            msg['prx_src'] = self
-            await self.msg_send(self.root, msg)
-        elif 'cmd' in msg:
-            self.debug(" Cmd (query update) message", "msg")
+            pipe_lcid = msg['lcid']
+            queue_lcid = await self.msg_send(self.root, msg)
+            self.channels[queue_lcid] = pipe_lcid
+            self.debug('self.channels['+str(queue_lcid)+'] = '+str(self.channels[queue_lcid]),'msg')
+#        elif 'cmd' in msg:
+#            #self.debug(" Cmd (query update) message", "msg")
+#            pass
         else:
-            self.warning('Unhandled message: ' + str(msg), 'msg')
+            self.debug("non c msg="+str(msg),"msg")
+            pipe_lcid = msg['lcid']
+            self.debug("non c pipe_lcid="+str(pipe_lcid),"msg")
+            channel = self.back_channels[pipe_lcid]
+            self.debug("non c channel="+str(channel),"msg")
+            msg['lcid'] = channel['lcid']
+            await self.msg_queue_transmit(channel['prx_dst'], msg)
+            self.debug("non c channel done "+str(msg),"msg")
+            #if 'd' in msg['flags']:
+            #    del self.back_channels[pipe_lcid]
+            #    self.debug("removed back_channel lcid: "+str(pipe_lcid), 'msg')
+            #    del self.channels[msg['lcid']]
+            #    self.debug("removed channel lcid: "+str(msg['lcid']), 'msg')
+            #self.warning('Unhandled message: ' + str(msg), 'msg')
         # if 'cmd' in msg and msg['cmd'] == 'get':
             # lcid = msg['lcid']
             # self.reply = {'reply':'This is the reply from the subprocess application.'}

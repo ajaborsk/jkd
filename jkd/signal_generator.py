@@ -20,7 +20,6 @@ class SignalGenerator(Node):
         #TODO: output_task scheduling should be determined by output channels configurations
         while True:
             #self.debug(str(self.name) + " : output_task...")
-            await asyncio.sleep(.5)
             self.compute()
             for cnx in self.ports['output']['connections']:
                 if 'update' in cnx:
@@ -34,9 +33,10 @@ class SignalGenerator(Node):
                     else:
                         cnx['count'] += 1
                     msg = {'prx_src':self, 'lcid':cnx['lcid'], 'flags':flags, 'reply':(cnx['count'], int(self.ports['output']['value']))}
-                    self.debug(str(self.name) + " : output_msg to "+str(cnx['prx_dst'])+': '+str(msg))
+                    #self.debug(str(self.name) + " : output_msg to "+str(cnx['prx_dst'])+': '+str(msg))
                     await self.msg_send(cnx['prx_dst'], msg)
                     #self.debug('Queue length: '+str(cnx['prx_dst'].input.qsize()), 'msg')
             #self.debug(str(self.name) + " : output_task done.")
+            await asyncio.sleep(0.5)
 #    def query_handle(self, query):
 #        pass
