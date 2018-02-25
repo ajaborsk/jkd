@@ -26,104 +26,106 @@ import time
 from .html_page import HtmlPage
 from .subprocessus import Subprocessus
 from .signal_generator import SignalGenerator
+from .serial_capture import SerialCapture
 registry = {
         "html_page":HtmlPage,
         "subprocessus":Subprocessus,
         "signal_generator":SignalGenerator,
+        "serial_cature":SerialCapture,
          }
 
 
-from bokeh.plotting import figure
-from bokeh.models import Range1d
-from bokeh.embed import components
-from bokeh.models import ColumnDataSource
+# from bokeh.plotting import figure
+# from bokeh.models import Range1d
+# from bokeh.embed import components
+# from bokeh.models import ColumnDataSource
 
-# create some data
+# # create some data
 
-cds = ColumnDataSource(data = {
-'x1':[0, 1, 2, 3, 4, 5, 6, 7,  8,  9, 10, 9],
-'y1':[0, 8, 2, 4, 6, 9, 5, 6, 25, 28,  4, 7]
-})
-
-
-# select the tools we want
-TOOLS="pan,wheel_zoom,box_zoom,reset,save"
-
-# the red and blue graphs will share this data range
-xr1 = Range1d(start=0, end=15)
-yr1 = Range1d(start=0, end=30)
-
-# only the green will use this data range
-xr2 = Range1d(start=0, end=30)
-yr2 = Range1d(start=0, end=30)
-
-# build our figures
-p1 = figure(x_range=xr1, y_range=yr1, tools=TOOLS, plot_width=900, plot_height=600)
-p1.scatter('x1', 'y1', size=12, color="red", alpha=0.5, source = cds)
-
-#p2 = figure(x_range=xr1, y_range=yr1, tools=TOOLS, plot_width=900, plot_height=300)
-#p2.scatter(x2, y2, size=12, color="blue", alpha=0.5)
-
-#p3 = figure(x_range=xr2, y_range=yr2, tools=TOOLS, plot_width=900, plot_height=300)
-#p3.scatter(x3, y3, size=12, color="green", alpha=0.5)
-
-# plots can be a single Bokeh Model, a list/tuple, or even a dictionary
-plots = {'Red': p1}
-#plots = {'Red': p1, 'Blue': p2, 'Green': p3}
-
-script, div = components(plots)
-#print(script)
-#print(div)
-
-class Processor(Node):
-    def __init__(self, content = None, **kwargs):
-        super().__init__(**kwargs)
-        self.next_id = 1
-
-    async def process(self, future): # unused
-        asyncio.sleep(2)
-        return "<html><head></head><body><p>Full one !</p></body></html>"
-
-    def get(self, callback, client, portname = None, format = None):
-        time.sleep(1)
-        self.env.loop.call_soon(callback, client, """<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Bokeh Scatter Plots</title>
-
-    <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.css" type="text/css" />
-    <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.js"></script>
-
-    {script}
-
-  </head>
-  <body>
-    <p>Paragraph Test</p>
-    {red}
-  </body>
-</html>
-""".format(script=script, red=div['Red']))
+# cds = ColumnDataSource(data = {
+# 'x1':[0, 1, 2, 3, 4, 5, 6, 7,  8,  9, 10, 9],
+# 'y1':[0, 8, 2, 4, 6, 9, 5, 6, 25, 28,  4, 7]
+# })
 
 
-class HtmlReport(Node):
+# # select the tools we want
+# TOOLS="pan,wheel_zoom,box_zoom,reset,save"
 
-    def __init__(self, content = None, processor = None, **kwargs):
-        super().__init__(**kwargs)
-        self.processor = processor
+# # the red and blue graphs will share this data range
+# xr1 = Range1d(start=0, end=15)
+# yr1 = Range1d(start=0, end=30)
 
-    def get_cb(self, future, result):
-        # callback for the callback based interface
-        return future.set_result(result)
+# # only the green will use this data range
+# xr2 = Range1d(start=0, end=30)
+# yr2 = Range1d(start=0, end=30)
 
-    async def aget(self, portname = None, format = None):
-        # create a future to "manage" the callback based interface
-        future = self.env.loop.create_future()
-        # call a callback based interface
-        self.processor.get(self.get_cb, future)
-        # await for the future to be completed (by the callback)
-        await asyncio.wait_for(future, None)
-        # return the future result
-        return future.result()
+# # build our figures
+# p1 = figure(x_range=xr1, y_range=yr1, tools=TOOLS, plot_width=900, plot_height=600)
+# p1.scatter('x1', 'y1', size=12, color="red", alpha=0.5, source = cds)
+
+# #p2 = figure(x_range=xr1, y_range=yr1, tools=TOOLS, plot_width=900, plot_height=300)
+# #p2.scatter(x2, y2, size=12, color="blue", alpha=0.5)
+
+# #p3 = figure(x_range=xr2, y_range=yr2, tools=TOOLS, plot_width=900, plot_height=300)
+# #p3.scatter(x3, y3, size=12, color="green", alpha=0.5)
+
+# # plots can be a single Bokeh Model, a list/tuple, or even a dictionary
+# plots = {'Red': p1}
+# #plots = {'Red': p1, 'Blue': p2, 'Green': p3}
+
+# script, div = components(plots)
+# #print(script)
+# #print(div)
+
+# class Processor(Node):
+    # def __init__(self, content = None, **kwargs):
+        # super().__init__(**kwargs)
+        # self.next_id = 1
+
+    # async def process(self, future): # unused
+        # asyncio.sleep(2)
+        # return "<html><head></head><body><p>Full one !</p></body></html>"
+
+    # def get(self, callback, client, portname = None, format = None):
+        # time.sleep(1)
+        # self.env.loop.call_soon(callback, client, """<html>
+  # <head>
+    # <meta charset="utf-8">
+    # <title>Bokeh Scatter Plots</title>
+
+    # <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.css" type="text/css" />
+    # <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.js"></script>
+
+    # {script}
+
+  # </head>
+  # <body>
+    # <p>Paragraph Test</p>
+    # {red}
+  # </body>
+# </html>
+# """.format(script=script, red=div['Red']))
+
+
+# class HtmlReport(Node):
+
+    # def __init__(self, content = None, processor = None, **kwargs):
+        # super().__init__(**kwargs)
+        # self.processor = processor
+
+    # def get_cb(self, future, result):
+        # # callback for the callback based interface
+        # return future.set_result(result)
+
+    # async def aget(self, portname = None, format = None):
+        # # create a future to "manage" the callback based interface
+        # future = self.env.loop.create_future()
+        # # call a callback based interface
+        # self.processor.get(self.get_cb, future)
+        # # await for the future to be completed (by the callback)
+        # await asyncio.wait_for(future, None)
+        # # return the future result
+        # return future.result()
 
 
 # The Web server part (to be put in a separate module)
