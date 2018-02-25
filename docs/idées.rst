@@ -22,19 +22,19 @@ Une application est créée à partir  d'un fichier (xml ?) qui décrit le graph
 
 Types de noeuds :
 -----------------
-- Source de données (brutes)
+* Source de données (brutes)
 
-     - Base de données
-     - Fichier(s) Excel
-     - h5
-     - fichier brut/binaire (.o .h .c .elf ...)
-     - drivers (reflète des données extérieures à l'application)
+   * Base de données
+   * Fichier(s) Excel
+   * h5
+   * fichier brut/binaire (.o .h .c .elf ...)
+   * drivers (reflète des données extérieures à l'application)
 
-- Caches
-- Transformateurs de données (import / export)
-- Table (ou ce serait pluôt un type de données ?)
-- Rapport (pdf/html/dhtml/svg...)
-- noeuds de calcul (Processor)
+* Caches
+* Transformateurs de données (import / export)
+* Table (ou ce serait pluôt un type de données ?)
+* Rapport (pdf/html/dhtml/svg...)
+* noeuds de calcul (Processor)
 
 Noeuds de calcul
 ----------------
