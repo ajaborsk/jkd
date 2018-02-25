@@ -219,3 +219,20 @@ msg_xxx_receive(msg) =>
 +=========+===========+
 |Left     |      3.5 €|
 +---------+-----------+
+
+Le système de types :
+---------------------
+
+Le système de types est très proche de celui de Python.
+
+Il existe des types littéraux :
+
+:string: Correspond au type "str" de python
+
+:int: Idem
+
+etc.
+
+Des types complexes/composés sont de base :
+
+:Table: Une table complète, avec des colonnes (nommées) et des lignes (enregistrements).
