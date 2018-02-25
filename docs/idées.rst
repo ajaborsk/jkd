@@ -23,11 +23,13 @@ Une application est créée à partir  d'un fichier (xml ?) qui décrit le graph
 Types de noeuds :
 -----------------
  - Source de données (brutes)
+
      - Base de données
      - Fichier(s) Excel
      - h5
      - fichier brut/binaire (.o .h .c .elf ...)
      - drivers (reflète des données extérieures à l'application)
+
  - Caches
  - Transformateurs de données (import / export)
  - Table (ou ce serait pluôt un type de données ?)
@@ -103,11 +105,6 @@ réponses partielles, informations sur l'avancement du traitement d'une requête
 Une connexion peut être fermée par une réponse définitive à une requête (mais ce n'est
 pas impératif)
 
-Les types :
------------
-
-
-
 
 Liens (links) et politiques (policies) :
 ----------------------------------------
@@ -124,7 +121,7 @@ Exemples de politiques :
 
 Les politiques peuvent avoir des propriétés :
  - comportement en cas de rupture d'un maillon
-    (essai de reconnexion ? pendant combien de temps? etc.)
+   (essai de reconnexion ? pendant combien de temps? etc.)
  - délais/période de mise à jour (indicatif, pour configurer les canaux)
  - nécessité de surveillance (ping/pong sur les canaux)
 
@@ -230,6 +227,10 @@ Il existe des types littéraux :
 :string: Correspond au type "str" de python
 
 :int: Idem
+
+:list: Idem
+
+:dict: Idem
 
 etc.
 
