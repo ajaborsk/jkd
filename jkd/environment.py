@@ -265,6 +265,6 @@ class EnvHttpServer(Environment):
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
 
-    def run(self):
+    def run(self, host='0.0.0.0', port=8080):
         self.info("Launching http server node...")
-        self.http_server.run()
+        self.http_server.run(host=host, port=port)

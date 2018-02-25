@@ -15,10 +15,10 @@ from .node import *
 
 if len(sys.argv) <= 1:
     environment = jkd.EnvHttpServer()
-    environment.run()
+    environment.run(port=9080)
 elif sys.argv[1] == 'http':
     environment = jkd.EnvHttpServer()
-    environment.run()
+    environment.run(port=9080)
 elif sys.argv[1] == 'batch':
     if len(sys.argv) >= 3:
         app_name = sys.argv[2]

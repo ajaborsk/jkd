@@ -74,6 +74,7 @@ Chaque Noeud est identifié de façon unique
 MAIS il n'est pas envisageable d'avoir une gestion GLOBALE des identifiants
 
 donc:
+
 * gestion arborescente (chaque noeud a un ID unique dans son parent)
 * Cela nécessite un système de requête pour rechercher l'id d'un noeud
 
@@ -85,6 +86,7 @@ une sortie sous forme de liste de triggers qui déclenchent l'envoi de message(s
 noeuds lorsque certaines conditions sont remplies.
 
 Evénements qui peuvent déclencher un trigger :
+
 * Réception d'un message (suivant le message), avant ou après traitement du message
 * Fin d'exécution d'une tâche interne (bloquante ou non)
 * Etapes intermédiaires d'un (long) calcul

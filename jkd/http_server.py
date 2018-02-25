@@ -148,6 +148,6 @@ class HttpServer(Container):
             text = "Application {} Not found".format(app_name)
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
-    def run(self):
-        web.run_app(self.web_app)
+    def run(self, host='0.0.0.0', port=8080):
+        web.run_app(self.web_app, host = host, port = port)
 
