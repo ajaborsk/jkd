@@ -86,16 +86,30 @@ var myChart = new Chart(ctx, {
 var myChart2 = new Chart(ctx2, {
     type: 'line',
     data:  {
-      labels: [0, 1, 2, 3, 4, 5],
+      labels: [Date.now()],
       datasets: [{
         fill:false,
         pointRadius:0,
         lineTension:0,
-        data: [12, 99, 3, -99, 2, 3],
+        data: [0],
       }],
     },
     options: {
       scales: {
+        xAxes:[{
+//          autoSkip:true,
+//          autoSkipPadding:10,
+          minRotation:45,
+          type: 'time',
+          time:{
+//            unit:'millisecond',
+              displayFormats:{
+                millisecond:'hh:mm:ss.SSS',
+                second:'hh:mm:ss',
+                minut:'hh:mm',
+              }
+          }
+        }],
         yAxes: [{
           ticks: {
             min: -100,
@@ -144,7 +158,7 @@ function removeData(chart) {
          {
           removeData(myChart2);
          }
-        addData(myChart2, msg.reply[0], msg.reply[1]);
+        addData(myChart2, msg.reply[0] * 1000, msg.reply[1]);
        },
       'popo');
     $("#stop2").attr('lcid',lcid);
