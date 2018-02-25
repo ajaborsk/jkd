@@ -90,18 +90,24 @@ Evénements qui peuvent déclencher un trigger :
 Liens, connexions et messages :
 -------------------------------
 
-  Un lien ("link") est un concept de haut niveau (pas d'implémentation)
-  qui décrit une relation entre deux ports de deux noeuds.
+Un lien ("link") est un concept de haut niveau (pas d'implémentation)
+qui décrit une relation entre deux ports de deux noeuds.
 
-  Une connexion ("connection") est la concrétisation d'un lien.
-  Une connexion est créée par une requête ("query") qui est routée depuis
-  le noeud source jusqu'au noeud destination. Elle laisse une trace sur son passage,
-  de façon à pouvoir router la ou les réponses de façon simple (pas de calcul de routage)
-  et sécurisée (seul l'envoyeur de la requête peut recevoir la ou les réponses).
-  Les réponses à une requête peuvent être multiples (abonnement à des mises à jour,
-  réponses partielles, informations sur l'avancement du traitement d'une requête complexe...)
-  Une connexion peut être fermée par une réponse définitive à une requête (mais ce n'est
-  pas impératif)
+Une connexion ("connection") est la concrétisation d'un lien.
+Une connexion est créée par une requête ("query") qui est routée depuis
+le noeud source jusqu'au noeud destination. Elle laisse une trace sur son passage,
+de façon à pouvoir router la ou les réponses de façon simple (pas de calcul de routage)
+et sécurisée (seul l'envoyeur de la requête peut recevoir la ou les réponses).
+Les réponses à une requête peuvent être multiples (abonnement à des mises à jour,
+réponses partielles, informations sur l'avancement du traitement d'une requête complexe...)
+Une connexion peut être fermée par une réponse définitive à une requête (mais ce n'est
+pas impératif)
+
+Les types :
+-----------
+
+
+
 
 Liens (links) et politiques (policies) :
 ----------------------------------------
@@ -126,26 +132,39 @@ Les politiques peuvent avoir des propriétés :
 Messages :
 ----------
 
-  Les messages sont utilisés pour créer des connexions (requêtes) et transmettre les
-  réponses et les éventuelles erreurs. Ils sont constitués d'un dictionnaire (hash), sérialisé ou non suivant
-  le mode de transmission.
+Les messages sont utilisés pour créer des connexions (requêtes) et transmettre les
+réponses et les éventuelles erreurs. Ils sont constitués d'un dictionnaire (hash), sérialisé ou non suivant
+le mode de transmission.
 
-  Chaque message comporte l'un des trois mots-clefs : 'query', 'reply' ou 'error'.
-  Chaque requête comporte un destinataire final, sous forme d'une addresse complète
-  (Fully Qualified Name / fqn /path).
+Chaque message comporte l'un des trois mots-clefs : 'query', 'reply' ou 'error'.
+Chaque requête comporte un destinataire final, sous forme d'une addresse complète
+(Fully Qualified Name / fqn /path).
 
-  La transmission d'un message entre deux noeuds (qui peuvent être de simples routeurs)
-  comporte des tags particuiers :
-  *prox_lcid* : proximal query id = identifant local de la requête : créé par l'envoyeur
-  pour les requêtes et transmis par l'envoyeur pour les réponses
-  *prox_src* : envoyeur (sous un format qui dépend du type de connection)
-  *prox_dst* : destinataire (idem).
+La transmission d'un message entre deux noeuds (qui peuvent être de simples routeurs)
+comporte des tags particuliers :
+
+:**prox_lcid**:
+    proximal query id = identifant local de la requête : créé par l'envoyeur
+    pour les requêtes et transmis par l'envoyeur pour les réponses
+
+:**prox_src**:
+  envoyeur (sous un format qui dépend du type de connection)
+
+:**prox_dst**:
+  destinataire (idem).
 
 Trame d'un message :
- - src : id du noeud d'envoi (adresse hiérarchique ?)
- - dst : id du noeud destination (adresse hiérarchique ?)
- - lcid : id de la requête
- - Charge utile :
+
+:src:
+  id du noeud d'envoi (adresse hiérarchique ?)
+
+:dst:
+ id du noeud destination (adresse hiérarchique ?)
+
+:lcid: id de la requête
+
+:Charge utile:
+ lorem ipsum
 
 Routage Aller d'un message :
  - Principe : Toujours passer par le noeud parent, dans la perspective de
@@ -195,4 +214,8 @@ msg_xxx_reroute(dest, msg) => envoie un message vers un destinataire sans laisse
 msg_xxx_transmit(dest, msg) => envoie un message vers un destinataire en gérant la trace (selon les drapeaux du message)
 msg_xxx_receive(msg) =>
 
-
++---------+-----------+
+| Tableau |data       |
++=========+===========+
+|Left     |      3.5 €|
++---------+-----------+
