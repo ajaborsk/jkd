@@ -121,7 +121,7 @@ Exemples de politiques :
 
 Les politiques peuvent avoir des propriétés :
  - comportement en cas de rupture d'un maillon
-   (essai de reconnexion ? pendant combien de temps? etc.)
+   (essai de reconnexion ? pendant combien de temps ? etc.)
  - délais/période de mise à jour (indicatif, pour configurer les canaux)
  - nécessité de surveillance (ping/pong sur les canaux)
 
@@ -174,7 +174,9 @@ Création d'un canal :
 ---------------------
 
 à l'aller (flags = 'c'):
-  Noter dans self.channels[lcid] ce qu'il faut faire lors de la réception de la réponse. C'est à dire :
+
+ # Noter dans self.channels[lcid] ce qu'il faut faire lors de la réception de la réponse. C'est à dire :
+
    - le lcid et éventuellement (si queue interne : prx_src, si websocket l'id de ws) la destination (en cas de routage)
    - la coroutine et le client_data pour le noeud qui a lancé la requête (query)
    - Format (NE PAS UTILISER DE {dict} comme valeur car ce n'est pas serialisable) :
@@ -200,7 +202,6 @@ au retour (flags = 'f'):
 
 Un message a trois drapeaux possibles de propagation (bas niveau). c et f sont exclusifs l'un de l'autre.
 'd' peut accompagner n'importe quel message sauf 'c' :
-
  - 'c' Create => trace son passage - aller - (sauf délégations), pour les Queries
  - 'f' First Use => pour le premier Reply => Crée un channel (retour)
  - ##USELESS 'u' Use => Utilise les traces du channel => utilise un channel
