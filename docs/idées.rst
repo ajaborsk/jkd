@@ -22,7 +22,7 @@ Une application est créée à partir  d'un fichier (xml ?) qui décrit le graph
 
 Types de noeuds :
 -----------------
- - Source de données (brutes)
+- Source de données (brutes)
 
      - Base de données
      - Fichier(s) Excel
@@ -30,11 +30,11 @@ Types de noeuds :
      - fichier brut/binaire (.o .h .c .elf ...)
      - drivers (reflète des données extérieures à l'application)
 
- - Caches
- - Transformateurs de données (import / export)
- - Table (ou ce serait pluôt un type de données ?)
- - Rapport (pdf/html/dhtml/svg...)
- - noeuds de calcul (Processor)
+- Caches
+- Transformateurs de données (import / export)
+- Table (ou ce serait pluôt un type de données ?)
+- Rapport (pdf/html/dhtml/svg...)
+- noeuds de calcul (Processor)
 
 Noeuds de calcul
 ----------------
@@ -58,14 +58,15 @@ Serveur http :
 --------------
 
 Pour le serveur WEB, typologie des adresses :
+
   /application/node/subnode/subsubnode#port.[html/xls/pdf/csv/svg]
 
 Rapports :
 ----------
 
 Un rapport peut être :
-  - Offline (contient toutes les données) ou Online (va chercher des données dynamiquement)
-  - Static (figé et donc Offline) ou Dynamic (Online or Offline)
+- Offline (contient toutes les données) ou Online (va chercher des données dynamiquement)
+- Static (figé et donc Offline) ou Dynamic (Online or Offline)
 
 Le type est *fixe* : html, pdf, web_page, txt...
 
@@ -73,8 +74,8 @@ Chaque Noeud est identifié de façon unique
 MAIS il n'est pas envisageable d'avoir une gestion GLOBALE des identifiants
 
 donc:
- - gestion arborescente (chaque noeud a un ID unique dans son parent)
- - Cela nécessite un système de requête pour rechercher l'id d'un noeud
+- gestion arborescente (chaque noeud a un ID unique dans son parent)
+- Cela nécessite un système de requête pour rechercher l'id d'un noeud
 
 Communication entre les noeuds
 ==============================
@@ -84,9 +85,9 @@ une sortie sous forme de liste de triggers qui déclenchent l'envoi de message(s
 noeuds lorsque certaines conditions sont remplies.
 
 Evénements qui peuvent déclencher un trigger :
- - Réception d'un message (suivant le message), avant ou après traitement du message
- - Fin d'exécution d'une tâche interne (bloquante ou non)
- - Etapes intermédiaires d'un (long) calcul
+- Réception d'un message (suivant le message), avant ou après traitement du message
+- Fin d'exécution d'une tâche interne (bloquante ou non)
+- Etapes intermédiaires d'un (long) calcul
 
 
 Liens, connexions et messages :
@@ -115,15 +116,16 @@ Ce lien n'est que descriptif.
 Les connections / canaux sont créés si nécessaire en utilisant les liens et une "politique" (policy)
 
 Exemples de politiques :
- - A la demande (query/response)
- - Continu dès mise à jour (Subscription)
- - Périodique (autre forme de subscription)
+- A la demande (query/response)
+- Continu dès mise à jour (Subscription)
+- Périodique (autre forme de subscription)
 
 Les politiques peuvent avoir des propriétés :
- - comportement en cas de rupture d'un maillon
-   (essai de reconnexion ? pendant combien de temps ? etc.)
- - délais/période de mise à jour (indicatif, pour configurer les canaux)
- - nécessité de surveillance (ping/pong sur les canaux)
+
+* comportement en cas de rupture d'un maillon
+  (essai de reconnexion ? pendant combien de temps ? etc.)
+* délais/période de mise à jour (indicatif, pour configurer les canaux)
+* nécessité de surveillance (ping/pong sur les canaux)
 
 
 Messages :
@@ -164,53 +166,56 @@ Trame d'un message :
  lorem ipsum
 
 Routage Aller d'un message :
- - Principe : Toujours passer par le noeud parent, dans la perspective de
-            gérer (ultérieurement) les droits d'accès
+
+* Principe : Toujours passer par le noeud parent, dans la perspective de
+  gérer (ultérieurement) les droits d'accès
 
 Routage Retour d'un message :
- - Utiliser les prx_lcid => facile
+- Utiliser les prx_lcid => facile
 
 Création d'un canal :
 ---------------------
 
 à l'aller (flags = 'c'):
 
- # Noter dans self.channels[lcid] ce qu'il faut faire lors de la réception de la réponse. C'est à dire :
+# Noter dans self.channels[lcid] ce qu'il faut faire lors de la réception de la réponse. C'est à dire :
+   * le lcid et éventuellement (si queue interne : prx_src, si websocket l'id de ws) la destination (en cas de routage)
+   * la coroutine et le client_data pour le noeud qui a lancé la requête (query)
+   * Format (NE PAS UTILISER DE {dict} comme valeur car ce n'est pas serialisable) :
 
-   - le lcid et éventuellement (si queue interne : prx_src, si websocket l'id de ws) la destination (en cas de routage)
-   - la coroutine et le client_data pour le noeud qui a lancé la requête (query)
-   - Format (NE PAS UTILISER DE {dict} comme valeur car ce n'est pas serialisable) :
+     * lors d'une requête (query) :
+       self.channels[lcid] = (coroutine_traitement_reponse, client_data)
+     * lors d'un routage http (GET or PUT):
+       self.channels[lcid] = private_async_queue
+     * lors d'un routage ws:
+       self.channels[lcid] = (wsid, ws_lcid)
+     * lors d'un routage pipe:
+       self.channels[lcid] = pipe_lcid
+     * lors d'un routage queue:
+       self.channels[lcid] = (sender, lcid)
 
-    - lors d'une requête (query) :
-          self.channels[lcid] = (coroutine_traitement_reponse, client_data)
-    - lors d'un routage http (GET or PUT):
-          self.channels[lcid] = private_async_queue
-    - lors d'un routage ws:
-          self.channels[lcid] = (wsid, ws_lcid)
-    - lors d'un routage pipe:
-          self.channels[lcid] = pipe_lcid
-    - lors d'un routage queue:
-          self.channels[lcid] = (sender, lcid)
-
-  - Cet enregistrement est fait dans la (co)routine qui appelle msg_send(), ce dernier
+   * Cet enregistrement est fait dans la (co)routine qui appelle msg_send(), ce dernier
      renvoyant lcid si création (None sinon)
 
 au retour (flags = 'f'):
-  Noter dans self.back_channels[(incoming lcid, incoming node)] le lcid (déjà créé lors de l'étape 'c')
-  Cela permettra de rerouter les messages query_update
 
+   * Noter dans self.back_channels[(incoming lcid, incoming node)] le lcid (déjà créé lors de l'étape 'c')
+     Cela permettra de rerouter les messages query_update
 
 Un message a trois drapeaux possibles de propagation (bas niveau). c et f sont exclusifs l'un de l'autre.
 'd' peut accompagner n'importe quel message sauf 'c' :
- - 'c' Create => trace son passage - aller - (sauf délégations), pour les Queries
- - 'f' First Use => pour le premier Reply => Crée un channel (retour)
- - ##USELESS 'u' Use => Utilise les traces du channel => utilise un channel
- - 'd' Delete => Supprime les traces après son passage (Query immediate, reply immediate, 'close'...) => Supprime un channel
+* 'c' Create => trace son passage - aller - (sauf délégations), pour les Queries
+* 'f' First Use => pour le premier Reply => Crée un channel (retour)
+* ##USELESS 'u' Use => Utilise les traces du channel => utilise un channel
+* 'd' Delete => Supprime les traces après son passage (Query immediate, reply immediate, 'close'...) => Supprime un channel
 
-msg_xxx_deleguate(dest, msg) => envoie un message vers un destinataire (en le forçant) sans laisser de trace (uniquement mode 'c')
-msg_xxx_reroute(dest, msg) => envoie un message vers un destinataire sans laisser de trace (uniquement mode 'c')
-msg_xxx_transmit(dest, msg) => envoie un message vers un destinataire en gérant la trace (selon les drapeaux du message)
-msg_xxx_receive(msg) =>
+:msg_xxx_deleguate(dest, msg): => envoie un message vers un destinataire (en le forçant) sans laisser de trace (uniquement mode 'c')
+
+:msg_xxx_reroute(dest, msg): => envoie un message vers un destinataire sans laisser de trace (uniquement mode 'c')
+
+:msg_xxx_transmit(dest, msg): => envoie un message vers un destinataire en gérant la trace (selon les drapeaux du message)
+
+:msg_xxx_receive(msg): =>
 
 +---------+-----------+
 | Tableau |data       |
