@@ -153,14 +153,14 @@ function removeData(chart) {
     lcid = env.query('/heavyproc/siggen_ext#output', 'updates',
       function(msg, client)
        {
-        $('#result2').text(client + ' ' + msg.reply);
+        $('#result2').text(client + msg.reply[1]);
         if (myChart2.data.labels.length > 50)
          {
           removeData(myChart2);
          }
         addData(myChart2, msg.reply[0] * 1000, msg.reply[1]);
        },
-      'popo');
+      'value: ');
     $("#stop2").attr('lcid',lcid);
    });
 

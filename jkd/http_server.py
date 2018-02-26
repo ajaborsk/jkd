@@ -149,5 +149,10 @@ class HttpServer(Container):
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
     def run(self, host='0.0.0.0', port=8080):
-        web.run_app(self.web_app, host = host, port = port)
+        while True:
+            # Run web server, relaunching on OSError (broken socket for WS : aiohttp bug ??)
+            try:
+                web.run_app(self.web_app, host = host, port = port)
+            except OSError:
+                pass
 

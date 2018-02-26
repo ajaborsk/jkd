@@ -35,6 +35,7 @@ import xml.etree.ElementTree as ET
 
 
 class Node:
+    tagname = "node"
     def __init__(self, env = None, parent = None, name = ''):
         #print("setting env to", env)
         self.env = env
@@ -293,7 +294,11 @@ class Node:
         pass
 
     async def introspect(self):
-        return {}
+        if self.parent is not None:
+            parent_name = self.parent.fqn()
+        else:
+            parent_name = None
+        return {'class':self.tagname, 'env':self.env.fqn(), 'parent':parent_name, 'nodes':[]}
 
     # def connect(self, dest, **kwargs):
         # #TODO: whole thing...
