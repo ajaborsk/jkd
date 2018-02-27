@@ -5,6 +5,7 @@ import jinja2
 from .node import *
 
 class HtmlPage(Node):
+    tagname = "html_page"
     def __init__(self, elt = None, parent = None, **kwargs):
         if 'appname' in kwargs:
             self.appname = kwargs['appname']
@@ -25,7 +26,6 @@ class HtmlPage(Node):
         for part in elt:
             self.debug("  Page part: {}".format(part.tag))
             #self.parts.append({'template':self.jinja_env.get_template(part.attrib['template'] + '.jinja2')})
-
 
     async def msg_query_handle(self, msg):
         self.debug(str(msg), 'msg')

@@ -4,6 +4,7 @@ from .node import *
 from .serialize import *
 
 class Subprocessus(Node):
+    tagname = "subprocessus"
     #TODO: Manage subprocessus death (and get error message and backtrace if possible)...
     def __init__(self, appname, content=None, elt = None, **kwargs):
         super().__init__(**kwargs)

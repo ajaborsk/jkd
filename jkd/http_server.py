@@ -13,7 +13,7 @@ from .demo_application import*
 
 
 class HttpServer(Container):
-
+    tagname = "http_server"
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.debug('httpserver input: '+str(self.input))
@@ -140,10 +140,13 @@ class HttpServer(Container):
 
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
+    @aiohttp_jinja2.template('edit.jinja2')
     async def http_view_handler(self, request):
         app_name = request.match_info.get('app', "")
         if app_name in self:
-            text = "Viewing application {} : (TODO)".format(app_name)
+            data = await self[app_name]._introspect()
+            return {'name':app_name, 'nodes':{app_name: data}}
+            text = "Viewing application {} : (TODO)<br/>{}".format(app_name, data)
         else:
             text = "Application {} Not found".format(app_name)
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))

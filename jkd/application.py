@@ -7,7 +7,7 @@ Created on Wed Jan 31 09:46:14 2018
 from .container import *
 
 class Application(Container):
-
+    tagname = "application"
     def __init__(self, appname = None, **kwargs):
         super().__init__(**kwargs)
         if appname is not None:

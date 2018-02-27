@@ -293,12 +293,21 @@ class Node:
         """
         pass
 
-    async def introspect(self):
+    async def _introspect(self):
         if self.parent is not None:
             parent_name = self.parent.fqn()
         else:
             parent_name = None
-        return {'class':self.tagname, 'env':self.env.fqn(), 'parent':parent_name, 'nodes':[]}
+        #TODO: links, ports, connections, channels...
+        return {'class':self.tagname,
+                'env':self.env.fqn(),
+                'parent':parent_name,
+                'name':self.name,
+                'ports':{},
+                'links':{},
+                'connections':{},
+                'channels':{},
+                'fqn':self.fqn()}
 
     # def connect(self, dest, **kwargs):
         # #TODO: whole thing...

@@ -6,6 +6,7 @@ import math
 from .node import Node
 
 class SignalGenerator(Node):
+    tagname = "signal_generator"
     def __init__(self, elt = None, **kwargs):
         super().__init__(**kwargs)
         self.ports['output'] = {'mode': 'output', 'value': 3.14, 'connections':[]}
