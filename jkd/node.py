@@ -49,6 +49,7 @@ class Node:
         self.input = asyncio.Queue()
         # I/O ports. each port has a entry in the dictionary : 'portname':{properties}
         self.ports = {'state':{}}
+        self.tasks = {}
 
         # Per-Query channels
         # channels segments which this node created
