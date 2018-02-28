@@ -122,17 +122,17 @@ class HttpServer(Container):
                 app = self[name]
 
             if app is not None:
-                lcid = await self.msg_query(app, {'query':'get', 'src':self.fqn(), 'url':name})
-                #self.debug("Query launched lcid=" + str(lcid))
-                text = "Timeout."
-                try:
-                    msg = await self.wait_for_reply(lcid, timeout = 5.)
-                    text = msg['reply']
-                except asyncio.TimeoutError:
-                    self.info("http request timeout")
-                #self.debug("Query first reply "+str(lcid))
-                if lcid in self.channels:
-                    del self.channels[lcid] # remove query input queue
+                text = await self.msg_query(app, {'query':'get', 'src':self.fqn(), 'url':name}, timeout = 5.)
+                # #self.debug("Query launched lcid=" + str(lcid))
+                # text =
+                # try:
+                    # msg = await self.wait_for_reply(lcid, timeout = 5.)
+                    # text = msg['reply']
+                # except asyncio.TimeoutError:
+                    # self.info("http request timeout")
+                # #self.debug("Query first reply "+str(lcid))
+                # if lcid in self.channels:
+                    # del self.channels[lcid] # remove query input queue
             else:
                 #TODO : True 404 Not Found page
                 text = 'Application Not found'

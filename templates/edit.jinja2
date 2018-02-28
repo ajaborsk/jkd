@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+<title>The view (edit) page : {{name}}</title>
+</head>
+<body>
+<h1>Application: {{name}}</h1>
+{% for name, node in nodes.items() recursive %}
+<table border="1">
+<tr><th>name</th><td>{{node.name}}</td>
+<tr><th>class</th><td>{{node.class}}</td>
+<tr><th>fqn</th><td>{{node.fqn}}</td>
+<tr><th>children</th><td>
+{% if node.nodes %}
+  {{ loop(node.nodes.items()) }}
+{% endif %}
+</td>
+</table>
+{% endfor %}
+</body>
+</html>

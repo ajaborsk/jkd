@@ -48,7 +48,7 @@ class Node:
         # Global input messages queue
         self.input = asyncio.Queue()
         # I/O ports. each port has a entry in the dictionary : 'portname':{properties}
-        self.ports = {}
+        self.ports = {'state':{}}
 
         # Per-Query channels
         # channels segments which this node created
@@ -220,7 +220,7 @@ class Node:
         return ET.Element()
 
     # Outgoing query
-    async def msg_query(self, destination, query, coro = None, client = None):
+    async def msg_query(self, destination, query, coro = None, client = None, timeout = 0):
         if 'url' in query:
             url = urlparse(query['url'])
             #self.debug(self.name+': '+"Url = " + str(url), 'msg')
@@ -232,6 +232,16 @@ class Node:
             # Add a internal dedicated queue for this channel id
             self.channels[lcid] = asyncio.Queue()
             self.debug('channels['+str(lcid)+'] = '+str(self.channels[lcid]), 'msg')
+            if timeout != 0:
+                response = None
+                try:
+                    msg = await self.wait_for_reply(lcid, timeout = 5.)
+                    response = msg['reply']
+                except asyncio.TimeoutError:
+                    self.info("msg query timeout")
+                if lcid in self.channels:
+                    del self.channels[lcid] # remove query input queue
+                return response
         else:
             # Add a callback and its client data for this channel id
             self.channels[lcid] = (coro, client)

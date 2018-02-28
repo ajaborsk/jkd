@@ -119,7 +119,7 @@ Les connections / canaux sont créés si nécessaire en utilisant les liens et u
 
 Exemples de politiques :
 
-* A la demande (query/response)
+* A la demande (query/response) : immédiate ou dès que possible
 * Continu dès mise à jour (Subscription)
 * Périodique (autre forme de subscription)
 
@@ -129,6 +129,19 @@ Les politiques peuvent avoir des propriétés :
   (essai de reconnexion ? pendant combien de temps ? etc.)
 * délais/période de mise à jour (indicatif, pour configurer les canaux)
 * nécessité de surveillance (ping/pong sur les canaux)
+
+Politiques :
+++++++++++++
+
+:immediate: Très rapidement (typiquement, l'utilisateur a appuyé sur un bouton et attend le résultat).
+Paramètre : timeout attendu (approximatif)
+
+:asap: Dès que possible (l'utilisateur a lancé l'opération). Des messages de suivi sont souhaités
+toutes les quelques secondes. paramètre : période des messages de suivi (approximatif)
+
+:every: Périodiques. Paramètre : période.
+
+:on_update: A chaque mise à jour (permanent).
 
 
 Messages :
