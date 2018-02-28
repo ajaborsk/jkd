@@ -52,23 +52,22 @@ Prévoir aussi un debugger de flux (du même genre) sur un lien/channel
 tâches :
 ++++++++
 
-  :**tasks**: nom de la tâche
-              :**task**: tâche (objet python, descendant de Future)
-              :**inputs**: Liste des entrées (noms des ports)
-              :**outputs**: Liste des sorties (noms des ports)
-              :**flags**: drapeaux sur la tâches (dict) :
-                          :**reentrant**: La tâche peut avoir plusieurs instances (voir comment...)
+Structure du dict **tasks** de chaque noeud (node) :
 
-+-----------------+----------+----------------------------+
-| nom de la tâche | task     | Objet python               |
-|                 +----------+----------------------------+
-|                 | inputs   | Liste des ports d'entrée   |
-|                 +----------+----------------------------+
-|                 | outputs  | Liste des ports de sortie  |
-|                 +----------+----------------------------+
-|                 | flags    |                            |
-|                 |          |                            |
-+-----------------+----------+----------------------------+
++-----------------+--------------+-----------------------------------------+
+| nom de la tâche | **task**     | Objet python                            |
+|                 +--------------+-----------------------------------------+
+|                 | **inputs**   | Liste des ports d'entrée                |
+|                 +--------------+-----------------------------------------+
+|                 | **outputs**  | Liste des ports de sortie               |
+|                 +--------------+---------------+-------------------------+
+|                 | **flags**    | **reentrant** | plusieurs instances     |
+|                 |              +-----------------------------------------+
+|                 |              | autre...                                |
+|                 |              |                                         |
+|                 |              |                                         |
+|                 |              |                                         |
++-----------------+--------------+-----------------------------------------+
 
 Tests à prévoir :
 * Tous les Nodes doivent être sérialisables
