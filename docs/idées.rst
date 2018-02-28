@@ -52,12 +52,12 @@ Prévoir aussi un debugger de flux (du même genre) sur un lien/channel
 tâches :
 ++++++++
 
-  **tasks** : nom de la tâche
-    **task** : tâche (objet python, descendant de Future)
-    **inputs** : Liste des entrées (noms des ports)
-    **outputs** : Liste des sorties (noms des ports)
-    **flags** : drapeaux sur la tâches :
-      **reentrant** : La tâche peut avoir plusieurs instances (voir comment...)
+  :**tasks**: nom de la tâche
+    :**task**: tâche (objet python, descendant de Future)
+    :**inputs**: Liste des entrées (noms des ports)
+    :**outputs**: Liste des sorties (noms des ports)
+    :**flags**: drapeaux sur la tâches :
+      :**reentrant**: La tâche peut avoir plusieurs instances (voir comment...)
 
 Tests à prévoir :
 * Tous les Nodes doivent être sérialisables
