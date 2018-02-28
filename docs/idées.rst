@@ -134,10 +134,10 @@ Politiques :
 ++++++++++++
 
 :immediate: Très rapidement (typiquement, l'utilisateur a appuyé sur un bouton et attend le résultat).
-Paramètre : timeout attendu (approximatif)
+            Paramètre : timeout attendu (approximatif)
 
 :asap: Dès que possible (l'utilisateur a lancé l'opération). Des messages de suivi sont souhaités
-toutes les quelques secondes. paramètre : période des messages de suivi (approximatif)
+       toutes les quelques secondes. paramètre : période des messages de suivi (approximatif)
 
 :every: Périodiques. Paramètre : période.
 
