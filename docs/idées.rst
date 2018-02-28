@@ -62,7 +62,7 @@ Structure du dict **tasks** de chaque noeud (node) :
 |                 | **outputs**  | Liste des ports de sortie               |
 |                 +--------------+---------------+-------------------------+
 |                 | **flags**    | **reentrant** | plusieurs instances     |
-|                 |              +-----------------------------------------+
+|                 |              +---------------+-------------------------+
 |                 |              | autre...                                |
 |                 |              |                                         |
 |                 |              |                                         |
