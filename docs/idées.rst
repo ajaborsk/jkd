@@ -59,6 +59,17 @@ tâches :
               :**flags**: drapeaux sur la tâches (dict) :
                           :**reentrant**: La tâche peut avoir plusieurs instances (voir comment...)
 
++-----------------+----------+----------------------------+
+| nom de la tâche | task     | Objet python               |
+|                 +----------+----------------------------+
+|                 | inputs   | Liste des ports d'entrée   |
+|                 +----------+----------------------------+
+|                 | outputs  | Liste des ports de sortie  |
+|                 +----------+----------------------------+
+|                 | flags    |                            |
+|                 |          |                            |
++-----------------+----------+----------------------------+
+
 Tests à prévoir :
 * Tous les Nodes doivent être sérialisables
 
