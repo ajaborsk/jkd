@@ -49,7 +49,8 @@ class Node:
         self.input = asyncio.Queue()
         # I/O ports. each port has a entry in the dictionary : 'portname':{properties}
         self.ports = {'state':{}}
-        self.tasks = {}
+        self.tasks = {'msg_queue_loop':{'coro':self.msg_queue_loop, 'autolaunch':True, 'task':None}}
+        self.methods = {'get':self.method_get}
 
         # Per-Query channels
         # channels segments which this node created
@@ -65,9 +66,16 @@ class Node:
         self.back_channels = {}
 
         self.done = False
+#        if self.env is not None and hasattr(self.env, 'loop'):
+#            #self.debug("launching msg_queue_loop()...")
+#            self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
+
+    def run(self):
         if self.env is not None and hasattr(self.env, 'loop'):
-            #self.debug("launching msg_queue_loop()...")
-            self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
+            for taskname in self.tasks:
+                if self.tasks[taskname].get('autolaunch'):
+                    self.debug("(auto)launching task: " + taskname)
+                    self.tasks[taskname]['task'] =self.env.loop.create_task(self.tasks[taskname]['coro']())
 
     #TODO:  An API to add/remove/configure ports
 
@@ -77,6 +85,9 @@ class Node:
             return(self.name)
         else:
             return self.parent.fqn() + '/' + self.name
+
+    async def method_get(self, msg):
+        pass
 
     async def msg_queue_transmit(self, destination, msg, delegate = False):
         "Low level queue message API"

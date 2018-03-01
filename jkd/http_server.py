@@ -120,6 +120,7 @@ class HttpServer(Container):
             elif os.path.isdir(name) and os.path.isfile(name + '/' + name + '.xml'):
                 self[name] = Application(env = self.env, parent = self.env, name = name)
                 app = self[name]
+                app.run()
 
             if app is not None:
                 text = await self.msg_query(app, {'query':'get', 'src':self.fqn(), 'url':name}, timeout = 5.)
@@ -152,6 +153,10 @@ class HttpServer(Container):
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
     def run(self, host='0.0.0.0', port=8080):
+        # Launch children
+        # for childname in self.contents:
+            # self.contents[childname].run()
+        super().run()
         while True:
             # Run web server, relaunching on OSError (broken socket for WS : aiohttp bug ??)
             try:

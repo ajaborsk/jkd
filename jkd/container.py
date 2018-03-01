@@ -73,3 +73,7 @@ class Container(Node):
         ret['nodes'] = nodes
         return ret
 
+    def run(self):
+        super().run()
+        for childname in self.contents:
+            self.contents[childname].run()

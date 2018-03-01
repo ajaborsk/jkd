@@ -35,10 +35,10 @@ class HtmlPage(Node):
             #self.debug("handling"+str(msg), 'msg')
             #self.debug("Reply to " + str(msg['src']) + " / lcid=" + str(msg['lcid']), 'msg')
             rep = {'flags':'', 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':html_page}
-            #self.debug("Reply = " + str(rep), 'msg')
+            self.debug("Reply = " + str(rep), 'msg')
             #self.debug("Queue = " + str(msg['src'].input))
             await self.msg_send(msg['prx_src'], rep)
-            #self.debug("Replied")
+            self.debug("Replied")
         else:
             await super().query_handle(msg)
 

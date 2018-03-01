@@ -163,6 +163,7 @@ class EnvSubApplication(Environment):
         self.pipe_channels = {}
 
         self.root = Container(env = self, parent = self, name = root_name.split('/')[-1], elt = tree, **kwargs)
+        self.root.run()
         if tree is not None:
             # Construct the sub-application tree
             self.debug("tree appname = " + str(tree.attrib['appname']))
