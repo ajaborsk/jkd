@@ -123,7 +123,7 @@ class HttpServer(Container):
                 app.run()
 
             if app is not None:
-                text = await self.msg_query(app, {'query':'get', 'src':self.fqn(), 'url':name}, timeout = 5.)
+                text = await self.msg_query(app, {'query':'get', 'src':self.fqn(), 'url':name, 'port':'html'}, timeout = 5.)
                 # #self.debug("Query launched lcid=" + str(lcid))
                 # text =
                 # try:

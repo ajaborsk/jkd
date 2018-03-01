@@ -236,7 +236,11 @@ class Node:
         if 'url' in query:
             url = urlparse(query['url'])
             #self.debug(self.name+': '+"Url = " + str(url), 'msg')
-            query.update({'path':url.path, 'port':url.fragment, 'flags':'c'})
+            if 'port' in query:
+                # do not update 'port' if preexistent
+                query.update({'path':url.path, 'flags':'c'})
+            else:
+                query.update({'path':url.path, 'port':url.fragment, 'flags':'c'})
         else:
             self.warning('No url for query' + str(query), 'msg')
         lcid = await self.msg_send(destination, query)
