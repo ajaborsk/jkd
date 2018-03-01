@@ -283,6 +283,12 @@ class Node:
         #TODO : port management ??
         #TODO : channel management ??
         #self.debug("generic msg query handle" + str(query), 'msg')
+        if 'method' in query and 'policy' in query and 'port' in query:
+            # New 0.2 message format
+            if query['method'] in self.methods:
+                return await self.methods[query['method']](query)
+            else:
+                self.warning("Method {} not found to handle query {}".format(query['method'], str(query)))
         if 'port' in query and query['port'] in self.ports:
             port = query['port']
             #self.debug(self.name + ": port = " + str(query), 'msg')
