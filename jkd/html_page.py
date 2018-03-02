@@ -21,11 +21,17 @@ class HtmlPage(Node):
                 autoescape=jinja2.select_autoescape(['html', 'xml']))
 
         self.ports['html'] = {'mode':'output'}
+        self.task_add('generate', coro = self.generate, returns = ['html'])
 
         self.parts = []
         for part in elt:
             self.debug("  Page part: {}".format(part.tag))
             #self.parts.append({'template':self.jinja_env.get_template(part.attrib['template'] + '.jinja2')})
+
+    async def generate(self):
+        template = self.jinja_env.get_template(self.name + '.jinja2')
+        html_page = template.render({'pagetitle':self.pagetitle, 'name':'Joris'})
+        return html_page
 
     async def msg_query_handle(self, msg):
         self.debug(str(msg), 'msg')

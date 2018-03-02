@@ -49,7 +49,7 @@ class Node:
         self.input = asyncio.Queue()
         # I/O ports. each port has a entry in the dictionary : 'portname':{properties}
         self.ports = {'state':{}}
-        self.tasks = {'msg_queue_loop':{'coro':self.msg_queue_loop, 'autolaunch':True, 'task':None}}
+        self.tasks = {}
         self.methods = {'get':self.method_get}
 
         # Per-Query channels
@@ -69,8 +69,44 @@ class Node:
 #        if self.env is not None and hasattr(self.env, 'loop'):
 #            #self.debug("launching msg_queue_loop()...")
 #            self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
+        self.task_add('', coro = self.msg_queue_loop, autolaunch = True)
+
+
+    def task_add(self, taskname, coro = None, gets = [], returns = [], provides = [], autolaunch = False):
+        """Add a task to node tasks list
+        """
+        self.tasks[taskname] = {'coro':coro,
+                                'gets':gets,
+                                'returns':returns,
+                                'provides':provides,
+                                'autolaunch':autolaunch,
+                                'task':None }
 
     def run(self):
+        # Prepare
+        for taskname in self.tasks:
+            for portname in self.tasks[taskname]['returns']:
+                if portname in self.ports:
+                    if 'returned_by' in self.ports[portname]:
+                        self.warning('port "{}" value returned by "{}" is already returned by task "{}"'.format(portname, taskname, self.ports[portname]['returned_by']))
+                    elif 'provided_by' in self.ports[portname]:
+                        self.warning('port "{}" value returned by "{}" is already provided by task "{}"'.format(portname, taskname, self.ports[portname]['provided_by']))
+                    else:
+                        self.ports[portname]['returned_by'] = taskname
+                else:
+                    self.warning('task "{}" returns unkown port "{}"'.format(taskname, portname))
+            for portname in self.tasks[taskname]['provides']:
+                if portname in self.ports:
+                    if 'returned_by' in self.ports[portname]:
+                        self.warning('port "{}" value provided by "{}" is already returned by task "{}"'.format(portname, taskname, self.ports[portname]['returned_by']))
+                    elif 'provided_by' in self.ports[portname]:
+                        self.warning('port "{}" value provided by "{}" is already provided by task "{}"'.format(portname, taskname, self.ports[portname]['provided_by']))
+                    else:
+                        self.ports[portname]['provided_by'] = taskname
+                else:
+                    self.warning('task "{}" provides unkown port "{}"'.format(taskname, portname))
+
+        # Launch autolaunch tasks
         if self.env is not None and hasattr(self.env, 'loop'):
             for taskname in self.tasks:
                 if self.tasks[taskname].get('autolaunch'):
@@ -87,6 +123,9 @@ class Node:
             return self.parent.fqn() + '/' + self.name
 
     async def method_get(self, msg):
+        self.debug("msg: "+str(msg))
+        if msg['policy'] == 'immediate':
+            pass
         pass
 
     async def msg_queue_transmit(self, destination, msg, delegate = False):
