@@ -25,8 +25,8 @@ class SerialCapture(Node):
         super().__init__(env, parent, name)
 
         self.ports['output'] = {'mode': 'output', 'value': "", 'connections':[]}
-        self.serial_port = "/dev/ACM0"
-        coro = serial.aio.create_serial_connection(self.env.loop, Output, self.serial_port, baudrate=115200)
+        self.serial_port = "/dev/USB0"
+        coro = serial.aio.create_serial_connection(self.env.loop, Output, self.serial_port, baudrate=57600)
         #self.task_add('reader', coro = coro, autolaunch = True, provides = ['output'])
 
         #self.output_task_id = self.env.loop.create_task(self.output_task())
