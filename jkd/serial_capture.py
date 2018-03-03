@@ -134,8 +134,8 @@ class SerialCapture(Node):
         block = self.serial.read(1024)
         self.debug('read:'+str(block))
         for byte in block:
-            self.current_buffer += byte
-            if byte == b'\n':
+            self.current_buffer += bytes([byte])
+            if byte == ord(b'\n'):
                 self.env.loop.create_task(self.serial_message_handle(self.current_buffer))
                 self.current_buffer = b''
 
