@@ -90,9 +90,10 @@ class HttpServer(Container):
                         reply = await self.ext_app2.aget(msg['lcid'])
                     else:
                     # test echo reply
-                        reply = await self.ext_app.aget("other")
+                        self.warning("Unknown lcid for message: "+str(msg), "msg")
+                        #reply = await self.ext_app.aget("other")
 #                    await self.msg_ws_send({"reply": message['data'] + '/answer'})
-                        await self.msg_ws_send(wsid, {"reply": reply})
+                        #await self.msg_ws_send(wsid, {"reply": reply})
             elif message.type == aiohttp.WSMsgType.ERROR:
                 self.warning('websocket connection {} closed with exception {}'.format(wsid, self.ws[wsid].exception()), 'msg')
             else:
@@ -145,13 +146,20 @@ class HttpServer(Container):
     @aiohttp_jinja2.template('edit.jinja2')
     async def http_view_handler(self, request):
         app_name = request.match_info.get('app', "")
+        app = None
         if app_name in self:
-            data = await self[app_name]._introspect()
-            return {'name':app_name, 'nodes':{app_name: data}}
-            text = "Viewing application {} : (TODO)<br/>{}".format(app_name, data)
+            app = self[app_name]
+        elif os.path.isdir(app_name) and os.path.isfile(app_name + '/' + app_name + '.xml'):
+            self[app_name] = Application(env = self.env, parent = self.env, name = app_name)
+            app = self[app_name]
+            app.run()
         else:
-            text = "Application {} Not found".format(app_name)
-        return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
+            text = 'Application Not found'
+            return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
+        data = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':app_name, 'port':'state'}, timeout = 5.)
+#            data = await self[app_name]._introspect()
+        return {'name':app_name, 'nodes':{app_name: data}}
+        text = "Viewing application {} : (TODO)<br/>{}".format(app_name, data)
 
     def run(self, host='0.0.0.0', port=8080):
         # Launch children

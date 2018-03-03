@@ -70,6 +70,7 @@ class Node:
 #            #self.debug("launching msg_queue_loop()...")
 #            self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
         self.task_add('', coro = self.msg_queue_loop, autolaunch = True)
+        self.task_add('state', coro = self._introspect, returns = ['state'])
 
 
     def task_add(self, taskname, coro = None, gets = [], returns = [], needs = [], provides = [], autolaunch = False):
@@ -162,9 +163,10 @@ class Node:
                     result = await task['coro'](*args)
                     self.debug("result: "+str(result), 'msg')
                     # Send reply
-                    response = {'flags':'', 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
+                    response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'reply':result}
+                    #response = {'flags':'d', 'prx_src':self, 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
                     await self.msg_send(msg['prx_src'], response)
-                    self.debug("Replied", 'msg')
+                    self.debug("Replied with:"+str(response), 'msg')
                 else:
                     # task returns more than this port value
                     #TODO
@@ -199,7 +201,7 @@ class Node:
 
     async def msg_queue_transmit(self, destination, msg, delegate = False):
         "Low level queue message API"
-        #self.debug("transmit to " + str(destination) + ': ' + str(msg), 'msg')
+        self.debug("transmit to " + str(destination) + ': ' + str(msg), 'msg')
         if 'c' in msg['flags']:
             # Create a new outgoing channel
             msg['lcid'] = self.next_lcid
@@ -212,8 +214,9 @@ class Node:
         # Always set the proxy source (which is this node)
         msg['prx_src'] = self
         await destination.input.put(msg)
-        if 'd' in msg['flags']:
-            # remove channel
+        self.debug("Transmitted.", 'msg')
+        if 'cmd' in msg and 'd' in msg['flags']:
+            # remove channel, only in "command" mode
             lcid = msg['lcid'] # only for debug purpose
             del self.channels[msg['lcid']]
             self.debug("removed channel lcid: "+str(lcid), 'msg')
@@ -224,8 +227,9 @@ class Node:
     async def msg_queue_loop(self):
         #self.debug("Entering msg_queue_loop...")
         while not self.done:
+            self.debug('Waiting for message...', 'msg')
             msg = await self.input.get()
-            #self.debug("Received msg: " + str(msg))
+            self.debug("Received msg: " + str(msg), 'msg')
             if 'c' in msg['flags']:
                 # Simple route
                 #TODO
@@ -244,7 +248,8 @@ class Node:
                     #self.debug("Updating back_channels " + str(key) + ' : ' +  str((lcid, msg['prx_src'])), 'msg')
                     self.back_channels[key] = {'lcid':lcid, 'prx_dst':msg['prx_src']}
                     self.debug("Updated back_channels " + str(key) + ' : ' +  str(self.back_channels[key]), 'msg')
-            await self.msg_queue_handle(msg)
+#            await self.msg_queue_handle(msg)
+            self.env.loop.create_task(self.msg_queue_handle(msg))
 
     async def msg_send(self, destination, message, delegate = False):
         "Low level message API"
@@ -255,7 +260,7 @@ class Node:
 
     async def msg_queue_handle(self, msg):
         # General message (from input queue) handling (including routing)
-        #self.debug('(generic) queue msg handle: ' + str(msg))
+        self.debug('(generic) queue msg handle: ' + str(msg))
         if 'method' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:
@@ -277,11 +282,11 @@ class Node:
                     self.warning('No route for '+str(msg), 'msg')
         elif 'reply' in msg:
             # This is a reply
-            #self.debug(self.name + ' reply catched : ' + str(msg), 'msg')
+            self.debug(self.name + ' reply catched : ' + str(msg), 'msg')
             lcid = msg['lcid']
             if lcid in self.channels:
                 if isinstance(self.channels[lcid], asyncio.Queue):
-                    #self.debug(self.name + ' reply queue mode : ' + str(msg), 'msg')
+                    self.debug(self.name + ' reply queue mode : ' + str(msg), 'msg')
                     # The node is the final destination (queue mode)
                     await self.channels[lcid].put(msg)
                 elif isinstance(self.channels[lcid], tuple):
@@ -360,10 +365,12 @@ class Node:
             if timeout != 0:
                 response = None
                 try:
-                    msg = await self.wait_for_reply(lcid, timeout = 5.)
+                    self.debug("Waiting for reply...", 'msg')
+                    msg = await self.wait_for_reply(lcid, timeout = timeout)
+                    self.debug("Reply received: "+str(msg['reply']), 'msg')
                     response = msg['reply']
                 except asyncio.TimeoutError:
-                    self.info("msg query timeout")
+                    self.info("msg query timeout", 'msg')
                 if lcid in self.channels:
                     del self.channels[lcid] # remove query input queue
                 return response
@@ -385,6 +392,7 @@ class Node:
         await destination.input.put(query)
 
     async def wait_for_reply(self, lcid, timeout = 10.):
+        self.debug("Waiting for reply on channel "+str(lcid)+" queue: "+str(self.channels[lcid]), 'msg')
         return await asyncio.wait_for(self.channels[lcid].get(), timeout, loop = self.env.loop)
 
     async def msg_query_handle(self, query):
@@ -399,7 +407,7 @@ class Node:
                 return await self.methods[query['method']](query)
             else:
                 self.warning("Method {} not found to handle query {}".format(query['method'], str(query)))
-        if 'port' in query and query['port'] in self.ports:
+        elif 'port' in query and query['port'] in self.ports:
             port = query['port']
             #self.debug(self.name + ": port = " + str(query), 'msg')
             if query['query'] == 'immediate':

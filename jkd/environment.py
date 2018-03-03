@@ -135,7 +135,7 @@ registry = {
 
 
 class Environment(Container):
-
+    tagname = "environment"
     def __init__(self):
         self.loggers = {'main':logger_main, "msg":logger_msg}
         super().__init__(env=self, name='/env')
@@ -155,6 +155,7 @@ import time
 from .serialize import *
 
 class EnvSubApplication(Environment):
+    tagname = "env_sub_application"
     def __init__(self, root_name, tree = None, **kwargs):
         self.root_name = '/'.join(root_name.split('/')[:-1])
         super().__init__(**kwargs)

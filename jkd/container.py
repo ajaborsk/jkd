@@ -89,7 +89,8 @@ class Container(Node):
         ret = await super()._introspect()
         nodes = {}
         for key, value in self.contents.items():
-            nodes[key] = await value._introspect()
+            nodes[key] = await self.msg_query(value, {'url':key, 'policy':'immediate', 'method':'get', 'port':'state'}, timeout = 2.)
+            #nodes[key] = await value._introspect()
         ret['nodes'] = nodes
         return ret
 
