@@ -449,14 +449,38 @@ class Node:
         else:
             parent_name = None
         #TODO: links, ports, connections, channels...
+        ports = {}
+        for portname in self.ports:
+            ports[portname] = str(self.ports[portname])
+        tasks = {}
+        for taskname in self.tasks:
+            tasks[taskname] = str(self.tasks[taskname])
+        channels = {'popo':'poku'}
+        for channel in self.channels:
+            self.debug("channel: "+str(channel))
+            if isinstance(self.channels[channel], int):
+                channels[channel] = "pipe_"+str(self.channels[channel])
+            elif isinstance(self.channels[channel], asyncio.Queue):
+                channels[channel] = "intern_queue"
+            elif isinstance(self.channels[channel], tuple):
+                if isinstance(self.channels[channel][0], int):
+                    channels[channel] = "wsis: "+str(self.channels[channel][0])+" lcid:"+str(self.channels[channel][1])
+                elif isinstance(self.channels[channel][0], Node):
+                    channels[channel] = "node: "+str(self.channels[channel][0].fqn())+" lcid:"+str(self.channels[channel][1])
+                else:
+                    channels[channel] = "coroutine_client"
+            else:
+                channels[channel] = "unknown"
+
         return {'class':self.tagname,
                 'env':self.env.fqn(),
                 'parent':parent_name,
                 'name':self.name,
-                'ports':{},
+                'ports':ports,
+                'tasks':tasks,
                 'links':{},
                 'connections':{},
-                'channels':{},
+                'channels':channels,
                 'fqn':self.fqn()}
 
     # def connect(self, dest, **kwargs):

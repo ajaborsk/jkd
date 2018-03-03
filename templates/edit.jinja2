@@ -7,14 +7,37 @@
 <h1>Application: {{name}}</h1>
 {% for name, node in nodes.items() recursive %}
 <table border="1">
-<tr><th>name</th><td>{{node.name}}</td>
-<tr><th>class</th><td>{{node.class}}</td>
-<tr><th>fqn</th><td>{{node.fqn}}</td>
+<tr><th>name</th><td>{{node.name}}</td></tr>
+<tr><th>class</th><td>{{node.class}}</td></tr>
+<tr><th>fqn</th><td>{{node.fqn}}</td></tr>
+<tr><th>ports</th><td>
+<ul>
+{% for name, data in node.ports.items() %}
+<li><b>{{name}}: </b>{{data}}</li>
+{% endfor %}
+</ul>
+</td>
+</tr>
+<tr><th>tasks</th><td>
+<ul>
+{% for name, data in node.tasks.items() %}
+<li><b>{{name}}: </b>{{data}}</li>
+{% endfor %}
+</ul>
+</td>
+</tr><tr><th>channels</th><td>
+<ul>
+{% for name, data in node.channels.items() %}
+<li><b>{{name}}: </b>{{data}}</li>
+{% endfor %}
+</ul>
+</td>
+</tr>
 <tr><th>children</th><td>
 {% if node.nodes %}
   {{ loop(node.nodes.items()) }}
 {% endif %}
-</td>
+</td></tr>
 </table>
 {% endfor %}
 </body>

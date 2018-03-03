@@ -157,7 +157,7 @@ class HttpServer(Container):
             text = 'Application Not found'
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
         data = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':app_name, 'port':'state'}, timeout = 5.)
-#            data = await self[app_name]._introspect()
+        self.debug("data"+str(data))
         return {'name':app_name, 'nodes':{app_name: data}}
         text = "Viewing application {} : (TODO)<br/>{}".format(app_name, data)
 
