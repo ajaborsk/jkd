@@ -28,19 +28,19 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=3
+current_page=4
 FILE_NAME_0=60;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2F__init__.py;0;4
-FILE_NAME_1=468;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2F__main__.py;0;4
+FILE_NAME_1=286;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2F__main__.py;0;4
 FILE_NAME_2=2441;reStructuredText;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fdocs%2Fidées.rst;0;4
-FILE_NAME_3=1412;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fnode.py;0;4
-FILE_NAME_4=140;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fcontainer.py;0;4
-FILE_NAME_5=1033;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fapplication.py;0;4
+FILE_NAME_3=2810;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fnode.py;0;4
+FILE_NAME_4=239;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fcontainer.py;0;4
+FILE_NAME_5=2010;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fapplication.py;0;4
 FILE_NAME_6=208;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fresult.py;0;4
-FILE_NAME_7=5980;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fhttp_server.py;0;4
+FILE_NAME_7=6029;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fhttp_server.py;0;4
 FILE_NAME_8=113;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fsubprocessus.py;0;4
 FILE_NAME_9=119;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fserialize.py;0;4
-FILE_NAME_10=149;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fhtml_page.py;0;4
-FILE_NAME_11=8532;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fenvironment.py;0;4
+FILE_NAME_10=1110;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fhtml_page.py;0;4
+FILE_NAME_11=4736;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fenvironment.py;0;4
 FILE_NAME_12=515;XML;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fdemo%2Fdemo.xml;0;4
 FILE_NAME_13=140;Python;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Fjkd%2Fsignal_generator.py;0;4
 FILE_NAME_14=384;None;0;EUTF-8;0;1;0;%2Fhome%2Falexandre%2FDropbox%2FProjets%2Fjkd%2Ftemplates%2Fedit.jinja2;0;4

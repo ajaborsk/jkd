@@ -36,14 +36,14 @@ class Application(Container):
     def fqn(self):
         return '/' + self.name
 
-    async def msg_query_handle(self, query):
-        #self.debug('Application: handling query: '+str(query), 'msg')
-        if 'homepage' in self:
-            # Delegate "get" query (= http) to homepage, if it exists
-            await self.msg_queue_delegate(self['homepage'], query)
-        else:
-            # Default (very) basic reply
-            await self.msg_send(msg['src'], {"dst":query['src'], 'lcid':query['lcid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
+    # async def msg_query_handle(self, query):
+        # #self.debug('Application: handling query: '+str(query), 'msg')
+        # if 'homepage' in self:
+            # # Delegate "get" query (= http) to homepage, if it exists
+            # await self.msg_queue_delegate(self['homepage'], query)
+        # else:
+            # # Default (very) basic reply
+            # await self.msg_send(msg['src'], {"dst":query['src'], 'lcid':query['lcid'], 'eoq':True, "reply":'Default Application "{}" Reply'.format(self.name)})
 
     # async def msg_handle(self, msg):
         # self.debug('Application: handling msg: '+str(msg))

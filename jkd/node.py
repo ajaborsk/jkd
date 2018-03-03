@@ -72,18 +72,19 @@ class Node:
         self.task_add('', coro = self.msg_queue_loop, autolaunch = True)
 
 
-    def task_add(self, taskname, coro = None, gets = [], returns = [], provides = [], autolaunch = False):
+    def task_add(self, taskname, coro = None, gets = [], returns = [], needs = [], provides = [], autolaunch = False):
         """Add a task to node tasks list
         """
         self.tasks[taskname] = {'coro':coro,
                                 'gets':gets,
                                 'returns':returns,
+                                'needs':needs,
                                 'provides':provides,
                                 'autolaunch':autolaunch,
                                 'task':None }
 
     def run(self):
-        # Prepare
+        # Prepare : make link between ports and tasks
         for taskname in self.tasks:
             for portname in self.tasks[taskname]['returns']:
                 if portname in self.ports:
@@ -105,13 +106,23 @@ class Node:
                         self.ports[portname]['provided_by'] = taskname
                 else:
                     self.warning('task "{}" provides unkown port "{}"'.format(taskname, portname))
+            for portname in self.tasks[taskname]['gets']:
+                if portname in self.ports:
+                    self.ports[portname]['got_by'] = taskname
+                else:
+                    self.warning('task "{}" gets unkown port "{}"'.format(taskname, portname))
+            for portname in self.tasks[taskname]['needs']:
+                if portname in self.ports:
+                    self.ports[portname]['needed_by'] = taskname
+                else:
+                    self.warning('task "{}" needs unkown port "{}"'.format(taskname, portname))
 
         # Launch autolaunch tasks
         if self.env is not None and hasattr(self.env, 'loop'):
             for taskname in self.tasks:
                 if self.tasks[taskname].get('autolaunch'):
                     self.debug("(auto)launching task: " + taskname)
-                    self.tasks[taskname]['task'] =self.env.loop.create_task(self.tasks[taskname]['coro']())
+                    self.tasks[taskname]['task'] = self.env.loop.create_task(self.tasks[taskname]['coro']())
 
     #TODO:  An API to add/remove/configure ports
 
@@ -123,10 +134,68 @@ class Node:
             return self.parent.fqn() + '/' + self.name
 
     async def method_get(self, msg):
-        self.debug("msg: "+str(msg))
+        self.debug("msg: "+str(msg), 'msg')
+        portname = msg['port']
+        if portname not in self.ports:
+            self.warning('Trying to get value of unknown port "{}"'.format(portname), 'msg')
+            return None
+        else:
+            port = self.ports[portname]
+        self.debug('policy ='+str(msg['policy'])+' port='+str(portname))
         if msg['policy'] == 'immediate':
-            pass
-        pass
+            # Check if a task provides the port value.
+            if 'provided_by' in port:
+                # Port is *provided* by a task
+                #TODO
+                self.warning("TODO")
+            elif 'returned_by' in port:
+                self.debug("returned_by mode: "+str(msg), 'msg')
+                # Port is *returned* by a task
+                if len(self.tasks[port['returned_by']]['returns']) == 1:
+                    task = self.tasks[port['returned_by']]
+                    # Get needed parameters for task
+                    args = []
+                    for gets in task['gets']:
+                        self.warning("TODO")
+                    # Launch task
+                    self.debug("launch task: "+str(task)+' '+str(args), 'msg')
+                    result = await task['coro'](*args)
+                    self.debug("result: "+str(result), 'msg')
+                    # Send reply
+                    response = {'flags':'', 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
+                    await self.msg_send(msg['prx_src'], response)
+                    self.debug("Replied", 'msg')
+                else:
+                    # task returns more than this port value
+                    #TODO
+                    self.warning("TODO")
+            else:
+                self.warning('port "{}" is not provided nor returned by any task.'.format(portname))
+                return None
+        elif msg['policy'] == 'on_update':
+            if 'provided_by' in port:
+                self.debug("provided_by mode: "+str(msg), 'msg')
+                if len(self.tasks[port['provided_by']]['provides']) == 1:
+                    task = self.tasks[port['provided_by']]
+                    if task['task'] is None:
+                        # The task isn't running => launch it
+                        self.debug('Launching task: '+str(port['provided_by'])+' '+str(task['coro']))
+                        task['task'] = self.env.loop.create_task(task['coro']())
+                        self.debug('Launched task: '+str(port['provided_by']))
+                # Add a subscription to the port
+                cnx = {'update':True, 'lcid':msg['lcid'], 'prx_dst':msg['prx_src']}
+
+                # Update back_channels
+                key = (id(msg['prx_src']), msg['lcid'])
+                self.debug("key= "+str(key), 'msg')
+                self.back_channels[key] = {'port':msg['port'], 'cnx_idx':len(port['connections'])}
+                self.debug("Updated back_channels " + str(key) + ' : ' +  str(self.back_channels[key]), 'msg')
+
+                # Add connection to the port
+                port['connections'].append(cnx)
+                self.debug(self.name + ": subscriptions = " + str(port['connections']), 'msg')
+        else:
+            self.warning("Unhandled policy: "+str(msg['policy']))
 
     async def msg_queue_transmit(self, destination, msg, delegate = False):
         "Low level queue message API"
@@ -187,9 +256,10 @@ class Node:
     async def msg_queue_handle(self, msg):
         # General message (from input queue) handling (including routing)
         #self.debug('(generic) queue msg handle: ' + str(msg))
-        if 'query' in msg:
+        if 'method' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:
+                self.debug('I am final dest for msg: ' + str(self.msg_query_handle))
                 # The node is the final destination
                 await self.msg_query_handle(msg)
             else:
@@ -321,9 +391,10 @@ class Node:
         # called when the node is the final destination of the query
         #TODO : port management ??
         #TODO : channel management ??
-        #self.debug("generic msg query handle" + str(query), 'msg')
+        self.debug("generic msg query handle" + str(query), 'msg')
         if 'method' in query and 'policy' in query and 'port' in query:
             # New 0.2 message format
+            self.debug("NEW 2.0 generic msg query handle" + str(query), 'msg')
             if query['method'] in self.methods:
                 return await self.methods[query['method']](query)
             else:
@@ -385,8 +456,8 @@ class Node:
         # pass
 
     def log(self, level, message, logger='main'):
-        if len(message) > 255:
-            message = message[:252] + '...'
+        if len(message) > 511:
+            message = message[:508] + '...'
         f = inspect.stack()
         self.env.loggers[logger].log(level, self.fqn() + '.' + f[2][3] + '(): ' + message)
 

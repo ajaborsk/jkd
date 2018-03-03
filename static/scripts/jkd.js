@@ -44,6 +44,8 @@ class JkdEnv
                 'from'  : this.from,
                 'lcid'  : lcid,
                 'flags' : 'c',
+                'method': 'get',
+                'policy': 'on_update',
                 'query' : query };
     this.websocket.send(JSON.stringify(msg));
     return lcid;
