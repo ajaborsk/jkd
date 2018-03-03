@@ -110,6 +110,7 @@ class SerialCapture(Node):
         # s.close()
         self.serial.timeout = 0
         self.serial.nonblocking()
+        self.current_buffer = b''
 
         self.env.loop.add_reader(self.serial.fd, self._read_ready)
 #        self.env.loop.call_soon(self.env.loop.add_reader, self.serial.fd, self._read_ready)
@@ -126,6 +127,15 @@ class SerialCapture(Node):
         # while True:
             # await asyncio.sleep(0.1)
 
+    async def serial_message_handle(self, serial_buffer):
+        self.debug("Serial message: "+str(serial_buffer))
+
     def _read_ready(self):
-        char = self.serial.read(1024)
-        self.debug('ready to read:'+str(char))
+        block = self.serial.read(1024)
+        self.debug('read:'+str(block))
+        for byte in block:
+            self.current_buffer += byte
+            if byte == b'\n':
+                self.env.loop.create_task(self.serial_message_handle(self.current_buffer))
+                self.current_buffer = b''
+
