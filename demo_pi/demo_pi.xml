@@ -1,0 +1,19 @@
+<?xml version = "1.0"  encoding="UTF-8" standalone="yes"?>
+<application name="demo">
+  <nodes>
+    <serial_capture name="serial1" />
+    <subprocessus name="heavyproc" appname="erer">
+      <nodes>
+        <signal_generator name="siggen_ext" />
+        <!-- This is a comment -->
+      </nodes>
+    </subprocessus>
+    <html_page appname="demo" name="homepage" template="homepage" title="A jkd Demo Application">
+      <table data="node:/heavyproc#output" template="table" />
+      <value data="node:/siggen#output" template="simple_value" />
+    </html_page>
+  </nodes>
+  <ports>
+    <port name="html" node="homepage" port="html" />
+  </ports>
+</application>

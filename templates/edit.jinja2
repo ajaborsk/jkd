@@ -10,6 +10,9 @@
 <tr><th>name</th><td>{{node.name}}</td></tr>
 <tr><th>class</th><td>{{node.class}}</td></tr>
 <tr><th>fqn</th><td>{{node.fqn}}</td></tr>
+{% if node.subprocess %}
+<tr><th>subprocess</th><td>{{node.subprocess}}</td></tr>
+{% endif %}
 <tr><th>ports</th><td>
 <ul>
 {% for name, data in node.ports.items() %}

@@ -22,7 +22,6 @@ import aiohttp_jinja2
 import jinja2
 import time
 
-
 from .html_page import HtmlPage
 from .subprocessus import Subprocessus
 from .signal_generator import SignalGenerator
@@ -31,7 +30,7 @@ registry = {
         "html_page":HtmlPage,
         "subprocessus":Subprocessus,
         "signal_generator":SignalGenerator,
-        "serial_cature":SerialCapture,
+        "serial_capture":SerialCapture,
          }
 
 
@@ -177,6 +176,11 @@ class EnvSubApplication(Environment):
 
     def fqn(self):
         return self.root_name
+
+    async def _introspect(self):
+        ret = await super()._introspect()
+        ret['subprocess'] = str(self.pipe_channels)
+        return ret
 
     def msg_pipe_send(self, msg):
         #self.debug("SubApplication {}: Sending message : {}".format(self.root_name, str(msg)), 'msg')

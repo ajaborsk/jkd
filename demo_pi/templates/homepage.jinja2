@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>{{pagetitle}}</title>
+  <link rel="stylesheet" href="/static/css/jkd.css">
+  <script src="/static/scripts/jquery-3.3.1.min.js"></script>
+  <script src="/static/scripts/Chart.bundle.min.js"></script>
+  <script src="/static/scripts/jkd.js"></script>
+</head>
+<body>
+  <p>{{name}}</p>
+  <!-- Le reste du contenu -->
+  <p id="test1">Blabla</p>
+  <div>
+    <span id="push1">Launch : </span>
+    <span id="result1">Result</span>
+    <canvas id="chart1" width="800" height="200"></canvas>
+  </div>
+  <div>
+    <span id="start2">*Launch*</span>
+    <span id="stop2" style="display: none">*Stop*</span>
+    <span id="result2">Result</span>
+  </div>
+  <canvas id="chart2" width="800" height="200"></canvas>
+  <div id="status_bar"><span id="conn_status">Connecting...</span></div>
+<script>
+
+$(document).ready(function()
+ {
+  env = new JkdEnv("ws://" + window.location.host + "/ws", "/demo/homepage");
+
+  send = function(msg)
+   {
+    msg.url = '/demo' + msg.url;
+    msg.src = '/demo/homepage';
+    msg.lcid = 1000;
+    websocket.send(JSON.stringify(msg));
+   };
+
+  query = function(msg, callback)
+   {
+   }
+
+  var ctx = $("#chart1");
+
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+
+  var ctx2 = $("#chart2");
+
+var myChart2 = new Chart(ctx2, {
+    type: 'line',
+    data:  {
+      labels: [Date.now()],
+      datasets: [{
+        fill:false,
+        pointRadius:0,
+        lineTension:0,
+        data: [0],
+      }],
+    },
+    options: {
+      scales: {
+        xAxes:[{
+//          autoSkip:true,
+//          autoSkipPadding:10,
+          minRotation:45,
+          type: 'time',
+          time:{
+//            unit:'millisecond',
+              displayFormats:{
+                millisecond:'HH:mm:ss.S',
+                second:'HH:mm:ss',
+                minut:'HH:mm',
+              }
+          }
+        }],
+        yAxes: [{
+          ticks: {
+            min: -100,
+            max: 100,
+          }
+        }]
+      }
+    }
+});
+
+function addData(chart, label, data) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+    });
+    chart.update(0);
+}
+
+function removeData(chart) {
+    chart.data.labels.shift();
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.shift();
+    });
+    chart.update(0);
+}
+
+  $("#push1").click(function(evt)
+   {
+    env.query('/heavyproc#output', 'single',
+      function (msg, client)
+       {
+        $('#result1').text(msg.reply);
+       },
+      null);
+   });
+
+  $("#start2").click(function(evt)
+   {
+    $("#stop2").show();
+    $("#start2").hide();
+    lcid = env.query('/heavyproc/siggen_ext#output', 'updates',
+      function(msg, client)
+       {
+        $('#result2').text(client + msg.reply[1]);
+        if (myChart2.data.labels.length > 50)
+         {
+          removeData(myChart2);
+         }
+        addData(myChart2, msg.reply[0] * 1000, msg.reply[1]);
+       },
+      'value: ');
+    $("#stop2").attr('lcid',lcid);
+   });
+
+  $("#stop2").click(function(evt)
+   {
+    $("#start2").show();
+    $("#stop2").hide();
+    env.send_on_channel(Number($("#stop2").attr('lcid')), {'flags':'d', 'cmd':'close'});
+   });
+
+  // Launch jkd environment
+  env.run();
+
+  $("#test1").text("Hello world!");
+
+});
+
+</script>
+</body>
+</html>

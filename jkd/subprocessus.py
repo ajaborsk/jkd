@@ -23,6 +23,11 @@ class Subprocessus(Node):
     def subscribe(self, coro):
         self.subscription = coro
 
+    async def _introspect(self):
+        ret = await super()._introspect()
+        ret['subprocess'] = str(self.subprocess)
+        return ret
+
     async def launch(self):
         #self.debug("Subprocessus {}s : Launching subprocessus...".format(self.appname))
         test_xml = b'"' + self.xml_contents.replace(b'"', b'\"') + b'"'
