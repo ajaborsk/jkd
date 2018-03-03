@@ -48,9 +48,9 @@ class Container(Node):
         self.contents[name] = node
 
     async def msg_query_handle(self, query):
-        self.debug('query = ' + str(query))
+        self.debug('query = ' + str(query), 'msg')
         if query['port'] in self.inside_links:
-            self.debug('linked ' + str(self.inside_links))
+            self.debug('linked ' + str(self.inside_links), 'msg')
             base_port = query['port']
             query['port'] = self.inside_links[base_port][1]
             await self.msg_queue_delegate(self.inside_links[base_port][0], query)

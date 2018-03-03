@@ -142,7 +142,7 @@ class Node:
             return None
         else:
             port = self.ports[portname]
-        self.debug('policy ='+str(msg['policy'])+' port='+str(portname))
+        self.debug('policy ='+str(msg['policy'])+' port='+str(portname), 'msg')
         if msg['policy'] == 'immediate':
             # Check if a task provides the port value.
             if 'provided_by' in port:
@@ -260,11 +260,11 @@ class Node:
 
     async def msg_queue_handle(self, msg):
         # General message (from input queue) handling (including routing)
-        self.debug('(generic) queue msg handle: ' + str(msg))
+        self.debug('(generic) queue msg handle: ' + str(msg), 'msg')
         if 'method' in msg:
             # This is a query
             if 'path' in msg and msg['path'] == self.name:
-                self.debug('I am final dest for msg: ' + str(self.msg_query_handle))
+                self.debug('I am final dest for msg: ' + str(self.msg_query_handle), 'msg')
                 # The node is the final destination
                 await self.msg_query_handle(msg)
             else:
@@ -406,7 +406,7 @@ class Node:
             if query['method'] in self.methods:
                 return await self.methods[query['method']](query)
             else:
-                self.warning("Method {} not found to handle query {}".format(query['method'], str(query)))
+                self.warning("Method {} not found to handle query {}".format(query['method'], str(query)), 'msg')
         elif 'port' in query and query['port'] in self.ports:
             port = query['port']
             #self.debug(self.name + ": port = " + str(query), 'msg')
