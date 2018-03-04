@@ -94,6 +94,9 @@ class Node:
                                  'timestamped': timestamped,
                                  'connections':[]}
 
+    async def port_read(self, portname):
+        pass
+
     async def port_value_update(self, portname, value):
         #self.debug('portname: '+str(portname))
         port = self.ports[portname]
