@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 import inspect
 import asyncio
 import logging
+import time
 
 
 import xml.etree.ElementTree as ET
@@ -48,7 +49,7 @@ class Node:
         # Global input messages queue
         self.input = asyncio.Queue()
         # I/O ports. each port has a entry in the dictionary : 'portname':{properties}
-        self.ports = {'state':{}}
+        self.ports = {}
         self.tasks = {}
         self.methods = {'get':self.method_get}
 
@@ -66,11 +67,14 @@ class Node:
         self.back_channels = {}
 
         self.done = False
+
+        self.port_add('state')
 #        if self.env is not None and hasattr(self.env, 'loop'):
 #            #self.debug("launching msg_queue_loop()...")
 #            self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
-        self.task_add('', coro = self.msg_queue_loop, autolaunch = True)
-        self.task_add('state', coro = self._introspect, returns = ['state'])
+
+        self.task_add('_msg_loop', coro = self.msg_queue_loop, autolaunch = True)
+        self.task_add('_state', coro = self._introspect, returns = ['state'])
 
 
     def task_add(self, taskname, coro = None, gets = [], returns = [], needs = [], provides = [], autolaunch = False):
@@ -83,6 +87,33 @@ class Node:
                                 'provides':provides,
                                 'autolaunch':autolaunch,
                                 'task':None }
+
+    def port_add(self, portname, mode = 'output', cached = False, timestamped = False):
+        self.ports[portname] = { 'mode': mode,
+                                 'cached': cached,
+                                 'timestamped': timestamped,
+                                 'connections':[]}
+
+    async def port_value_update(self, portname, value):
+        #self.debug('portname: '+str(portname))
+        port = self.ports[portname]
+        #self.debug('port: '+str(port))
+        if port.get('cached', False):
+            port['value'] = value
+        for cnx in port['connections']:
+            #self.debug('cnx: '+str(cnx))
+            if 'update' in cnx:
+                if 'finished' not in cnx or cnx['finished'] == False:
+                    flags = 'f'
+                    cnx['finished'] = True # Channel *opening* is finished
+                else:
+                    flags = ''
+                if port.get('timestamped', False):
+                    msg = {'prx_src':self, 'lcid':cnx['lcid'], 'flags':flags, 'reply':(time.time(), value)}
+                else:
+                    msg = {'prx_src':self, 'lcid':cnx['lcid'], 'flags':flags, 'reply':value}
+                #self.debug(str(self.name) + " : output_msg to "+str(cnx['prx_dst'])+': '+str(msg))
+                await self.msg_send(cnx['prx_dst'], msg)
 
     def run(self):
         # Prepare : make link between ports and tasks

@@ -129,7 +129,7 @@ class HttpServer(Container):
                 # #self.debug("Query launched lcid=" + str(lcid))
                 # text =
                 # try:
-                    # msg = await self.wait_for_reply(lcid, timeout = 5.)
+                    # msg = await self.msg_wait_for_reply(lcid, timeout = 5.)
                     # text = msg['reply']
                 # except asyncio.TimeoutError:
                     # self.info("http request timeout")
