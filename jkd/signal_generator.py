@@ -13,7 +13,6 @@ class SignalGenerator(Node):
         self.period = 2.32768
         self.offset = 1.
         self.amplitude = 100
-#        self.output_task_id = self.env.loop.create_task(self.output_task())
         self.task_add('signal', coro = self.output_task, provides=['output'])
 
     def compute(self):
