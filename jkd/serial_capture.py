@@ -11,8 +11,9 @@ class SerialCapture(Node):
         super().__init__(env, parent, name)
 
         self.ports['output'] = {'mode': 'output', 'value': "", 'connections':[]}
-        self.serial_port = "/dev/ttyUSB0"
-        self.serial = serial.Serial(self.serial_port, baudrate=57600)
+        self.serial_port = elt.attrib.get('serial_port', "/dev/tty0")
+        self.serial_baudrate = int(elt.attrib.get('serial_baudrate', 9600))
+        self.serial = serial.Serial(self.serial_port, self.serial_baudrate)
         self.serial.timeout = 0
         self.serial.nonblocking()
         self.current_buffer = b''
