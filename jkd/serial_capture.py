@@ -132,7 +132,7 @@ class SerialCapture(Node):
 
     def _read_ready(self):
         block = self.serial.read(1024)
-        self.debug('read:'+str(block))
+        #self.debug('read:'+str(block))
         for byte in block:
             self.current_buffer += bytes([byte])
             if byte == ord(b'\n'):
