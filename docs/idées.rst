@@ -234,7 +234,7 @@ Création d'un canal :
 au retour (flags = 'f'):
 
 * Noter dans self.back_channels[(incoming lcid, incoming node)] le lcid (déjà créé lors de l'étape 'c')
-     Cela permettra de rerouter les messages query_update
+     Cela permettra de r les messages query_update
 
 Un message a trois drapeaux possibles de propagation (bas niveau). c et f sont exclusifs l'un de l'autre.
 'd' peut accompagner n'importe quel message sauf 'c' :

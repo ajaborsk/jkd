@@ -277,7 +277,7 @@ class Node:
                     msg['path'] = msg['path'][name_len + 2:]
                 elt = msg['path'].split('/')[0]
                 if elt in self:
-                    await self.reroute(self[elt], msg)
+                    await self.msg_reroute(self[elt], msg)
                 else:
                     self.warning('No route for '+str(msg), 'msg')
         elif 'reply' in msg:
@@ -295,7 +295,7 @@ class Node:
                     await self.channels[lcid][0](msg, self.channels[lcid][1])
                 else:
                     # Just route to next node
-                    #self.debug(self.name + ' reply reroute mode : ' + str(msg), 'msg')
+                    #self.debug(self.name + ' reply  mode : ' + str(msg), 'msg')
                     msg['lcid'] = self.channels[lcid]['lcid']
                     msg['prx_src'] = self
                     await self.msg_send(self.channels[lcid]['prx_dst'], msg)
@@ -366,7 +366,7 @@ class Node:
                 response = None
                 try:
                     self.debug("Waiting for reply...", 'msg')
-                    msg = await self.wait_for_reply(lcid, timeout = timeout)
+                    msg = await self.msg_wait_for_reply(lcid, timeout = timeout)
                     self.debug("Reply received: "+str(msg['reply']), 'msg')
                     response = msg['reply']
                 except asyncio.TimeoutError:
@@ -386,12 +386,12 @@ class Node:
 #        await self.msg_send(destination, query, delegate = True)
         await destination.input.put(query)
 
-    async def reroute(self, destination, query):
+    async def msg_reroute(self, destination, query):
         #self.debug("Rerouting to " + str(destination)+' : '+str(query), 'msg')
 #        await self.msg_send(destination, query, delegate = True)
         await destination.input.put(query)
 
-    async def wait_for_reply(self, lcid, timeout = 10.):
+    async def msg_wait_for_reply(self, lcid, timeout = 10.):
         self.debug("Waiting for reply on channel "+str(lcid)+" queue: "+str(self.channels[lcid]), 'msg')
         return await asyncio.wait_for(self.channels[lcid].get(), timeout, loop = self.env.loop)
 
@@ -429,19 +429,19 @@ class Node:
                 self.ports[port]['connections'].append(cnx)
                 self.debug(self.name + ": subscriptions = " + str(self.ports[port]['connections']), 'msg')
 
-    async def reply_handle(self, reply):
-        # called when the node is the final destination of the reply
-        pass
+    # async def reply_handle(self, reply):
+        # # called when the node is the final destination of the reply
+        # pass
 
-    async def aget(self, portname = None):
-        """Return a ElementTree that represent the Node full state (if possible) or the port value
-        """
-        self.warning("Unimplemented aget() method.")
+    # async def aget(self, portname = None):
+        # """Return a ElementTree that represent the Node full state (if possible) or the port value
+        # """
+        # self.warning("Unimplemented aget() method.")
 
-    def serialize(self):
-        """
-        """
-        pass
+    # def serialize(self):
+        # """
+        # """
+        # pass
 
     async def _introspect(self):
         if self.parent is not None:
