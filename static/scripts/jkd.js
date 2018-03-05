@@ -26,9 +26,9 @@ class JkdEnv
    }
 
    // send a message
-   send(msg)
-   {
-   }
+   //send(msg)
+   //{
+   //}
 
   get(url, query, callback, client)
    {
@@ -37,12 +37,12 @@ class JkdEnv
 
     this.channels[lcid] = {'cb':callback, 'client':client};
 
-    console.log(typeof(callback));
-    console.log(typeof(this.channels[lcid]['cb']));
+//    console.log(typeof(callback));
+//    console.log(typeof(this.channels[lcid]['cb']));
 
     var msg = { 'url'   : '/' + this.appname + url,
-                'src'   : '/chuap/homepage',
-                'from'  : this.from,
+                'src'   : '/chuap/homepage', // Unused ??
+                'from'  : this.from, // Unused ??
                 'lcid'  : lcid,
                 'flags' : 'c',
                 'method': 'get',
@@ -60,12 +60,12 @@ class JkdEnv
 
     this.channels[lcid] = {'cb':callback, 'client':client};
 
-    console.log(typeof(callback));
-    console.log(typeof(this.channels[lcid]['cb']));
+//    console.log(typeof(callback));
+//    console.log(typeof(this.channels[lcid]['cb']));
 
-    var msg = { 'url'   : '/demo' + url,
-                'src'   : '/demo/homepage',
-                'from'  : this.from,
+    var msg = { 'url'   : '/' + this.appname + url,
+                'src'   : '/demo/homepage', // Unused ??
+                'from'  : this.from, // Unused ??
                 'lcid'  : lcid,
                 'flags' : 'c',
                 'method': 'get',
