@@ -16,8 +16,9 @@ function partial(fn) { // `fn` is the original function
 
 class JkdEnv
  {
-  constructor(ws_url, from)
+  constructor(appname, ws_url, from)
    {
+    this.appname = appname;
     this.next_lcid = 1000;
     this.ws_url = ws_url;
     this.from = from;
@@ -28,6 +29,29 @@ class JkdEnv
    send(msg)
    {
    }
+
+  get(url, query, callback, client)
+   {
+    var lcid = this.next_lcid;
+    this.next_lcid++;
+
+    this.channels[lcid] = {'cb':callback, 'client':client};
+
+    console.log(typeof(callback));
+    console.log(typeof(this.channels[lcid]['cb']));
+
+    var msg = { 'url'   : '/' + this.appname + url,
+                'src'   : '/chuap/homepage',
+                'from'  : this.from,
+                'lcid'  : lcid,
+                'flags' : 'c',
+                'method': 'get',
+                'policy': 'immediate',
+                'query' : query };
+    this.websocket.send(JSON.stringify(msg));
+    return lcid;
+   }
+
 
   query(url, query, callback, client)
    {
