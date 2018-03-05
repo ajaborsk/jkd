@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>{{pagetitle}}</title>
+  <link rel="stylesheet" href="/static/css/jkd.css">
+  <link rel="stylesheet" href="/static/css/jquery-ui.min.css">
+  <link rel="stylesheet" href="/static/css/tabulator.min.css">
+  <script src="/static/scripts/jquery-3.3.1.min.js"></script>
+  <script src="/static/scripts/jquery-ui.min.js"></script>
+  <script src="/static/scripts/tabulator.min.js"></script>
+  <script src="/static/scripts/moment-with-locales.min.js"></script>
+  <script src="/static/scripts/Chart.bundle.min.js"></script>
+  <script src="/static/scripts/jkd.js"></script>
+</head>
+<body>
+  <h1>{{pagetitle}}</h1>
+  <p>{{name}}</p>
+  <!-- Le reste du contenu -->
+  <p id="test1">Blabla</p>
+  <div id="jkd_contents">
+  <p>Composition de la page :</p>
+  <ol>
+  {% for element in parts%}
+  <li><b>{{element.jkd_class}}:</b> {{element}}</li>
+  {% endfor %}
+  </ol>
+  </div>
+  
+<div id="example-table"></div>  
+  
+  <div>
+    <span id="push1">Launch : </span>
+    <span id="result1">Result</span>
+    <canvas id="chart1" width="800" height="200"></canvas>
+  </div>
+  <div>
+    <span id="push2">Launch : </span>
+    <span id="result2">Result</span>
+  </div>
+  <div id="status_bar"><span id="conn_status">Connecting...</span></div>
+<script>
+
+$(document).ready(function()
+ {
+ 
+ 
+ //create Tabulator on DOM element with id "example-table"
+$("#example-table").tabulator({
+    //height:205, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+    layout:"fitColumns", //fit columns to width of table (optional)
+    columns:[ //Define Table Columns
+        {title:"Name", field:"name", width:150},
+        {title:"Age", field:"age", align:"left", formatter:"progress"},
+        {title:"Favourite Color", field:"col"},
+        {title:"Date Of Birth", field:"dob", sorter:"date", align:"center"},
+    ],
+    rowClick:function(e, row){ //trigger an alert message when the row is clicked
+        alert("Row " + row.getData().id + " Clicked!!!!");
+    },
+});
+
+var tabledata = [
+    {id:1, name:"Oli Bob", age:"12", col:"red", dob:""},
+    {id:2, name:"Mary May", age:"1", col:"blue", dob:"14/05/1982"},
+    {id:3, name:"Christine Lobowski", age:"42", col:"green", dob:"22/05/1982"},
+    {id:4, name:"Brendon Philips", age:"125", col:"orange", dob:"01/08/1980"},
+    {id:5, name:"Margret Marmajuke", age:"16", col:"yellow", dob:"31/01/1999"},
+];
+
+//load sample data into the table
+$("#example-table").tabulator("setData", tabledata);
+
+ 
+  send = function(msg)
+   {
+    websocket.send(JSON.stringify(msg));
+   };
+
+  var ctx = $("#chart1");
+
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+
+  var env = new JkdEnv("chuap", "ws://" + window.location.host + "/ws", "/chuap/homepage");
+
+  // First of all: launch websocket connection
+  //websocket = new WebSocket("ws://localhost:9080/ws");
+
+  $("#test1").text("Hello world!");
+
+//  $("#push1").click(function(evt){send({'qid':'q1', 'query':'test1'})});
+//  $("#push2").click(function(evt){send({'qid':'q2', 'query':'test2'})});
+
+  $("#push1").click(function(evt)
+   {
+    env.get('/sql0#test0', 'single',
+      function (msg, client)
+       {
+        $('#result1').text(msg.reply.query);
+        var cols = [];
+        for (var c=0 ; c < msg.reply.cols.length; c++)
+         {
+          cols.push({title:msg.reply.cols[c]['title'], field: 'c' + c});
+         }
+        $("#example-table").tabulator("destroy");
+        $("#example-table").tabulator({layout:"fitColumns", columns:cols});
+        var tableData = [];
+        for (var r= 0; r < msg.reply.data.length; r++)
+         {
+          var row = msg.reply.data[r];
+          var rowData = {id:r};
+          for (var c=0 ; c < row.length; c++)
+           {
+            rowData['c'+c] = row[c];
+           }
+          tableData.push(rowData);
+         }
+        $("#example-table").tabulator("setData", tableData);
+       },
+      null);
+   });
+
+  // Launch jkd environment
+  env.run();
+
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<?xml version = "1.0" encoding="UTF-8" standalone="yes" ?>
+<application name="chuap">
+  <nodes>
+    <html_page appname="chuap" name="homepage" template="homepage" title="Test Application Asset+ CHU Amiens-Picardie">
+      <table src="/chuap/sql0/test0"/>
+      <table id="ma_table" src="/chuap/sql0/test0"/>
+      <table class="table_sombre" src="/chuap/sql0/test0"/>
+      <table src="/chuap/sql0/test0"/>
+      <chart id="c1" src="/chuap/sql0/test12"/>
+      <table src="/chuap/sql0/test0"/>
+      <table src="/chuap/sql0/test0"/>
+    </html_page>
+    <sql_datasource name="sql0" database="AssetPlus" username="gmao" password="gmao">
+      <query name="test0">
+        SELECT nu_int as "Code oi", int_statut, int_cm FROM en_cours WHERE da_ap >= '2018-03-01';
+      </query>
+    </sql_datasource>
+  </nodes>
+  <ports>
+    <!-- Route application "index.html" port to node "homepage", port "html" -->
+    <port name="index.html" node="homepage" port="html"/>
+  </ports>
+</application>
