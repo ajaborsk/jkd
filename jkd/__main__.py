@@ -9,7 +9,7 @@ log_handler.setFormatter(logging.Formatter("%(asctime)s:[%(process)s] {%(name)s}
 logger_main.addHandler(log_handler)
 logger_main.setLevel(logging.DEBUG)
 logger_msg.addHandler(log_handler)
-logger_msg.setLevel(logging.INFO)
+logger_msg.setLevel(logging.DEBUG)
 
 from .node import *
 
