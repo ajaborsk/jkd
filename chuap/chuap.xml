@@ -12,7 +12,14 @@
     </html_page>
     <sql_datasource name="sql0" database="AssetPlus" username="gmao" password="gmao">
       <query name="test0">
-        SELECT nu_int as "Code oi", int_statut, int_cm FROM en_cours WHERE da_ap >= '2018-03-01';
+        SELECT nu_int AS "Code interv", int_statut, int_cm, ri_suivi_techn, code_techn 
+        FROM en_cours 
+        WHERE da_ap >= '2018-02-01';
+      </query>
+      <query name="test1">
+        SELECT nu_int AS "Code interv", int_statut, int_cm, ri_suivi_techn, code_techn 
+        FROM en_cours 
+        WHERE da_ap >= '2018-02-01';
       </query>
     </sql_datasource>
   </nodes>
