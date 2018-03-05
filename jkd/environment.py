@@ -18,8 +18,8 @@ from .logging import *
 from .container import Container
 from .report_bokeh_offline_html import *
 
-import aiohttp_jinja2
-import jinja2
+#import aiohttp_jinja2
+#import jinja2
 import time
 
 from .html_page import HtmlPage
@@ -27,12 +27,14 @@ from .subprocessus import Subprocessus
 from .signal_generator import SignalGenerator
 from .serial_capture import SerialCapture
 from .text_parser import TextParser
+from .sql_datasource import SqlDatasource
 registry = {
         "html_page":HtmlPage,
         "subprocessus":Subprocessus,
         "signal_generator":SignalGenerator,
         "serial_capture":SerialCapture,
         "text_parser":TextParser,
+        "sql_datasource":SqlDatasource,
          }
 
 

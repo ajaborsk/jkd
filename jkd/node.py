@@ -105,7 +105,7 @@ class Node:
         #self.debug('port: '+str(port))
         if port.get('cached', False):
             port['value'] = value
-            self.debug('port:'+str(port)+' '+str(self.ports[portname]))
+            #self.debug('port:'+str(port)+' '+str(self.ports[portname]))
         for cnx in port['connections']:
             #self.debug('cnx: '+str(cnx))
             if 'update' in cnx:
