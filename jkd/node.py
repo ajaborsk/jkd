@@ -37,7 +37,7 @@ import xml.etree.ElementTree as ET
 
 class Node:
     tagname = "node"
-    def __init__(self, env = None, parent = None, name = ''):
+    def __init__(self, env = None, parent = None, name = '', elt = None):
         #print("setting env to", env)
         self.env = env
         self.parent = parent
@@ -216,7 +216,7 @@ class Node:
                 else:
                     idx = self.tasks[port['returned_by']]['returns'].index(portname)
                     result = await task['coro'](*args)
-                    result = result[idx]                    
+                    result = result[idx]
                 self.debug("result: "+str(result), 'msg')
             else:
                 self.warning('port "{}" is not provided nor returned by any task.'.format(portname))

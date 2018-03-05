@@ -1,8 +1,11 @@
 <?xml version = "1.0"  encoding="UTF-8" standalone="yes"?>
 <application name="demo">
+  <!-- 'nodes' tag is used to describe container contents -->
   <nodes>
     <signal_generator name="siggen" />
     <text_parser name="parser">
+      <!-- links tag is used to describe links between this node ports and other nodes ports -->
+      <!-- these will be used to create appropriate channels on request (queries) -->
       <links>
         <link node="siggen" port="text_output" input="input" />
       </links>
@@ -18,6 +21,7 @@
       <value data="node:/siggen#output" template="simple_value" />
     </html_page>
   </nodes>
+  <!-- 'ports' tag create container port and links it to a contained node port-->
   <ports>
     <port name="index.html" node="homepage" port="html" />
   </ports>
