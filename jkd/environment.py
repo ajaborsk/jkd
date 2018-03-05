@@ -26,11 +26,13 @@ from .html_page import HtmlPage
 from .subprocessus import Subprocessus
 from .signal_generator import SignalGenerator
 from .serial_capture import SerialCapture
+from .text_parser import TextParser
 registry = {
         "html_page":HtmlPage,
         "subprocessus":Subprocessus,
         "signal_generator":SignalGenerator,
         "serial_capture":SerialCapture,
+        "text_parser":TextParser,
          }
 
 

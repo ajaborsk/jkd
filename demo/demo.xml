@@ -2,6 +2,11 @@
 <application name="demo">
   <nodes>
     <signal_generator name="siggen" />
+    <text_parser name="parser">
+      <links>
+        <link node="siggen" port="text_output" input="input" />
+      </links>
+    </text_parser>
     <subprocessus name="heavyproc" appname="erer">
       <nodes>
         <signal_generator name="siggen_ext" />

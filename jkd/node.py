@@ -95,6 +95,7 @@ class Node:
                                  'connections':[]}
 
     async def port_read(self, portname):
+        #TODO
         pass
 
     async def port_value_update(self, portname, value):

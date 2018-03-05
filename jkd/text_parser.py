@@ -5,8 +5,8 @@ import math
 
 from .node import Node
 
-class LineParser(Node):
-    tagname = "line_parser"
+class TextParser(Node):
+    tagname = "text_parser"
     def __init__(self, elt = None, **kwargs):
         super().__init__(**kwargs)
         self.port_add('input', mode = 'input')

@@ -1,12 +1,12 @@
 <?xml version = "1.0"  encoding="UTF-8" standalone="yes"?>
 <application name="demo">
   <nodes>
-    <serial_capture name="serial1" serial_port="/dev/ttyUSB0" serial_baudrate="57600"/>
-    <line_parse name="parser">
-        <links>
-            <link node="serial1" port="output" to="input"/>
-        </links>
-    </line_parse>
+    <serial_capture name="serial1" serial_port="/dev/ttyUSB0" serial_baudrate="57600" />
+    <text_parser name="parser">
+      <links>
+        <link node="serial1" port="output" to="input" />
+      </links>
+    </text_parser>
     <subprocessus name="heavyproc" appname="erer">
       <nodes>
         <signal_generator name="siggen_ext" />
