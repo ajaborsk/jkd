@@ -91,6 +91,7 @@ class Node:
     def port_add(self, portname, mode = 'output', cached = False, timestamped = False):
         self.ports[portname] = { 'mode': mode,
                                  'cached': cached,
+                                 'value': None,
                                  'timestamped': timestamped,
                                  'connections':[]}
 
@@ -101,9 +102,10 @@ class Node:
     async def port_value_update(self, portname, value):
         #self.debug('portname: '+str(portname))
         port = self.ports[portname]
-        self.debug('port: '+str(port))
+        #self.debug('port: '+str(port))
         if port.get('cached', False):
             port['value'] = value
+            self.debug('port:'+str(port)+' '+str(self.ports[portname]))
         for cnx in port['connections']:
             #self.debug('cnx: '+str(cnx))
             if 'update' in cnx:
@@ -182,8 +184,23 @@ class Node:
             # Check if a task provides the port value.
             if 'provided_by' in port:
                 # Port is *provided* by a task
-                #TODO
-                self.warning("TODO")
+                if port['cached']:
+                    task = self.tasks[port['provided_by']]
+                    if task['task'] is None:
+                        # Get needed parameters for task
+                        args = []
+                        for gets in task['gets']:
+                            self.warning("TODO")
+                        # Launch task
+                        self.debug('Launching task: '+str(port['provided_by'])+' '+str(task['coro']))
+                        task['task'] = self.env.loop.create_task(task['coro']())
+                        self.debug('Launched task: '+str(port['provided_by']))
+                        #TODO : How to stop this task ?
+                    #TODO : Wait for task do its job !
+                    await asyncio.sleep(0.1)
+                    result = port['value']
+                else:
+                    self.warning("TODO")
             elif 'returned_by' in port:
                 self.debug("returned_by mode: "+str(msg), 'msg')
                 # Port is *returned* by a task
@@ -201,14 +218,14 @@ class Node:
                     result = await task['coro'](*args)
                     result = result[idx]                    
                 self.debug("result: "+str(result), 'msg')
-                # Send reply
-                response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'reply':result}
-                #response = {'flags':'d', 'prx_src':self, 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
-                await self.msg_send(msg['prx_src'], response)
-                self.debug("Replied with:"+str(response), 'msg')
             else:
                 self.warning('port "{}" is not provided nor returned by any task.'.format(portname))
                 return None
+            # Send reply
+            response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'reply':result}
+            #response = {'flags':'d', 'prx_src':self, 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
+            await self.msg_send(msg['prx_src'], response)
+            self.debug("Replied with:"+str(response), 'msg')
         elif msg['policy'] == 'on_update':
             if 'provided_by' in port:
                 self.debug("provided_by mode: "+str(msg), 'msg')
