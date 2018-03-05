@@ -19,6 +19,6 @@
     </html_page>
   </nodes>
   <ports>
-    <port name="html" node="homepage" port="html" />
+    <port name="index.html" node="homepage" port="html" />
   </ports>
 </application>

@@ -490,7 +490,7 @@ class Node:
         tasks = {}
         for taskname in self.tasks:
             tasks[taskname] = str(self.tasks[taskname])
-        channels = {'popo':'poku'}
+        channels = {'test':'dummy'}
         for channel in self.channels:
             self.debug("channel: "+str(channel))
             if isinstance(self.channels[channel], int):

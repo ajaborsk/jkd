@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 import os.path
 import json
 
@@ -29,7 +30,7 @@ class HttpServer(Container):
 #        self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
         self.web_app.router.add_get('/view/{app}', self.http_view_handler)
         self.web_app.router.add_get('/{app}', self.http_handler)
-        self.web_app.router.add_get('/{app}/{address}', self.http_handler)
+        self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.http_handler)
 
         aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
@@ -114,7 +115,18 @@ class HttpServer(Container):
         else:
             #self.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
             address = request.match_info.get('address', "")
+            self.debug('request: '+str(request.method)+' '+str(request.path)+' '+str(dict(request.query)))
             #text = await self.ext_app.aget(address)
+
+            path = request.url.path.split('/')
+            name = path[1]
+            port_name = path[-1]
+            msg_url = '/'.join(path[1:-1])
+            if port_name == '':
+                port_name = 'index.html'
+
+            self.debug('url data: '+str(path)+' '+str(name)+' '+str(msg_url)+' '+str(port_name))
+
             app = None
             if name in self:
                 app = self[name]
@@ -125,7 +137,7 @@ class HttpServer(Container):
 
             if app is not None:
 #                text = await self.msg_query(app, {'query':'get', 'src':self.fqn(), 'url':name, 'port':'html'}, timeout = 5.)
-                text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':name, 'port':'html'}, timeout = 5.)
+                text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name}, timeout = 5.)
                 # #self.debug("Query launched lcid=" + str(lcid))
                 # text =
                 # try:
@@ -136,6 +148,8 @@ class HttpServer(Container):
                 # #self.debug("Query first reply "+str(lcid))
                 # if lcid in self.channels:
                     # del self.channels[lcid] # remove query input queue
+                if text is None:
+                    text = 'Timeout...'
             else:
                 #TODO : True 404 Not Found page
                 text = 'Application Not found'
