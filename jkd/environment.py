@@ -133,6 +133,7 @@ from .http_server import *
 class EnvHttpServer(Environment):
     def __init__(self):
         super().__init__()
+        
         self.http_server = HttpServer(env = self, parent = self, name = 'httpd')
 
         self.loop = self.http_server.web_app.loop

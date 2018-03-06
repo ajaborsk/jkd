@@ -18,11 +18,12 @@ class SqlDatasource(Node):
         for el in elt:
             if el.tag == 'query':
                 name = el.attrib['name']
-                query = el.text
+                query = "".join(el.itertext())
                 self.port_add(name)
                 self.task_add(name, partial(self.sql_query, query = query), returns = ['test0'])
         
     async def sql_query(self, query = None):
+        self.debug("Query: "+str(query))
         cols = []
         resp = []
         cur = self.cnx.cursor()

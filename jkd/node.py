@@ -174,6 +174,9 @@ class Node:
                     self.debug("(auto)launching task: " + taskname)
                     self.tasks[taskname]['task'] = self.env.loop.create_task(self.tasks[taskname]['coro']())
 
+    def stop(self):
+        pass
+
     #TODO:  An API to add/remove/configure ports
 
     def fqn(self):
@@ -299,7 +302,7 @@ class Node:
     async def msg_queue_loop(self):
         #self.debug("Entering msg_queue_loop...")
         while not self.done:
-            self.debug('Waiting for message...', 'msg')
+            #self.debug('Waiting for message...', 'msg')
             msg = await self.input.get()
             self.debug("Received msg: " + str(msg), 'msg')
             if 'c' in msg['flags']:
