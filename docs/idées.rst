@@ -278,3 +278,16 @@ etc.
 Des types complexes/composés sont de base :
 
 :Table: Une table complète, avec des colonnes (nommées) et des lignes (enregistrements).
+
+Page HTML
+---------
+
+Pour chaque *part* :
+
+- dépendances *js*
+- dépendances *css*
+- script *js*
+- *css* spécifique ? (pas sûr...)
+- portion de html (ou de jinja2 ??)
+
+un html *part* peut être un conteneur.
