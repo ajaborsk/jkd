@@ -3,7 +3,7 @@ import inspect
 import asyncio
 import logging
 import time
-
+import sys
 
 import xml.etree.ElementTree as ET
 
@@ -105,8 +105,11 @@ class Node:
                                  'connections':[]}
 
     async def port_read(self, portname):
-        #TODO
-        pass
+        queue = self.ports[portname].get('queue')
+        if queue is not None:
+            return await queue.get()
+        else:
+            self.error('no intern queue for port: '+str(portname))
 
     async def port_value_update(self, portname, value):
         #self.debug('portname: '+str(portname))
@@ -129,6 +132,14 @@ class Node:
                     msg = {'prx_src':self, 'lcid':cnx['lcid'], 'flags':flags, 'reply':value}
                 #self.debug(str(self.name) + " : output_msg to "+str(cnx['prx_dst'])+': '+str(msg))
                 await self.msg_send(cnx['prx_dst'], msg)
+
+        queue = port.get('queue')
+        if isinstance(queue, asyncio.Queue):
+            #self.debug('write to intern port queue: '+str(value))
+            if queue.full():
+                # make some place...
+                queue.get_nowait()
+            queue.put_nowait(value)
 
     def run(self):
         # prepare : check input links
@@ -186,6 +197,9 @@ class Node:
         else:
             return self.parent.fqn() + '/' + self.name
 
+    async def updated(self, msg, portname):
+        await self.port_value_update(portname, msg['reply'])
+
     async def method_get(self, msg):
         self.debug("msg: "+str(msg), 'msg')
         portname = msg['port']
@@ -228,7 +242,7 @@ class Node:
                         #TEST
                         self.debug('  link found: '+str(self.links[arg]))
                         #text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(request.query)}, timeout = 5.)
-                        resp = await self.msg_query(self.parent, {'method':'get', 'policy':'immediate', 'url':self.links[arg]['node'], 'port':self.links[arg]['port']}, timeout = 5.)
+                        resp = await self.msg_query(self.parent, {'method':'get', 'policy':'immediate', 'flags':'c', 'url':self.links[arg]['node'], 'port':self.links[arg]['port']}, timeout = 5.)
                         args.append(resp)
                     self.warning("TODO")
                 # Launch task
@@ -256,6 +270,17 @@ class Node:
                 task = self.tasks[port['provided_by']]
                 if task['task'] is None:
                     # The task isn't running => launch it
+                    # Prepare source data
+                    for need in task['needs']:
+                        self.debug('needs: '+str(need))
+                        link = self.links[need]
+                        #TODO: test if launching a new subscription is needed
+                        if True:
+                            self.ports[need]['queue'] = asyncio.Queue(maxsize = 1)
+                            self.debug('ports: '+str(self.ports))
+                            await self.msg_query(self.parent, {'method':'get', 'policy':'on_update', 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.updated, client = need)
+                    #TODO
+                    # Launch task
                     self.debug('Launching task: '+str(port['provided_by'])+' '+str(task['coro']))
                     task['task'] = self.env.loop.create_task(task['coro']())
                     self.debug('Launched task: '+str(port['provided_by']))
@@ -579,3 +604,4 @@ class Node:
 
     def error(self, message, logger='main'):
         self.log(logging.ERROR, message, logger)
+        sys.abort()

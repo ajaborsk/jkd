@@ -27,4 +27,4 @@ class SignalGenerator(Node):
             value = self.compute()
             await self.port_value_update('output', value[0])
             await self.port_value_update('text_output', value[1])
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(.1)

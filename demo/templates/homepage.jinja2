@@ -138,10 +138,10 @@ function removeData(chart) {
 
   $("#push1").click(function(evt)
    {
-    env.query('/heavyproc#output', 'single',
+    env.query('/parser#output', 'updates',
       function (msg, client)
        {
-        $('#result1').text(msg.reply);
+        $('#result1').text(msg.reply[1]);
        },
       null);
    });
