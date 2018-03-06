@@ -8,7 +8,7 @@ from .node import Node
 class TextParser(Node):
     tagname = "text_parser"
     def __init__(self, elt = None, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
         self.task_add('signal', coro = self.output_task, provides=['output'])

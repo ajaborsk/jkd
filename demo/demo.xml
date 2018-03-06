@@ -4,7 +4,7 @@
   <nodes>
     <signal_generator name="siggen" />
     <text_parser name="parser">
-      <!-- links tag is used to describe links between this node ports and other nodes ports -->
+      <!-- links tag is used to describe links between this node (input) ports and other nodes (output) ports -->
       <!-- these will be used to create appropriate channels on request (queries) -->
       <links>
         <link node="siggen" port="text_output" input="input" />

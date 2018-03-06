@@ -76,6 +76,15 @@ class Node:
         self.task_add('_msg_loop', coro = self.msg_queue_loop, autolaunch = True)
         self.task_add('_state', coro = self._introspect, returns = ['state'])
 
+        self.links = {}
+        if elt is not None:
+            for branch in elt:
+                if branch.tag == 'links':
+                    for link_node in branch:
+                        port_name = link_node.attrib.get('input')
+                        self.links[port_name] = dict(link_node.attrib)
+                        # No check for now (will be done in self.run() preparation part)
+                        self.debug('link: '+str(port_name)+' <== '+str(self.links[port_name]))
 
     def task_add(self, taskname, coro = None, gets = [], returns = [], needs = [], provides = [], autolaunch = False):
         """Add a task to node tasks list
@@ -122,6 +131,9 @@ class Node:
                 await self.msg_send(cnx['prx_dst'], msg)
 
     def run(self):
+        # prepare : check input links
+        #TODO
+
         # Prepare : make link between ports and tasks
         for taskname in self.tasks:
             for portname in self.tasks[taskname]['returns']:
