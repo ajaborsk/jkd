@@ -11,10 +11,12 @@ class TextParser(Node):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
-        self.task_add('signal', coro = self.output_task, provides=['output'])
+        self.task_add('signal', coro = self.parse, gets=['input'], returns=['output'])
 
-    def parse(self, line):
-        return {'dummy':1.22}
+    async def parse(self, line):
+        #TEST
+        #TODO
+        return {'dummy':1.22, 'length':len(line)}
 
     async def output_task(self):
         #TODO: output_task scheduling should be determined by output channels configurations

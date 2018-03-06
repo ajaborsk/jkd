@@ -201,7 +201,7 @@ class Node:
                     if task['task'] is None:
                         # Get needed parameters for task
                         args = []
-                        for gets in task['gets']:
+                        for arg in task['gets']:
                             self.warning("TODO")
                         # Launch task
                         self.debug('Launching task: '+str(port['provided_by'])+' '+str(task['coro']))
@@ -219,12 +219,21 @@ class Node:
                 task = self.tasks[port['returned_by']]
                 # Get needed parameters for task
                 args = []
-                for gets in task['gets']:
+                for arg in task['gets']:
+                    self.debug('Getting arg/port: '+str(arg))
+                    if arg in self.links:
+                        #TEST
+                        self.debug('  link found: '+str(self.links[arg]))
+                        #text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(request.query)}, timeout = 5.)
+                        resp = await self.msg_query(self.parent, {'method':'get', 'policy':'immediate', 'url':self.links[arg]['node'], 'port':self.links[arg]['port']}, timeout = 5.)
+                        args.append(resp)
                     self.warning("TODO")
                 # Launch task
                 self.debug("launch task: "+str(task)+' '+str(args), 'msg')
                 if len(self.tasks[port['returned_by']]['returns']) == 1:
-                    result = await task['coro'](*args)
+                    coro_f = task['coro']
+                    coro = coro_f(*args)
+                    result = await coro
                 else:
                     idx = self.tasks[port['returned_by']]['returns'].index(portname)
                     result = await task['coro'](*args)

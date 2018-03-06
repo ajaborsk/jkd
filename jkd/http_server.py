@@ -150,6 +150,9 @@ class HttpServer(Container):
                     # del self.channels[lcid] # remove query input queue
                 if text is None:
                     text = 'Timeout...'
+                else:
+                    text = str(text)
+
             else:
                 #TODO : True 404 Not Found page
                 text = 'Application Not found'
