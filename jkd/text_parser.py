@@ -11,8 +11,8 @@ class TextParser(Node):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
-        #self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
-        self.task_add('process_loop', coro = self.output_task, needs=['input'], provides=['output'])
+        self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
+        #self.task_add('process_loop', coro = self.output_task, needs=['input'], provides=['output'])
 
     async def parse(self, line):
         #TODO

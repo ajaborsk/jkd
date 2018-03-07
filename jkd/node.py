@@ -74,6 +74,7 @@ class Node:
 #            self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
 
         self.task_add('_msg_loop', coro = self.msg_queue_loop, autolaunch = True)
+        self.task_add('_on_update_loop', coro = self._on_update_loop)
         self.task_add('_state', coro = self._introspect, returns = ['state'])
 
         self.links = {}
@@ -141,6 +142,20 @@ class Node:
                 queue.get_nowait()
             queue.put_nowait(value)
 
+    async def _on_update_loop(self, inputs = [], outputs = [], coro = None):
+        self.debug('inputs: '+str(inputs)+', outputs:'+str(outputs))
+        while True:
+            args = []
+            for input_port in inputs:
+                args.append(await self.port_read(input_port))
+            #self.debug('process...'+str(coro)+', args='+str(args))
+            results = await coro(*args)
+            #self.debug('processed. results= '+str(results))
+            if len(outputs) == 1:
+                await self.port_value_update(outputs[0], results)
+            else:
+                for i in range(len(outputs)):
+                    await self.port_value_update(outputs[i], results[i])
     def run(self):
         # prepare : check input links
         #TODO
@@ -268,34 +283,44 @@ class Node:
             if 'provided_by' in port:
                 self.debug("provided_by mode: "+str(msg), 'msg')
                 task = self.tasks[port['provided_by']]
-                if task['task'] is None:
-                    # The task isn't running => launch it
-                    # Prepare source data
-                    for need in task['needs']:
-                        self.debug('needs: '+str(need))
-                        link = self.links[need]
-                        #TODO: test if launching a new subscription is needed
-                        if True:
-                            self.ports[need]['queue'] = asyncio.Queue(maxsize = 1)
-                            self.debug('ports: '+str(self.ports))
-                            await self.msg_query(self.parent, {'method':'get', 'policy':'on_update', 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.updated, client = need)
-                    #TODO
-                    # Launch task
-                    self.debug('Launching task: '+str(port['provided_by'])+' '+str(task['coro']))
-                    task['task'] = self.env.loop.create_task(task['coro']())
-                    self.debug('Launched task: '+str(port['provided_by']))
-                # Add a subscription to the port
-                cnx = {'update':True, 'lcid':msg['lcid'], 'prx_dst':msg['prx_src']}
+                needs = task['needs']
+                kwargs = {}
+            elif 'returned_by' in port:
+                self.debug('returns_by mode - internal loop on process task')
+                task = self.tasks['_on_update_loop']
+                needs = self.tasks[port['returned_by']]['gets']
+                kwargs = {'coro':self.tasks[port['returned_by']]['coro'], 'inputs':needs, 'outputs':self.tasks[port['returned_by']]['returns']}
+            else:
+                self.warning('Unable to reply for on_update policy: '+str(msg))
+                return
+            if task['task'] is None:
+                # The task isn't running => launch it
+                # Prepare source data
+                for need in needs:
+                    self.debug('needs: '+str(need))
+                    link = self.links[need]
+                    #TODO: test if launching a new subscription is needed
+                    if True:
+                        self.ports[need]['queue'] = asyncio.Queue(maxsize = 1)
+                        self.debug('ports: '+str(self.ports))
+                        await self.msg_query(self.parent, {'method':'get', 'policy':'on_update', 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.updated, client = need)
+                #TODO
+                # Launch task
+                self.debug('Launching task: '+str(task['coro']))
+                task['task'] = self.env.loop.create_task(task['coro'](**kwargs))
+                self.debug('Launched task.')
+            # Add a subscription to the port
+            cnx = {'update':True, 'lcid':msg['lcid'], 'prx_dst':msg['prx_src']}
 
-                # Update back_channels
-                key = (id(msg['prx_src']), msg['lcid'])
-                self.debug("key= "+str(key), 'msg')
-                self.back_channels[key] = {'port':msg['port'], 'cnx_idx':len(port['connections'])}
-                self.debug("Updated back_channels " + str(key) + ' : ' +  str(self.back_channels[key]), 'msg')
+            # Update back_channels
+            key = (id(msg['prx_src']), msg['lcid'])
+            self.debug("key= "+str(key), 'msg')
+            self.back_channels[key] = {'port':msg['port'], 'cnx_idx':len(port['connections'])}
+            self.debug("Updated back_channels " + str(key) + ' : ' +  str(self.back_channels[key]), 'msg')
 
-                # Add connection to the port
-                port['connections'].append(cnx)
-                self.debug(self.name + ": subscriptions = " + str(port['connections']), 'msg')
+            # Add connection to the port
+            port['connections'].append(cnx)
+            self.debug(self.name + ": subscriptions = " + str(port['connections']), 'msg')
         else:
             self.warning("Unhandled policy: "+str(msg['policy']))
 
