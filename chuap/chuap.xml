@@ -4,14 +4,11 @@
     <sql_datasource name="sql0" database="AssetPlus" username="gmao" password="gmao">
       <query name="test0">
         <column title="Blabla" field="int_statut"/>
-        SELECT nu_int AS "Code", code_techn, da_ap, he_ap, da_fin, he_fin, int_statut, observ, observ2 
-        FROM en_cours 
-        WHERE da_ap >= '2018-01-01' AND int_cm = 'BIOMEDICAL'
-        UNION
-        SELECT nu_int AS "Code", code_techn, da_ap, he_ap, da_fin, he_fin, int_statut, observ, observ2 
-        FROM b_ft1996 
-        WHERE da_ap >= '2018-01-01' AND int_cm = 'BIOMEDICAL'
-        ORDER BY "Code" DESC;
+        SELECT count(nu_int) AS "Total", code_techn
+          FROM en_cours 
+          WHERE int_cm = 'BIOMEDICAL' AND da_ap &lt; '2017-03-07' 
+        GROUP BY code_techn
+        ORDER BY "Total";
       </query>
       <query name="test1">
         SELECT nu_int AS "Code interv", int_statut, int_cm, ri_suivi_techn, code_techn 

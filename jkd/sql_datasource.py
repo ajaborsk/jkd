@@ -20,7 +20,7 @@ class SqlDatasource(Node):
                 name = el.attrib['name']
                 query = "".join(el.itertext())
                 self.port_add(name)
-                self.task_add(name, partial(self.sql_query, query = query), returns = ['test0'])
+                self.task_add(name, partial(self.sql_query, query = query), returns = [el.attrib['name']])
         
     async def sql_query(self, query = None):
         self.debug("Query: "+str(query))
