@@ -290,4 +290,24 @@ Pour chaque *part* :
 - *css* spécifique ? (pas sûr...)
 - portion de html (ou de jinja2 ??)
 
-un html *part* peut être un conteneur.
+Un html *part* peut être un conteneur.
+
+On construit une page HTML complète à partir d'un template de base et d'un
+arbre de *part*s.
+
+Le tout est paramétrique (=> génère un template ??)
+
+Cache :
+-------
+
+Un cache peut avoir deux modes de fonctionnement :
+
+:timestamp: Il recalcule l'entrée (requête) si le timestamp que celle-ci produit
+est plus récent que le timestamp de la requête.
+
+:delay: Il recalcule l'entrée (par requête) s'il s'est écoulé un temps donné
+entre le timestamp produit par l'entrée et le présent (ou le timestamp de la requête ??).
+
+Le stockage de la donnée peut être en mémoire (défaut) ou dans un fichier (système persistant).
+
+
