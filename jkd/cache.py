@@ -14,16 +14,8 @@ class Cache(Node):
 
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = False, timestamped = True)
-        #self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
-        self.task_add('process_loop', coro = self.output_task, needs=['input'], provides=['output'])
+        self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
 
-    async def process(self, line):
+    async def process(self, data):
         return self.data
 
-    async def output_task(self):
-        #TODO: output_task scheduling should be determined by output channels configurations
-        while True:
-            #self.debug(str(self.name) + " : output_task...")
-            input_data = await self.port_read('input')
-            value = await self.process(input_data)
-            await self.port_value_update('output', value)
