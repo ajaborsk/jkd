@@ -23,6 +23,7 @@ from .signal_generator import SignalGenerator
 from .serial_capture import SerialCapture
 from .data_file import DataFile
 from .text_parser import TextParser
+from .data_process import DataProcess
 from .cache import Cache
 from .sql_datasource import SqlDatasource
 registry = {
@@ -33,6 +34,7 @@ registry = {
         "signal_generator":SignalGenerator,
         "serial_capture":SerialCapture,
         "text_parser":TextParser,
+        "data_process":DataProcess,
         "sql_datasource":SqlDatasource,
          }
 
