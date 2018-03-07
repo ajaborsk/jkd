@@ -21,11 +21,15 @@ from .html_page import HtmlPage
 from .subprocessus import Subprocessus
 from .signal_generator import SignalGenerator
 from .serial_capture import SerialCapture
+from .data_file import DataFile
 from .text_parser import TextParser
+from .cache import Cache
 from .sql_datasource import SqlDatasource
 registry = {
         "html_page":HtmlPage,
         "subprocessus":Subprocessus,
+        "cache":Cache,            # Not Working (yet) !
+        "data_file":DataFile,     # Not Working (yet) !
         "signal_generator":SignalGenerator,
         "serial_capture":SerialCapture,
         "text_parser":TextParser,
@@ -133,7 +137,7 @@ from .http_server import *
 class EnvHttpServer(Environment):
     def __init__(self):
         super().__init__()
-        
+
         self.http_server = HttpServer(env = self, parent = self, name = 'httpd')
 
         self.loop = self.http_server.web_app.loop
