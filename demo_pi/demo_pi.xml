@@ -1,5 +1,5 @@
 <?xml version = "1.0"  encoding="UTF-8" standalone="yes"?>
-<application name="demo">
+<application name="demo_pi">
   <nodes>
     <serial_capture name="serial1" serial_port="/dev/ttyUSB0" serial_baudrate="57600" />
     <text_parser name="parser">
@@ -13,12 +13,12 @@
         <!-- This is a comment -->
       </nodes>
     </subprocessus>
-    <html_page appname="demo" name="homepage" template="homepage" title="A jkd Demo Application">
+    <html_page appname="demo_pi" name="homepage" template="homepage" title="A jkd Demo Application">
       <table data="node:/heavyproc#output" template="table" />
       <value data="node:/siggen#output" template="simple_value" />
     </html_page>
   </nodes>
   <ports>
-    <port name="html" node="homepage" port="html" />
+    <port name="index.html" node="homepage" port="html" />
   </ports>
 </application>
