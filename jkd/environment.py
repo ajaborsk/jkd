@@ -22,6 +22,7 @@ from .subprocessus import Subprocessus
 from .signal_generator import SignalGenerator
 from .serial_capture import SerialCapture
 from .data_file import DataFile
+from .history import History
 from .text_parser import TextParser
 from .serial_line_process import SerialLineProcess
 from .data_process import DataProcess
@@ -32,6 +33,7 @@ registry = {
         "subprocessus":Subprocessus,
         "cache":Cache,            # Not Working (yet) !
         "data_file":DataFile,     # Not Working (yet) !
+        "history":History,
         "signal_generator":SignalGenerator,
         "serial_capture":SerialCapture,
         "text_parser":TextParser,
