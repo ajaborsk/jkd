@@ -28,12 +28,12 @@
 
 $(document).ready(function()
  {
-  env = new JkdEnv("demo_pi", "ws://" + window.location.host + "/ws", "/demo/homepage");
+  env = new JkdEnv("demo_pi", "ws://" + window.location.host + "/ws", "/demo_pi/homepage");
 
   send = function(msg)
    {
-    msg.url = '/demo' + msg.url;
-    msg.src = '/demo/homepage';
+    msg.url = '/demo_pi' + msg.url;
+    msg.src = '/demo_pi/homepage';
     msg.lcid = 1000;
     websocket.send(JSON.stringify(msg));
    };
@@ -138,7 +138,7 @@ function removeData(chart) {
 
   $("#push1").click(function(evt)
    {
-    env.query('/heavyproc#output', 'single',
+    env.query('/serial1#output', 'immediate',
       function (msg, client)
        {
         $('#result1').text(msg.reply);
