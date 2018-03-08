@@ -25,7 +25,8 @@ class SerialCapture(Node):
 
     async def serial_line_handler(self):
         while True:
-            await self.port_value_update('output', await self.serial_queue.get())
+            #self.debug("handling...")
+            await self.port_value_update('output', (await self.serial_queue.get()).decode('ascii'))
 
     async def serial_message_handle(self, serial_buffer):
         self.debug("Serial message: "+str(serial_buffer))
