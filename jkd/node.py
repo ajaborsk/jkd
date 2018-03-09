@@ -156,6 +156,11 @@ class Node:
             else:
                 for i in range(len(outputs)):
                     await self.port_value_update(outputs[i], results[i])
+
+    async def link_connect(self, linkname):
+        #TODO
+        pass
+
     def run(self):
         # prepare : check input links
         #TODO
