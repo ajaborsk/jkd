@@ -11,11 +11,11 @@ class History(Node):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
-        self.task_add('process', coro = self.process, gets=['input'], returns=['output'])
+        self.task_add('process', autolaunch = True, coro = self.historize, needs=['input'], provides=[])
 
-    async def process(self, data):
-        #self.debug('data: '+str(data))
-        result = data
-        #self.debug('result: '+str(result))
-        return result
+    async def historize(self):
+        self.ports['input']['queue'] = asyncio.Queue(maxsize=5)
+        while True:
+            data = await self.port_read('input')
+            self.debug('data: '+str(data))
 

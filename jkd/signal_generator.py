@@ -11,7 +11,7 @@ class SignalGenerator(Node):
         super().__init__(**kwargs)
         self.port_add('output', cached = True, timestamped = True)
         self.port_add('text_output', cached = True, timestamped = True)
-        self.period = 2.32768
+        self.period = 23.2768
         self.offset = 1.
         self.amplitude = 100
         self.task_add('signal', coro = self.output_task, provides=['output', 'text_output'])
@@ -27,4 +27,4 @@ class SignalGenerator(Node):
             value = self.compute()
             await self.port_value_update('output', value[0])
             await self.port_value_update('text_output', value[1])
-            await asyncio.sleep(.1)
+            await asyncio.sleep(1.)

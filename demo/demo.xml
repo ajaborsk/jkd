@@ -7,10 +7,15 @@
       <!-- links tag is used to describe links between this node (input) ports and other nodes (output) ports -->
       <!-- these will be used to create appropriate channels on request (queries) -->
       <links>
-        <link node="siggen" port="text_output" input="input" />
+        <link input="input" node="siggen" port="text_output" />
       </links>
     </text_parser>
-    <subprocessus name="heavyproc" appname="erer">
+    <history name="h0">
+      <links>
+        <link input="input" connect="auto" policy="on_update" node="siggen" port="output" />
+      </links>
+    </history>
+    <subprocessus name="heavyproc" appname="dummy">
       <nodes>
         <signal_generator name="siggen_ext" />
         <!-- This is a comment -->

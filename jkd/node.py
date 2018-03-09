@@ -193,14 +193,21 @@ class Node:
                 else:
                     self.warning('task "{}" needs unkown port "{}"'.format(taskname, portname))
 
-        # Launch autolaunch tasks
         if self.env is not None and hasattr(self.env, 'loop'):
+            # Launch autolaunch tasks
             for taskname in self.tasks:
                 if self.tasks[taskname].get('autolaunch'):
                     self.debug("(auto)launching task: " + taskname)
                     self.tasks[taskname]['task'] = self.env.loop.create_task(self.tasks[taskname]['coro']())
+            # Launch autolaunch tasks
+            for portname in self.links:
+                link = self.links[portname]
+                if link.get('connect') == 'auto':
+                    self.debug("(auto)connecting port: " + portname)
+                    self.env.loop.create_task(self.msg_query(self.parent, {'method':'get', 'policy':link['policy'], 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.port_updated, client = portname))
 
     def stop(self):
+        #TODO
         pass
 
     #TODO:  An API to add/remove/configure ports
@@ -212,7 +219,7 @@ class Node:
         else:
             return self.parent.fqn() + '/' + self.name
 
-    async def updated(self, msg, portname):
+    async def port_updated(self, msg, portname):
         await self.port_value_update(portname, msg['reply'])
 
     async def method_get(self, msg):
@@ -303,7 +310,7 @@ class Node:
                     if True:
                         self.ports[need]['queue'] = asyncio.Queue(maxsize = 1)
                         self.debug('ports: '+str(self.ports))
-                        await self.msg_query(self.parent, {'method':'get', 'policy':'on_update', 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.updated, client = need)
+                        await self.msg_query(self.parent, {'method':'get', 'policy':'on_update', 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.port_updated, client = need)
                 #TODO
                 # Launch task
                 self.debug('Launching task: '+str(task['coro']))
