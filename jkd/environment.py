@@ -12,7 +12,6 @@ if sys.platform == 'win32':
 
 from .logging import *
 from .container import Container
-from .report_bokeh_offline_html import *
 
 import time
 
