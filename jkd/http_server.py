@@ -152,6 +152,7 @@ class HttpServer(Node):
                 text = 'Timeout...'
                 return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
             else:
+                print(data)
                 return {'name':app_name, 'nodes':{app_name: data}}
         except KeyError:
             # Application not found

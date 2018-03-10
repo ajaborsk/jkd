@@ -16,6 +16,6 @@ class Cache(Node):
         self.port_add('output', cached = False, timestamped = True)
         self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
 
-    async def process(self, data):
+    async def process(self, data, args={}):
         return self.data
 

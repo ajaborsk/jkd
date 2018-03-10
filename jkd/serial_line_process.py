@@ -23,7 +23,7 @@ class SerialLineProcess(Node):
         self.r_int_sum = 0
         self.r_int_sum_w = 0
 
-    async def parse(self, line):
+    async def parse(self, line, args={}):
         self.debug('line to process: '+str(line))
         if len(line) > 10 and line[0:6] == 'OK 20 ':
             lst = line[6:].strip(' \r\n').split(' ')

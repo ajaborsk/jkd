@@ -142,15 +142,15 @@ class Node:
                 queue.get_nowait()
             queue.put_nowait(value)
 
-    async def _on_update_loop(self, inputs = [], outputs = [], coro = None):
+    async def _on_update_loop(self, inputs = [], outputs = [], coro = None, query_args = {}):
         self.debug('inputs: '+str(inputs)+', outputs:'+str(outputs))
         while True:
             args = []
             for input_port in inputs:
                 args.append(await self.port_read(input_port))
-            #self.debug('process...'+str(coro)+', args='+str(args))
-            results = await coro(*args)
-            #self.debug('processed. results= '+str(results))
+            self.debug('process...'+str(coro)+', args='+str(args))
+            results = await coro(*args, args = query_args)
+            self.debug('processed. results= '+str(results))
             if len(outputs) == 1:
                 await self.port_value_update(outputs[0], results)
             else:
@@ -274,13 +274,14 @@ class Node:
                     self.warning("TODO")
                 # Launch task
                 self.debug("launch task: "+str(task)+' '+str(args), 'msg')
+                query_args=msg.get("args", {})
                 if len(self.tasks[port['returned_by']]['returns']) == 1:
                     coro_f = task['coro']
-                    coro = coro_f(*args)
+                    coro = coro_f(*args, args=query_args)
                     result = await coro
                 else:
                     idx = self.tasks[port['returned_by']]['returns'].index(portname)
-                    result = await task['coro'](*args)
+                    result = await task['coro'](*args, args=query_args)
                     result = result[idx]
                 self.debug("result: "+str(result), 'msg')
             else:
@@ -301,7 +302,7 @@ class Node:
                 self.debug('returns_by mode - internal loop on process task')
                 task = self.tasks['_on_update_loop']
                 needs = self.tasks[port['returned_by']]['gets']
-                kwargs = {'coro':self.tasks[port['returned_by']]['coro'], 'inputs':needs, 'outputs':self.tasks[port['returned_by']]['returns']}
+                kwargs = {'query_args':msg.get('args', {}), 'coro':self.tasks[port['returned_by']]['coro'], 'inputs':needs, 'outputs':self.tasks[port['returned_by']]['returns']}
             else:
                 self.warning('Unable to reply for on_update policy: '+str(msg))
                 return
@@ -580,7 +581,7 @@ class Node:
         # """
         # pass
 
-    async def _introspect(self):
+    async def _introspect(self, args={}):
         if self.parent is not None:
             parent_name = self.parent.fqn()
         else:

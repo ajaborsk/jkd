@@ -13,7 +13,7 @@ class TextParser(Node):
         self.port_add('output', cached = True, timestamped = True)
         self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
 
-    async def parse(self, line):
+    async def parse(self, line, args={}):
         #self.debug('line: '+str(line[1]))
         value = float(line[1][7:])
         #self.debug('value: '+str(value))

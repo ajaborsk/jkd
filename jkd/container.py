@@ -85,7 +85,7 @@ class Container(Node):
     def __contains__(self, key):
         return key in self.contents
 
-    async def _introspect(self):
+    async def _introspect(self, args={}):
         ret = await super()._introspect()
         nodes = {}
         for key, value in self.contents.items():

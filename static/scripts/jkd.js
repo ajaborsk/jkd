@@ -30,7 +30,7 @@ class JkdEnv
    //{
    //}
 
-  get(url, query, callback, client)
+  get(url, args, callback, client)
    {
     var lcid = this.next_lcid;
     this.next_lcid++;
@@ -47,13 +47,13 @@ class JkdEnv
                 'flags' : 'c',
                 'method': 'get',
                 'policy': 'immediate',
-                'query' : query };
+                'args' : args };
     this.websocket.send(JSON.stringify(msg));
     return lcid;
    }
 
 
-  query(url, query, callback, client)
+  query(url, args, callback, client)
    {
     var lcid = this.next_lcid;
     this.next_lcid++;
@@ -70,7 +70,7 @@ class JkdEnv
                 'flags' : 'c',
                 'method': 'get',
                 'policy': 'on_update',
-                'query' : query };
+                'args'  : args };
     this.websocket.send(JSON.stringify(msg));
     return lcid;
    }

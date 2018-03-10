@@ -13,7 +13,7 @@ class DataProcess(Node):
         self.port_add('output', cached = True, timestamped = True)
         self.task_add('process', coro = self.process, gets=['input'], returns=['output'])
 
-    async def process(self, data):
+    async def process(self, data, args={}):
         #self.debug('data: '+str(data))
         result = data
         #self.debug('result: '+str(result))

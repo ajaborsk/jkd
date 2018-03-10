@@ -119,7 +119,7 @@ class EnvSubApplication(Environment):
     def fqn(self):
         return self.root_name
 
-    async def _introspect(self):
+    async def _introspect(self, args={}):
         ret = await super()._introspect()
         ret['subprocess'] = str(self.pipe_channels)
         return ret

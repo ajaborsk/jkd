@@ -1,0 +1,38 @@
+import asyncio
+import time
+import datetime
+import math
+
+from .node import Node
+from .data_process import DataProcess
+
+class DataProcess0(DataProcess):
+    tagname = "data_process_0"
+    def __init__(self, elt = None, **kwargs):
+        super().__init__(elt=elt, **kwargs)
+        self.port_add('input', mode = 'input')
+        self.port_add('output', cached = True, timestamped = True)
+        self.task_add('process', coro = self.process, gets=['input'], returns=['output'])
+
+    async def process(self, data, args={}):
+        self.debug('data[0]: '+str(data[0])+' args: '+str(args))
+        #value = float(line[1][7:])
+        #self.debug('value: '+str(value))
+        labels = []
+        datasets = [{'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},]
+
+        for point in data:
+            labels.append(int(point[0] * 1000))
+            datasets[0]['data'].append(point[1][1])
+            datasets[1]['data'].append(point[1][2])
+            datasets[2]['data'].append(point[1][3])
+            datasets[3]['data'].append(point[1][4])
+            datasets[4]['data'].append(point[1][5])
+            datasets[5]['data'].append(point[1][6])
+        response = {'labels':labels, 'datasets':datasets}
+        return response

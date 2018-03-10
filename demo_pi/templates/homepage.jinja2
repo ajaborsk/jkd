@@ -152,7 +152,7 @@ function removeData(chart) {
 
   $("#push1").click(function(evt)
    {
-    env.get('/data_process_0_0#output', 'immediate',
+    env.get('/data_process_0_0#output', {'query_arg':3.14},
       function (msg, client)
        {
         myChart.data = msg.reply;

@@ -12,17 +12,17 @@ class SqlDatasource(Node):
         import pyodbc
         self.pyodbc = pyodbc
         super().__init__(**kwargs)
-        
+
         self.cnx = pyodbc.connect("DSN={};UID={};PWD={}".format(database, username, password))
-        
+
         for el in elt:
             if el.tag == 'query':
                 name = el.attrib['name']
                 query = "".join(el.itertext())
                 self.port_add(name)
                 self.task_add(name, partial(self.sql_query, query = query), returns = [el.attrib['name']])
-        
-    async def sql_query(self, query = None):
+
+    async def sql_query(self, query = None, args={}):
         self.debug("Query: "+str(query))
         cols = []
         resp = []

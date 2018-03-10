@@ -23,8 +23,8 @@ class Subprocessus(Node):
     def subscribe(self, coro):
         self.subscription = coro
 
-    async def _introspect(self):
-        ret = await super()._introspect()
+    async def _introspect(self, args={}):
+        ret = await super()._introspect(args=args)
         ret['subprocess'] = str(self.subprocess)
         return ret
 
