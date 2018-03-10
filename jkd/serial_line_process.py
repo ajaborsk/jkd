@@ -67,7 +67,7 @@ class SerialLineProcess(Node):
 
             return [data,"{}:{:5d} - [{:5d}] Vbat:{:6.4f}V  Vcir:{:6.4f}V  Ibat:{:5.0f}mA Pbat:{:5.0f}mW Rbat:{:4.2f}Ohm Rbat_e:{:4.2f}Ohm Vbat_e:{:5.3f}V".format(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()), data[0], data[1], v_bat, v_cir, i_bat, v_bat * i_bat, r_int_bat, r_int_mean, v_bat_e)]
         else:
-            return "Badly formated line"
+            return [None, "Badly formated line"]
             # value = 12.9
             # #self.debug('value: '+str(value))
             # return 'processed: '+line
