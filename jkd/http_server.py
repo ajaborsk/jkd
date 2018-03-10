@@ -12,7 +12,7 @@ from .subprocessus import *
 from .application import*
 
 
-class HttpServer(Container):
+class HttpServer(Node):
     tagname = "http_server"
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -127,7 +127,7 @@ class HttpServer(Container):
             self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name))
 
             app = None
-            if app_name in self:
+            if app_name in self.env:
                 app = self.env[app_name]
             elif os.path.isdir(app_name) and os.path.isfile(app_name + '/' + app_name + '.xml'):
                 tree = ET.parse(app_name + '/' + app_name + '.xml')
