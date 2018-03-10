@@ -61,18 +61,32 @@ class Environment(Container):
         self.debug(app_name + ' application etree loaded')
         root = tree.getroot()
         self.debug("Root :" + str(root.tag) + ' ' + str(root.attrib))
-        self[app_name] = Application(env = self.env, parent = self.env, name = app_name, elt = root)
+        return root
+
+    def app_launch(self, app_name, elt = None):
+        if elt is None:
+            elt = self.app_load(app_name)
+        self[app_name] = Application(env = self.env, parent = self.env, name = app_name, elt = elt)
         self[app_name].run()
         return self[app_name]
+
+    def app_launch_auto(self):
+        # Launch all 'autoload' applications
+        for app_name in os.listdir('.'):
+            if self.app_exists(app_name):
+                elt = self.app_load(app_name)
+                if elt.attrib.get("autolaunch", "") != "":
+                    self.app_launch(app_name, elt = elt)
 
     def __getitem__(self, key):
         if key not in self.contents and self.app_exists(key):
             # try to launch application
-            self.app_load(key)
+            self.app_launch(key)
         return self.contents[key]
 
     def run(self):
         # default
+        self.app_launch_auto()
         self.loop.run_forever()
 
 
@@ -168,5 +182,6 @@ class EnvHttpServer(Environment):
             self.loop = asyncio.get_event_loop()
 
     def run(self, host='0.0.0.0', port=8080):
+        self.app_launch_auto()
         self.info("Launching http server node...")
         self.http_server.run(host=host, port=port)

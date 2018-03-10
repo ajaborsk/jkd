@@ -1,5 +1,5 @@
 <?xml version = "1.0"  encoding="UTF-8" standalone="yes"?>
-<application name="demo">
+<application name="demo" autolaunch="true">
   <!-- 'nodes' tag is used to describe container contents -->
   <nodes>
     <signal_generator name="siggen" />
