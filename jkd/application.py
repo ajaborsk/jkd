@@ -8,30 +8,17 @@ from .container import *
 
 class Application(Container):
     tagname = "application"
-    def __init__(self, appname = None, **kwargs):
-        super().__init__(**kwargs)
-        if appname is not None:
-            # load application description
-            pass
-        else:
-            # brand new application
-            # Add some default nodes :
-            # - editor
-            # - main page
-            pass
-        try:
-            tree = ET.parse(self.name + '/' + self.name + '.xml')
-            self.debug(self.name+ ' application etree loaded')
-            root = tree.getroot()
-            self.debug("Root :"+str(root.tag)+' '+str(root.attrib))
-            self.populate(root)
-        except Exception as ex:
-            self.warning('unable to load {} application description : {}'.format(self.name, str(ex)))
+    def __init__(self, elt=None, **kwargs):
+        super().__init__(elt=elt, **kwargs)
+        # try:
+            # self.populate(root)
+        # except Exception as ex:
+            # self.warning('unable to load {} application description : {}'.format(self.name, str(ex)))
 
         # if there is a homepage in the container => /application
         #   then delegate any queries on 'html' port
-        if 'homepage' in self:
-            self.ports['html'] = {'delegate':self['homepage']}
+        # if 'homepage' in self:
+            # self.ports['html'] = {'delegate':self['homepage']}
 
     def fqn(self):
         return '/' + self.name

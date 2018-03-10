@@ -119,20 +119,24 @@ class HttpServer(Container):
             #text = await self.ext_app.aget(address)
 
             path = request.url.path.split('/')
-            name = path[1]
+            app_name = path[1]
             port_name = path[-1]
             msg_url = '/'.join(path[1:-1])
             if port_name == '':
                 port_name = 'index.html'
 
-            self.debug('url data: '+str(path)+' '+str(name)+' '+str(msg_url)+' '+str(port_name))
+            self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name))
 
             app = None
-            if name in self:
-                app = self[name]
-            elif os.path.isdir(name) and os.path.isfile(name + '/' + name + '.xml'):
-                self[name] = Application(env = self.env, parent = self.env, name = name)
-                app = self[name]
+            if app_name in self:
+                app = self[app_name]
+            elif os.path.isdir(app_name) and os.path.isfile(app_name + '/' + app_name + '.xml'):
+                tree = ET.parse(app_name + '/' + app_name + '.xml')
+                self.debug(app_name+ ' application etree loaded')
+                root = tree.getroot()
+                self.debug("Root :"+str(root.tag)+' '+str(root.attrib))
+                self[app_name] = Application(env = self.env, parent = self.env, name = app_name, elt = root)
+                app = self[app_name]
                 app.run()
 
             if app is not None:

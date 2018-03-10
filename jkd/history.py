@@ -60,4 +60,3 @@ class History(Node):
             else:
                 done = True
         return result
-
