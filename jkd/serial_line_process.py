@@ -11,7 +11,8 @@ class SerialLineProcess(Node):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
-        self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
+        self.port_add('output_text', cached = True, timestamped = True)
+        self.task_add('process', coro = self.parse, gets=['input'], returns=['output', 'output_text'])
 
         self.alpha_bat = 1.5961 # 4.065 * 10944 / 27872
         self.alpha_cir = 1.5888 # 4.065 * 10944 / 28000
@@ -64,7 +65,7 @@ class SerialLineProcess(Node):
             else:
                 v_bat_e = v_bat
 
-            return "{}:{:5d} - [{:5d}] Vbat:{:6.4f}V  Vcir:{:6.4f}V  Ibat:{:5.0f}mA Pbat:{:5.0f}mW Rbat:{:4.2f}Ohm Rbat_e:{:4.2f}Ohm Vbat_e:{:5.3f}V".format(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()), data[0], data[1], v_bat, v_cir, i_bat, v_bat * i_bat, r_int_bat, r_int_mean, v_bat_e)
+            return [data,"{}:{:5d} - [{:5d}] Vbat:{:6.4f}V  Vcir:{:6.4f}V  Ibat:{:5.0f}mA Pbat:{:5.0f}mW Rbat:{:4.2f}Ohm Rbat_e:{:4.2f}Ohm Vbat_e:{:5.3f}V".format(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()), data[0], data[1], v_bat, v_cir, i_bat, v_bat * i_bat, r_int_bat, r_int_mean, v_bat_e)]
         else:
             return "Badly formated line"
             # value = 12.9

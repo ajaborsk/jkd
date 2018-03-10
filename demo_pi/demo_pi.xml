@@ -2,11 +2,16 @@
 <application name="demo_pi">
   <nodes>
     <serial_capture name="serial1" serial_port="/dev/ttyUSB0" serial_baudrate="57600" />
-    <serial_line_process name="parser">
+    <serial_line_process name="serial_parser">
       <links>
         <link node="serial1" port="output" input="input" />
       </links>
     </serial_line_process>
+    <history name="jee_histo">
+      <links>
+        <link input="input" connect="auto" policy="on_update" node="serial_parser" port="output" />
+      </links>
+    </history>
     <subprocessus name="heavyproc" appname="erer">
       <nodes>
         <signal_generator name="siggen_ext" />
