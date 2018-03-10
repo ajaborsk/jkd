@@ -26,7 +26,6 @@ class HttpServer(Node):
         self.web_app.router.add_get('/', self.http_handler)
         self.web_app.router.add_static('/static', 'static/')
         self.web_app.router.add_get('/ws', self.ws_handler)
-#        self.web_app.router.add_get('/tmpl/{x}', self.tmpl_handler)
         self.web_app.router.add_get('/view/{app}', self.http_view_handler)
         self.web_app.router.add_get('/{app}', self.http_handler)
         self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.http_handler)
