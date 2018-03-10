@@ -28,18 +28,19 @@ class History(Node):
         self.index_file = open(self.filename+'.idx', mode='ab', buffering = 0)
         while True:
             data = await self.port_read('input')
-            self.debug('data: '+str(data))
-            data_bin = json.dumps(data).encode('utf8')
-            #self.debug('1: '+str(data))
-            pos = self.current_pos
-            self.data_file.write(data_bin)
-            #self.debug('2: '+str(data))
-            self.current_pos = self.data_file.tell()
-            size = self.current_pos - pos
-            index_bin = struct.pack('QQL', int(data[0]), pos, size)
-            #self.debug('3: '+str(data))
-            self.index_file.write(index_bin)
-            #self.debug('4: '+str(data))
+            if data[1] is not None:
+                self.debug('data: '+str(data))
+                data_bin = json.dumps(data).encode('utf8')
+                #self.debug('1: '+str(data))
+                pos = self.current_pos
+                self.data_file.write(data_bin)
+                #self.debug('2: '+str(data))
+                self.current_pos = self.data_file.tell()
+                size = self.current_pos - pos
+                index_bin = struct.pack('QQL', int(data[0]), pos, size)
+                #self.debug('3: '+str(data))
+                self.index_file.write(index_bin)
+                #self.debug('4: '+str(data))
 
     async def history(self, args = {}):
         result = []
