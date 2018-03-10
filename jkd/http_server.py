@@ -126,39 +126,18 @@ class HttpServer(Node):
 
             self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name))
 
-            app = None
-            if app_name in self.env:
+            try:
                 app = self.env[app_name]
-            elif os.path.isdir(app_name) and os.path.isfile(app_name + '/' + app_name + '.xml'):
-                tree = ET.parse(app_name + '/' + app_name + '.xml')
-                self.debug(app_name+ ' application etree loaded')
-                root = tree.getroot()
-                self.debug("Root :"+str(root.tag)+' '+str(root.attrib))
-                self.env[app_name] = Application(env = self.env, parent = self.env, name = app_name, elt = root)
-                app = self.env[app_name]
-                app.run()
-
-            if app is not None:
-#                text = await self.msg_query(app, {'query':'get', 'src':self.fqn(), 'url':name, 'port':'html'}, timeout = 5.)
                 text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(request.query)}, timeout = 5.)
-                # #self.debug("Query launched lcid=" + str(lcid))
-                # text =
-                # try:
-                    # msg = await self.msg_wait_for_reply(lcid, timeout = 5.)
-                    # text = msg['reply']
-                # except asyncio.TimeoutError:
-                    # self.info("http request timeout")
-                # #self.debug("Query first reply "+str(lcid))
-                # if lcid in self.channels:
-                    # del self.channels[lcid] # remove query input queue
                 if text is None:
                     text = 'Timeout...'
                 else:
                     text = str(text)
-
-            else:
+            except KeyError:
+                # Application not found
                 #TODO : True 404 Not Found page
                 text = 'Application Not found'
+
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
@@ -166,25 +145,22 @@ class HttpServer(Node):
     @aiohttp_jinja2.template('edit.jinja2')
     async def http_view_handler(self, request):
         app_name = request.match_info.get('app', "")
-        app = None
-        if app_name in self.env:
+        try:
             app = self.env[app_name]
-        elif os.path.isdir(app_name) and os.path.isfile(app_name + '/' + app_name + '.xml'):
-            self.env[app_name] = Application(env = self.env, parent = self.env, name = app_name)
-            app = self.env[app_name]
-            app.run()
-        else:
+            data = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':app_name, 'port':'state'}, timeout = 5.)
+            self.debug("data"+str(data))
+            if data is None:
+                text = 'Timeout...'
+                return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
+            else:
+                return {'name':app_name, 'nodes':{app_name: data}}
+        except KeyError:
+            # Application not found
+            #TODO : True 404 Not Found page
             text = 'Application Not found'
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
-        data = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':app_name, 'port':'state'}, timeout = 5.)
-        self.debug("data"+str(data))
-        return {'name':app_name, 'nodes':{app_name: data}}
-        text = "Viewing application {} : (TODO)<br/>{}".format(app_name, data)
 
     def run(self, host='0.0.0.0', port=8080):
-        # Launch children
-        # for childname in self.contents:
-            # self.contents[childname].run()
         super().run()
         while True:
             # Run web server, relaunching on OSError (broken socket for WS : aiohttp bug ??)

@@ -49,10 +49,27 @@ class Environment(Container):
         self.loggers = {'main':logger_main, "msg":logger_msg}
         super().__init__(env=self, name='/env')
         self.loop = asyncio.get_event_loop()
-        # Manually launch mainloop since self.loop was not initialized on Node class initialization
+        # Manually launch msg_queue_loop since self.loop was not yet initialized on Node class initialization
         self.loop_task = self.env.loop.create_task(self.msg_queue_loop())
         self.registry = registry
 
+    def app_exists(self, app_name):
+        return os.path.isdir(app_name) and os.path.isfile(app_name + '/' + app_name + '.xml')
+
+    def app_load(self, app_name):
+        tree = ET.parse(app_name + '/' + app_name + '.xml')
+        self.debug(app_name + ' application etree loaded')
+        root = tree.getroot()
+        self.debug("Root :" + str(root.tag) + ' ' + str(root.attrib))
+        self[app_name] = Application(env = self.env, parent = self.env, name = app_name, elt = root)
+        self[app_name].run()
+        return self[app_name]
+
+    def __getitem__(self, key):
+        if key not in self.contents and self.app_exists(key):
+            # try to launch application
+            self.app_load(key)
+        return self.contents[key]
 
     def run(self):
         # default
