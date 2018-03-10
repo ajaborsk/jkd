@@ -83,7 +83,7 @@ class HttpServer(Container):
                         await self.msg_send(channel['prx_src'], msg)
                     elif 'url' in msg:
                         appname = msg['url'][1:].split('/')[0]
-                        lcid = await self.msg_query(self[appname], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
+                        lcid = await self.msg_query(self.env[appname], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
                     elif msg['lcid'] == "q1":
                         reply = await self.ext_app.aget(msg['lcid'])
                     elif msg['lcid'] == "q2":
@@ -128,14 +128,14 @@ class HttpServer(Container):
 
             app = None
             if app_name in self:
-                app = self[app_name]
+                app = self.env[app_name]
             elif os.path.isdir(app_name) and os.path.isfile(app_name + '/' + app_name + '.xml'):
                 tree = ET.parse(app_name + '/' + app_name + '.xml')
                 self.debug(app_name+ ' application etree loaded')
                 root = tree.getroot()
                 self.debug("Root :"+str(root.tag)+' '+str(root.attrib))
-                self[app_name] = Application(env = self.env, parent = self.env, name = app_name, elt = root)
-                app = self[app_name]
+                self.env[app_name] = Application(env = self.env, parent = self.env, name = app_name, elt = root)
+                app = self.env[app_name]
                 app.run()
 
             if app is not None:
@@ -167,11 +167,11 @@ class HttpServer(Container):
     async def http_view_handler(self, request):
         app_name = request.match_info.get('app', "")
         app = None
-        if app_name in self:
-            app = self[app_name]
+        if app_name in self.env:
+            app = self.env[app_name]
         elif os.path.isdir(app_name) and os.path.isfile(app_name + '/' + app_name + '.xml'):
-            self[app_name] = Application(env = self.env, parent = self.env, name = app_name)
-            app = self[app_name]
+            self.env[app_name] = Application(env = self.env, parent = self.env, name = app_name)
+            app = self.env[app_name]
             app.run()
         else:
             text = 'Application Not found'
