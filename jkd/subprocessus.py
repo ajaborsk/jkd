@@ -34,7 +34,7 @@ class Subprocessus(Node):
         self.debug(test_xml.decode('utf8'))
         try:
             #self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.fqn(), '"' + self.xml_contents.replace('"', '\\"') + '"', loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "slave", self.fqn(), test_xml.decode('utf8'), loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+            self.subprocess = await asyncio.create_subprocess_exec("python", "-m", "jkd", "-m", "slave", self.fqn(), test_xml.decode('utf8'), loop=self.env.loop, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
             self.done = False
             self.reply = ''
         except Exception as ex:
