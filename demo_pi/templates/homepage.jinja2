@@ -45,9 +45,9 @@ $(document).ready(function()
   var ctx = $("#chart1");
 
 var myChart = new Chart(ctx, {
-    type: 'bar',
+    type: 'line',
     data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+//        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
         datasets: [{
             label: '# of Votes',
             data: [12, 19, 3, 5, 2, 3],
@@ -72,9 +72,23 @@ var myChart = new Chart(ctx, {
     },
     options: {
         scales: {
+            xAxes:[{
+//              autoSkip:true,
+//              autoSkipPadding:10,
+                minRotation:45,
+                type: 'time',
+                time:{
+//                  unit:'millisecond',
+                    displayFormats:{
+                    millisecond:'HH:mm:ss.S',
+                    second:'HH:mm:ss',
+                    minut:'HH:mm',
+                }
+            }
+        }],
             yAxes: [{
                 ticks: {
-                    beginAtZero:true
+                    //beginAtZero:true
                 }
             }]
         }
@@ -138,9 +152,11 @@ function removeData(chart) {
 
   $("#push1").click(function(evt)
    {
-    env.query('/serial_parser#output_text', 'immediate',
+    env.get('/data_process_0_0#output', 'immediate',
       function (msg, client)
        {
+        myChart.data = msg.reply;
+        myChart.update();
         $('#result1').text(msg.reply);
        },
       null);

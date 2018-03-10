@@ -12,6 +12,11 @@
         <link input="input" connect="auto" policy="on_update" node="serial_parser" port="output" />
       </links>
     </history>
+    <data_process_0 name="data_process_0_0">
+      <links>
+        <link input="input" node="jee_histo" port="output" />
+      </links>
+    </data_process_0>
     <subprocessus name="heavyproc" appname="erer">
       <nodes>
         <signal_generator name="siggen_ext" />

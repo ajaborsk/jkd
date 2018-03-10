@@ -25,6 +25,7 @@ from .history import History
 from .text_parser import TextParser
 from .serial_line_process import SerialLineProcess
 from .data_process import DataProcess
+from .data_process_0 import DataProcess0
 from .cache import Cache
 from .sql_datasource import SqlDatasource
 registry = {
@@ -38,6 +39,7 @@ registry = {
         "text_parser":TextParser,
         "serial_line_process":SerialLineProcess,
         "data_process":DataProcess,
+        "data_process_0":DataProcess0,
         "sql_datasource":SqlDatasource,
          }
 
