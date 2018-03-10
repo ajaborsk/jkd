@@ -9,8 +9,7 @@ import aiohttp_jinja2
 
 from .container import *
 from .subprocessus import *
-from .demo_application import*
-
+from .application import*
 
 
 class HttpServer(Container):
