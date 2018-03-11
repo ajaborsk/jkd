@@ -99,11 +99,12 @@ class Node:
                                 'autolaunch':autolaunch,
                                 'task':None }
 
-    def port_add(self, portname, mode = 'output', cached = False, timestamped = False):
+    def port_add(self, portname, mode = 'output', cached = False, timestamped = False, auto = False):
         self.ports[portname] = { 'mode': mode,
                                  'cached': cached,
                                  'value': None,
                                  'timestamped': timestamped,
+                                 'auto':auto,
                                  'connections':[]}
 
     def port_get(self, portname):
@@ -113,7 +114,8 @@ class Node:
             splitted = portname.rsplit(sep='.', maxsplit=1)
             if len(splitted) == 2 and splitted[0] in self.ports:
                 ref_port = self.ports[splitted[0]]
-                self.port_add(portname, mode = ref_port['mode'], cached = ref_port['cached'], timestamped = ref_port['timestamped'])
+                self.port_add(portname, mode = ref_port['mode'], cached = ref_port['cached'], timestamped = ref_port['timestamped'], auto = True)
+                return self.ports[portname]
             else:
                 self.warning("port '" + str(portname)+ "' does not exist")
                 return None

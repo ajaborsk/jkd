@@ -21,6 +21,7 @@ from .subprocessus import Subprocessus
 from .signal_generator import SignalGenerator
 from .serial_capture import SerialCapture
 from .data_file import DataFile
+from .data_object import DataObject
 from .history import History
 from .text_parser import TextParser
 from .serial_line_process import SerialLineProcess
