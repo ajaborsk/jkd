@@ -106,8 +106,20 @@ class Node:
                                  'timestamped': timestamped,
                                  'connections':[]}
 
+    def port_get(self, portname):
+        if portname in self.ports:
+            return self.ports[portname]
+        else:
+            splitted = portname.rsplit(sep='.', maxsplit=1)
+            if len(splitted) == 2 and splitted[0] in self.ports:
+                ref_port = self.ports[splitted[0]]
+                self.port_add(portname, mode = ref_port['mode'], cached = ref_port['cached'], timestamped = ref_port['timestamped'])
+            else:
+                self.warning("port '" + str(portname)+ "' does not exist")
+                return None
+
     async def port_read(self, portname):
-        queue = self.ports[portname].get('queue')
+        queue = self.port_get(portname).get('queue')
         if queue is not None:
             return await queue.get()
         else:
@@ -115,7 +127,7 @@ class Node:
 
     async def port_value_update(self, portname, value):
         #self.debug('portname: '+str(portname))
-        port = self.ports[portname]
+        port = self.port_get(portname)
         #self.debug('port: '+str(port))
         if port.get('cached', False):
             port['value'] = value
