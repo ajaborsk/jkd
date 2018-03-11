@@ -111,14 +111,8 @@ class Node:
         if portname in self.ports:
             return self.ports[portname]
         else:
-            splitted = portname.rsplit(sep='.', maxsplit=1)
-            if len(splitted) == 2 and splitted[0] in self.ports:
-                ref_port = self.ports[splitted[0]]
-                self.port_add(portname, mode = ref_port['mode'], cached = ref_port['cached'], timestamped = ref_port['timestamped'], auto = True)
-                return self.ports[portname]
-            else:
-                self.warning("port '" + str(portname)+ "' does not exist")
-                return None
+            self.warning("port '" + str(portname)+ "' does not exist")
+            return None
 
     async def port_read(self, portname):
         queue = self.port_get(portname).get('queue')
@@ -246,12 +240,13 @@ class Node:
     async def method_get(self, msg):
         self.debug("msg: "+str(msg), 'msg')
         portname = msg['port']
-        if portname not in self.ports:
+        port = self.port_get(portname)
+        if port is None:
             self.warning('Trying to get value of unknown port "{}"'.format(portname), 'msg')
-            return None
-        else:
-            port = self.ports[portname]
-        self.debug('policy ='+str(msg['policy'])+' port='+str(portname), 'msg')
+            response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'error':'Unknown port '+str(portname)}
+            await self.msg_send(msg['prx_src'], response)
+            self.debug("Replied with:"+str(response), 'msg')
+        self.debug('policy =' + str(msg['policy']) + ' port=' + str(portname), 'msg')
         if msg['policy'] == 'immediate':
             # Check if a task provides the port value.
             if 'provided_by' in port:
@@ -330,8 +325,8 @@ class Node:
                     link = self.links[need]
                     #TODO: test if launching a new subscription is needed
                     if True:
-                        self.ports[need]['queue'] = asyncio.Queue(maxsize = 1)
-                        self.debug('ports: '+str(self.ports))
+                        self.port_get(need)['queue'] = asyncio.Queue(maxsize = 1)
+                        #self.debug('ports: '+str(self.ports))
                         await self.msg_query(self.parent, {'method':'get', 'policy':'on_update', 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.port_updated, client = need)
                 #TODO
                 # Launch task
