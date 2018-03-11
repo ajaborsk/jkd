@@ -7,6 +7,7 @@
         <link node="serial1" port="output" input="input" />
       </links>
     </serial_line_process>
+    <data_object name="config" persistent="true"/>
     <history name="esp01_128_histo" timestamp="true"></history>
     <history name="jee_histo">
       <links>

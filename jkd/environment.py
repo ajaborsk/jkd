@@ -34,6 +34,7 @@ registry = {
         "subprocessus":Subprocessus,
         "cache":Cache,            # Not Working (yet) !
         "data_file":DataFile,     # Not Working (yet) !
+        "data_object":DataObject,     # Not Working (yet) !
         "history":History,
         "signal_generator":SignalGenerator,
         "serial_capture":SerialCapture,

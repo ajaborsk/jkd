@@ -88,7 +88,7 @@ class Node:
                         # No check for now (will be done in self.run() preparation part)
                         self.debug('link: '+str(port_name)+' <== '+str(self.links[port_name]))
 
-    def task_add(self, taskname, coro = None, gets = [], returns = [], needs = [], provides = [], autolaunch = False):
+    def task_add(self, taskname, coro = None, gets = [], returns = [], needs = [], provides = [], autolaunch = False, client = None):
         """Add a task to node tasks list
         """
         self.tasks[taskname] = {'coro':coro,
@@ -97,14 +97,16 @@ class Node:
                                 'needs':needs,
                                 'provides':provides,
                                 'autolaunch':autolaunch,
+                                'client':client,
                                 'task':None }
 
-    def port_add(self, portname, mode = 'output', cached = False, timestamped = False, auto = False):
+    def port_add(self, portname, mode = 'output', cached = False, timestamped = False, auto = False, client = None):
         self.ports[portname] = { 'mode': mode,
                                  'cached': cached,
                                  'value': None,
                                  'timestamped': timestamped,
-                                 'auto':auto,
+                                 'auto': auto,
+                                 'client': client,
                                  'connections':[]}
 
     def port_get(self, portname):
@@ -121,6 +123,10 @@ class Node:
         else:
             self.error('no intern queue for port: '+str(portname))
 
+    async def port_write(self, portname, value):
+        # default action : do nothing
+        pass
+
     async def port_value_update(self, portname, value):
         #self.debug('portname: '+str(portname))
         port = self.port_get(portname)
@@ -128,6 +134,8 @@ class Node:
         if port.get('cached', False):
             port['value'] = value
             #self.debug('port:'+str(port)+' '+str(self.ports[portname]))
+        # internal stuff...
+        await self.port_write(portname, value)
         for cnx in port['connections']:
             #self.debug('cnx: '+str(cnx))
             if 'update' in cnx:
@@ -285,14 +293,19 @@ class Node:
                     self.warning("TODO")
                 # Launch task
                 self.debug("launch task: "+str(task)+' '+str(args), 'msg')
-                query_args=msg.get("args", {})
+                kwargs = {}
+                query_args=msg.get("args", None)
+                if query_args is not None:
+                    kwargs['args'] = query_args
+                if task['client'] is not None:
+                    kwargs['client'] = task['client']
                 if len(self.tasks[port['returned_by']]['returns']) == 1:
                     coro_f = task['coro']
-                    coro = coro_f(*args, args=query_args)
+                    coro = coro_f(*args, **kwargs)
                     result = await coro
                 else:
                     idx = self.tasks[port['returned_by']]['returns'].index(portname)
-                    result = await task['coro'](*args, args=query_args)
+                    result = await task['coro'](*args, **kwargs)
                     result = result[idx]
                 self.debug("result: "+str(result), 'msg')
             else:
