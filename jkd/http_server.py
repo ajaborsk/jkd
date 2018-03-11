@@ -29,6 +29,7 @@ class HttpServer(Node):
         self.web_app.router.add_get('/view/{app}', self.http_view_handler)
         self.web_app.router.add_get('/{app}', self.http_handler)
         self.web_app.router.add_get('/{app}/{address:[^{}$]+}', self.http_handler)
+        self.web_app.router.add_put('/{app}/{address:[^{}$]+}', self.http_put_handler)
 
         aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
@@ -139,6 +140,35 @@ class HttpServer(Node):
 
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
+        return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
+
+    async def http_put_handler(self, request):
+        self.debug("PUT: "+str(request))
+        app_name = request.match_info.get('app', "")
+        if app_name == "":
+            text = "<html><body><p>Default (empty) page</p></body></html>"
+        else:
+            text='well done !'
+            path = request.url.path.split('/')
+            app_name = path[1]
+            port_name = path[-1]
+            msg_url = '/'.join(path[1:-1])
+            if port_name == '':
+                port_name = 'data'
+            self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name))
+            self.debug("args: " + str(await request.json()))
+            try:
+                app = self.env[app_name]
+                text = await self.msg_query(app, {'method':'put', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(await request.json())}, timeout = 5.)
+                if text is None:
+                    text = 'Timeout...'
+                else:
+                    text = str(text)
+            except KeyError:
+                # Application not found
+                #TODO : True 404 Not Found page
+                text = 'Application Not found'
+            return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
         return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
     @aiohttp_jinja2.template('edit.jinja2')

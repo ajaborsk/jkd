@@ -25,7 +25,8 @@ class DataProcess0(DataProcess):
                     {'borderWidth':1, 'borderColor':'blue', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
                     {'borderWidth':1, 'borderColor':'red', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
                     {'borderWidth':1, 'borderColor':'magenta', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'borderWidth':1, 'borderColor':'cyan', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},]
+                    {'borderWidth':1, 'borderColor':'cyan', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'borderWidth':1, 'borderColor':'orange', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},]
 
         for point in data:
             labels.append(int(point[0] * 1000))
@@ -35,5 +36,6 @@ class DataProcess0(DataProcess):
             datasets[3]['data'].append(point[1][4])
             datasets[4]['data'].append(point[1][5])
             datasets[5]['data'].append(point[1][6])
+            datasets[6]['data'].append(point[1][4] - point[1][3])
         response = {'labels':labels, 'datasets':datasets}
         return response
