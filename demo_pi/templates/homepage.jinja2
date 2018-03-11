@@ -6,6 +6,8 @@
   <link rel="stylesheet" href="/static/css/jkd.css">
   <script src="/static/scripts/jquery-3.3.1.min.js"></script>
   <script src="/static/scripts/Chart.bundle.min.js"></script>
+  <script src="/static/scripts/hammer.min.js"></script>
+  <script src="/static/scripts/chartjs-plugin-zoom.min.js"></script>
   <script src="/static/scripts/jkd.js"></script>
 </head>
 <body>
@@ -91,8 +93,16 @@ var myChart = new Chart(ctx, {
                     //beginAtZero:true
                 }
             }]
-        }
-    }
+        },
+        zoom:{
+            enabled:true,
+            mode:'xy',
+        },
+        pan:{
+            enabled:true,
+            mode:'xy',
+        },
+    },
 });
 
   var ctx2 = $("#chart2");
