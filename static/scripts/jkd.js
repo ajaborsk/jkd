@@ -52,6 +52,28 @@ class JkdEnv
     return lcid;
    }
 
+  put(url, args, callback, client)
+   {
+    var lcid = this.next_lcid;
+    this.next_lcid++;
+
+    this.channels[lcid] = {'cb':callback, 'client':client};
+
+//    console.log(typeof(callback));
+//    console.log(typeof(this.channels[lcid]['cb']));
+
+    var msg = { 'url'   : '/' + this.appname + url,
+                'src'   : '/chuap/homepage', // Unused ??
+                'from'  : this.from, // Unused ??
+                'lcid'  : lcid,
+                'flags' : 'c',
+                'method': 'put',
+                'policy': 'immediate',
+                'args' : args };
+    this.websocket.send(JSON.stringify(msg));
+    return lcid;
+   }
+
 
   query(url, args, callback, client)
    {

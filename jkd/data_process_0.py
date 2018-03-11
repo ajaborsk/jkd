@@ -11,6 +11,7 @@ class DataProcess0(DataProcess):
     def __init__(self, elt = None, **kwargs):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
+        self.port_add('input1', mode = 'input') # test for 'put' method
         self.port_add('output', cached = True, timestamped = True)
         self.task_add('process', coro = self.process, gets=['input'], returns=['output'])
 
@@ -19,12 +20,12 @@ class DataProcess0(DataProcess):
         #value = float(line[1][7:])
         #self.debug('value: '+str(value))
         labels = []
-        datasets = [{'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},]
+        datasets = [{'borderWidth':1, 'borderColor':'black', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'borderWidth':1, 'borderColor':'green', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'borderWidth':1, 'borderColor':'blue', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'borderWidth':1, 'borderColor':'red', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'borderWidth':1, 'borderColor':'magenta', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'borderWidth':1, 'borderColor':'cyan', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},]
 
         for point in data:
             labels.append(int(point[0] * 1000))

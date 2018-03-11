@@ -51,7 +51,8 @@ class Node:
         # I/O ports. each port has a entry in the dictionary : 'portname':{properties}
         self.ports = {}
         self.tasks = {}
-        self.methods = {'get':self.method_get}
+        self.methods = {'get':self.method_get,
+                        'put':self.method_put}
 
         # Per-Query channels
         # channels segments which this node created
@@ -141,6 +142,7 @@ class Node:
                 # make some place...
                 queue.get_nowait()
             queue.put_nowait(value)
+        return value
 
     async def _on_update_loop(self, inputs = [], outputs = [], coro = None, query_args = {}):
         self.debug('inputs: '+str(inputs)+', outputs:'+str(outputs))
@@ -336,6 +338,17 @@ class Node:
             self.debug(self.name + ": subscriptions = " + str(port['connections']), 'msg')
         else:
             self.warning("Unhandled policy: "+str(msg['policy']))
+
+    async def method_put(self, msg):
+        self.debug("msg: "+str(msg), 'msg')
+
+        value = await self.port_value_update(msg['port'], msg['args']['value'])
+
+        # Send reply
+        response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'reply':value}
+        #response = {'flags':'d', 'prx_src':self, 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
+        await self.msg_send(msg['prx_src'], response)
+        self.debug("Replied with:"+str(response), 'msg')
 
     async def msg_queue_transmit(self, destination, msg, delegate = False):
         "Low level queue message API"

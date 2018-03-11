@@ -16,7 +16,8 @@
   <p id="test1">Blabla</p>
   <div>
     <span id="push1">Launch : </span>
-    <span id="result1">Result</span>
+    <span id="result1">Result</span><br/>
+    <span id="put1">Change : </span>
     <canvas id="chart1" width="800" height="200"></canvas>
   </div>
   <div>
@@ -168,6 +169,16 @@ function removeData(chart) {
         myChart.data = msg.reply;
         myChart.update();
         $('#result1').text(msg.reply);
+       },
+      null);
+   });
+
+  $("#put1").click(function(evt)
+   {
+    env.put('/data_process_0_0#input1', {'value':3.14},
+      function (msg, client)
+       {
+        $('#put1').text(msg.reply);
        },
       null);
    });
