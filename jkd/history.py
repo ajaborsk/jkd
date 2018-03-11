@@ -9,8 +9,9 @@ from .node import Node
 
 class History(Node):
     tagname = "history"
-    def __init__(self, elt = None, **kwargs):
+    def __init__(self, elt = None, timestamp = False, **kwargs):
         super().__init__(elt=elt, **kwargs)
+        self.timestamp = timestamp
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
         self.task_add('process', autolaunch = True, coro = self.historize, needs=['input'], provides=[])
@@ -28,6 +29,8 @@ class History(Node):
         self.index_file = open(self.filename+'.idx', mode='ab', buffering = 0)
         while True:
             data = await self.port_read('input')
+            if self.timestamp:
+                data = [time.time(), data]
             if data[1] is not None:
                 self.debug('data: '+str(data))
                 data_bin = json.dumps(data).encode('utf8')
