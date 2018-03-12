@@ -16,6 +16,7 @@
     </history>
     <data_process_0 name="data_process_0_0">
       <links>
+        <link input="config" node="config" port="data" />
         <link input="input" node="jee_histo" port="output" />
       </links>
     </data_process_0>

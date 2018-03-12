@@ -11,11 +11,12 @@ class DataProcess0(DataProcess):
     def __init__(self, elt = None, **kwargs):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
-        self.port_add('input1', mode = 'input') # test for 'put' method
+        self.port_add('config', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
-        self.task_add('process', coro = self.process, gets=['input'], returns=['output'])
+        self.task_add('process', coro = self.process, gets=['config','input'], returns=['output'])
 
-    async def process(self, data, args={}):
+    async def process(self, config, data, args={}):
+        self.debug('config: '+str(config))
         self.debug('data[0]: '+str(data[0])+' args: '+str(args))
         #value = float(line[1][7:])
         #self.debug('value: '+str(value))
