@@ -49,6 +49,7 @@ class DataObject(Node):
             return self.ports[portname]
         else:
             splitted = portname.split(sep='.')
+            self.debug('Splitted: ' + str(splitted))
             touched = False
             if splitted[0] == 'data':
                 root = self.data
