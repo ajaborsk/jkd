@@ -128,7 +128,7 @@ var myChart = new Chart(ctx, {
 
   $("#push1").click(function(evt)
    {
-    env.get('/sql0#test0', 'single',
+    env.get('/tabulator_format#output', {},
       function (msg, client)
        {
         $('#result1').text(msg.reply.query);

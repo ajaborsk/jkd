@@ -2,6 +2,7 @@
 <application name="chuap">
   <nodes>
     <sql_datasource name="sql0" database="AssetPlus" username="gmao" password="gmao">
+      <data_object name="config"/>
       <query name="test0">
         <column title="Blabla" field="int_statut"/>
         SELECT count(nu_int) AS "Total", code_techn
@@ -16,6 +17,12 @@
         WHERE da_ap >= '2018-02-01';
       </query>
     </sql_datasource>
+    <data_format name="tabulator_format">
+      <links>
+        <link input="config" node="config" port="data"/>
+        <link input="input" node="sql0" port="test0"/>
+      </links>
+    </data_format>
     <html_page appname="chuap" name="homepage" template="homepage" title="Test Application Asset+ CHU Amiens-Picardie">
       <table src="/chuap/sql0/test0"/>
       <table id="ma_table" src="/chuap/sql0/test0"/>
