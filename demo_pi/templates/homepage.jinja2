@@ -175,7 +175,7 @@ function removeData(chart) {
 
   $("#put1").click(function(evt)
    {
-    env.put('/data_process_0_0#input1', {'value':3.14},
+    env.put('/config#data.test0', {'value':3.14},
       function (msg, client)
        {
         $('#put1').text(msg.reply);
