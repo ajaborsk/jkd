@@ -5,11 +5,20 @@ import jinja2
 from .node import *
 
 class HtmlPart:
-    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None):
+    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, **kwargs):
         self.scripts = []
         self.css = []
         self.html = ""
         self.js = ""
+        self.kwargs = kwargs
+
+    def script_add(self, script_name):
+        if script_name not in self.scripts:
+            self.scripts.append(script_name)
+
+    def css_add(self, css_name):
+        if css_name not in self.css:
+            self.css.append(css_name)
 
 
 class HtmlPartTable(HtmlPart):
@@ -20,6 +29,11 @@ class HtmlPartTable(HtmlPart):
 class HtmlPartChart(HtmlPart):
     def __init__(self, elt = None, p_class = None, p_name = None, p_id = None):
         pass
+
+
+class HtmlPartHisto(HtmlPart):
+    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None):
+        self.scripts_add("jkd.js")
 
 
 class HtmlPage(Node):

@@ -163,7 +163,7 @@ function removeData(chart) {
 
   $("#push1").click(function(evt)
    {
-    env.get('/data_process_0_0#output', {'query_arg':3.14},
+    env.get('/data_process_0_0#output', {'after':Date.now() / 1000 - 3600 * 3},
       function (msg, client)
        {
         myChart.data = msg.reply;

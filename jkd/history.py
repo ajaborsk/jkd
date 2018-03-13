@@ -95,7 +95,7 @@ class History(Node):
             return None
         if start_ts > ts:
             index_file.close()
-            return end_idx
+            return start_idx
         # Start dichotomy algorithm
         while end_idx - start_idx > 1:
             cur_idx = int((start_idx + end_idx) // 2)
@@ -114,20 +114,24 @@ class History(Node):
         data_file = open(self.filename+'.data', mode='rb')
         index_file = open(self.filename+'.idx', mode='rb')
         done = False
-
+        before_ts = args.get("before", math.inf)
+        after_ts = args.get("after", -math.inf)
         #TEST
-        index_file.seek(self.index_after(time.time() - 3600 * 8) * self.idx_rec_size)
+        index_file.seek(self.index_after(after_ts) * self.idx_rec_size)
 
         while not done:
             idx_b = index_file.read(self.idx_rec_size)
             if len(idx_b) == self.idx_rec_size:
                 idx = struct.unpack('QQL', idx_b)
                 #self.debug(str(idx))
-                data_file.seek(idx[1])
-                b_data = data_file.read(idx[2])
-                #self.debug(str(b_data))
-                data = json.loads(b_data.decode('utf8'))
-                result.append(data)
+                if idx[0] < before_ts:
+                    data_file.seek(idx[1])
+                    b_data = data_file.read(idx[2])
+                    #self.debug(str(b_data))
+                    data = json.loads(b_data.decode('utf8'))
+                    result.append(data)
+                else:
+                    done = True
             else:
                 done = True
         data_file.close()

@@ -278,6 +278,7 @@ class Node:
                     self.warning("TODO")
             elif 'returned_by' in port:
                 self.debug("returned_by mode: "+str(msg), 'msg')
+                query_args = msg.get("args", None)
                 # Port is *returned* by a task
                 task = self.tasks[port['returned_by']]
                 # Get needed parameters for task
@@ -288,13 +289,16 @@ class Node:
                         #TEST
                         self.debug('  link found: '+str(self.links[arg]))
                         #text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(request.query)}, timeout = 5.)
-                        resp = await self.msg_query(self.parent, {'method':'get', 'policy':'immediate', 'flags':'c', 'url':self.links[arg]['node'], 'port':self.links[arg]['port']}, timeout = 5.)
+                        arg_msg = {'method':'get', 'policy':'immediate', 'flags':'c', 'url':self.links[arg]['node'], 'port':self.links[arg]['port']}
+                        # propagate query_args
+                        if query_args is not None:
+                            arg_msg['args'] = query_args
+                        #TODO: define a timeout policy instead of spreading 5. everywhere...
+                        resp = await self.msg_query(self.parent, arg_msg, timeout = 5.)
                         args.append(resp)
-                    self.warning("TODO")
                 # Launch task
                 self.debug("launch task: "+str(task)+' '+str(args), 'msg')
                 kwargs = {}
-                query_args=msg.get("args", None)
                 if query_args is not None:
                     kwargs['args'] = query_args
                 if task['client'] is not None:
