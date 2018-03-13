@@ -138,7 +138,7 @@ function removeData(chart) {
 
   $("#push1").click(function(evt)
    {
-    env.query('/parser#output', 'updates',
+    env.query('/parser/output', 'updates',
       function (msg, client)
        {
         $('#result1').text(msg.reply[1]);
@@ -150,7 +150,7 @@ function removeData(chart) {
    {
     $("#stop2").show();
     $("#start2").hide();
-    lcid = env.query('/heavyproc/siggen_ext#output', 'updates',
+    lcid = env.query('/heavyproc/siggen_ext/output', 'updates',
       function(msg, client)
        {
         $('#result2').text(client + msg.reply[1]);

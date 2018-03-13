@@ -4,11 +4,8 @@
   <meta charset="utf-8">
   <title>{{pagetitle}}</title>
 {%- for css in css_list %}
-  <link rel="stylesheet" href="/static/css/{{css}}">
+  <link rel="stylesheet" href="/static/css/{{css}}"/>
 {%- endfor %}
-  <script src="/static/scripts/Chart.bundle.min.js"></script>
-  <script src="/static/scripts/hammer.min.js"></script>
-  <script src="/static/scripts/chartjs-plugin-zoom.min.js"></script>
 {%- for script in scripts %}
   <script src="/static/scripts/{{script}}"></script>
 {%- endfor %}
@@ -149,25 +146,9 @@ var myChart2 = new Chart(ctx2, {
     }
 });
 
-function addData(chart, label, data) {
-    chart.data.labels.push(label);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(data);
-    });
-    chart.update(0);
-}
-
-function removeData(chart) {
-    chart.data.labels.shift();
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.shift();
-    });
-    chart.update(0);
-}
-
   $("#push1").click(function(evt)
    {
-    env.get('/data_process_0_0#output', {'after':Date.now() / 1000 - 3600 * 3},
+    env.get('/data_process_0_0/output', {'after':Date.now() / 1000 - 3600 * 3},
       function (msg, client)
        {
         myChart.data = msg.reply;
@@ -179,7 +160,7 @@ function removeData(chart) {
 
   $("#put1").click(function(evt)
    {
-    env.put('/config#data.test0', {'value':3.14},
+    env.put('/config/data.test0', {'value':3.14},
       function (msg, client)
        {
         $('#put1').text(msg.reply);
@@ -191,7 +172,7 @@ function removeData(chart) {
    {
     $("#stop2").show();
     $("#start2").hide();
-    lcid = env.query('/heavyproc/siggen_ext#output', 'updates',
+    lcid = env.query('/heavyproc/siggen_ext/output', 'updates',
       function(msg, client)
        {
         $('#result2').text(client + msg.reply[1]);
@@ -212,12 +193,13 @@ function removeData(chart) {
     env.send_on_channel(Number($("#stop2").attr('lcid')), {'flags':'d', 'cmd':'close'});
    });
 
+{{js}}
+
   // Launch jkd environment
   env.run();
 
   $("#test1").text("Hello world!");
 
-{{js}}
 
 });
 

@@ -453,10 +453,14 @@ class Node:
                 if msg['path'][0:name_len + 2] == '/' + self.name + '/':
                     msg['path'] = msg['path'][name_len + 2:]
                 elt = msg['path'].split('/')[0]
-                if elt in self:
-                    await self.msg_reroute(self[elt], msg)
-                else:
+                try:
+                    if elt in self:
+                        await self.msg_reroute(self[elt], msg)
+                    else:
+                        self.warning('No route for '+str(msg), 'msg')
+                except TypeError:
                     self.warning('No route for '+str(msg), 'msg')
+
         elif 'reply' in msg:
             # This is a reply
             self.debug(self.name + ' reply catched : ' + str(msg), 'msg')

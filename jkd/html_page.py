@@ -24,7 +24,7 @@ class HtmlPart:
             self.css.append(css_name)
 
     def context(self):
-        return {'p_id':self.p_id}
+        return {'p_id':self.p_id, 'p_class':self.p_class, 'p_name':self.p_name}
 
     def get_html(self):
         return self.html_template.render(self.context())
@@ -49,19 +49,21 @@ class HtmlPartChart(HtmlPart):
 
 
 class HtmlPartHisto(HtmlPart):
-    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, **kwargs):
+    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, **kwargs):
         super().__init__(elt, p_class, p_name, p_id, **kwargs)
-        parms = {'p_id':self.p_id}
+        #parms = {'p_id':self.p_id}
+        self.data_addr = data
         self.css_add("jkd.css")
         self.script_add("jkd.js")
-        self.script_add("jkd.js")
-        self.script_add("jkd.js")
-        self.script_add("jkd.js")
-        self.script_add("jkd.js")
+        self.script_add("Chart.bundle.min.js")
+        self.script_add("hammer.min.js")
+        self.script_add("chartjs-plugin-zoom.min.js")
+        self.script_add("jkd-chart.js")
         self.html_template = jinja2.Template("""
   <!-- HtmlPartHisto {{p_id}} -->
   <div id="{{p_id}}-container">
-    <canvas id="{{p_id}}-canvas" width="800" height="100"/>
+    <canvas style="bgcolor:white;" id="{{p_id}}-canvas" width="800" height="100"></canvas>
+    <div style=""><span id="{{p_id}}-update" style="width:100px;">Update</span></div>
   </div>
   <!-- HtmlPartHisto end -->""")
         self.js_template = jinja2.Template("""
@@ -71,7 +73,6 @@ class HtmlPartHisto(HtmlPart):
   var {{p_id}}_chart = new Chart({{p_id}}_ctx, {
     type: 'line',
     data: {
-//        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
         datasets: [{
             label: '# of Votes',
             data: [12, 19, 3, 5, 2, 3],
@@ -97,12 +98,9 @@ class HtmlPartHisto(HtmlPart):
     options: {
         scales: {
             xAxes:[{
-//              autoSkip:true,
-//              autoSkipPadding:10,
                 minRotation:45,
                 type: 'time',
                 time:{
-//                  unit:'millisecond',
                     displayFormats:{
                     millisecond:'HH:mm:ss.S',
                     second:'HH:mm:ss',
@@ -118,16 +116,33 @@ class HtmlPartHisto(HtmlPart):
         },
         zoom:{
             enabled:true,
-            mode:'xy',
+            mode:'y',
         },
         pan:{
             enabled:true,
-            mode:'xy',
+            mode:'y',
         },
     },
 });
+
+  $("#{{p_id}}-update").click(function (evt) {
+    env.get('{{data_addr}}', {'after':Date.now() / 1000 - 3600 * 3},
+      function (msg, client)
+       {
+        {{p_id}}_chart.data = msg.reply;
+        {{p_id}}_chart.update();
+       },
+      null);
+    }
+  );
+
   // end of HtmlPartHisto script part
 """)
+
+    def context(self):
+        ctx = super().context()
+        ctx.update({'data_addr':self.data_addr})
+        return ctx
 
 
 class HtmlPage(Node):

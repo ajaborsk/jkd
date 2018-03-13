@@ -82,8 +82,19 @@ class HttpServer(Node):
                         msg['prx_src'] = self
                         await self.msg_send(channel['prx_src'], msg)
                     elif 'url' in msg:
-                        appname = msg['url'][1:].split('/')[0]
-                        lcid = await self.msg_query(self.env[appname], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
+                        self.debug("msg: " + str(msg), "msg")
+                        path = msg['url'].split('/')
+                        app_name = path[1]
+                        port_name = path[-1]
+                        msg_url = '/'.join(path[1:-1])
+                        self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name))
+                        msg['url'] = msg_url
+                        msg['port']= port_name
+                        #appname = msg['url'][1:].split('/')[0]
+                        if app_name in self.env:
+                            lcid = await self.msg_query(self.env[app_name], msg, self.reply_for_ws, {'wsid':wsid, 'lcid':msg['lcid']})
+                        else:
+                            self.warning('Unknown application: '+str(app_name))
                     elif msg['lcid'] == "q1":
                         reply = await self.ext_app.aget(msg['lcid'])
                     elif msg['lcid'] == "q2":
@@ -106,6 +117,7 @@ class HttpServer(Node):
         # return {'name': 'Andrew', 'surname': 'Svetlov'}
 
     async def http_handler(self, request):
+        self.debug("request: "+repr(request))
         name = request.match_info.get('app', "Anonymous")
 
         if name == "Anonymous":
@@ -191,6 +203,7 @@ class HttpServer(Node):
             return web.Response(content_type = "text/html", charset = 'utf-8', body = text.encode('utf_8'))
 
     def run(self, host='0.0.0.0', port=8080):
+        self.debug("serving on "+str(host)+':'+str(port))
         super().run()
         while True:
             # Run web server, relaunching on OSError (broken socket for WS : aiohttp bug ??)
