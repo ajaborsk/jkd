@@ -1,3 +1,4 @@
+import io
 import asyncio
 import time
 import datetime
@@ -11,6 +12,7 @@ class History(Node):
     tagname = "history"
     def __init__(self, elt = None, timestamp = False, **kwargs):
         super().__init__(elt=elt, **kwargs)
+        self.idx_rec_size = struct.calcsize('QQL')
         self.timestamp = timestamp
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
@@ -45,15 +47,80 @@ class History(Node):
                 self.index_file.write(index_bin)
                 #self.debug('4: '+str(data))
 
+    def index_get_ts(self, indexf, cur_idx):
+        #self.debug('idx: '+str(cur_idx))
+        indexf.seek(cur_idx * self.idx_rec_size)
+        idx_b = indexf.read(self.idx_rec_size)
+        idx = struct.unpack('QQL', idx_b)
+        #self.debug('idx: '+str(cur_idx)+' ts: '+str(idx[0]))
+        return idx[0]
+
+    def index_before(self, ts):
+        "Returns index in data file for last record that is before (or at) timestamp ts"
+        #self.debug('target ts: '+str(ts))
+        index_file = open(self.filename+'.idx', mode='rb')
+        start_idx = 0
+        start_ts = self.index_get_ts(index_file, start_idx)
+        end_idx = int(index_file.seek(0, io.SEEK_END) // self.idx_rec_size) - 1
+        end_ts = self.index_get_ts(index_file, end_idx)
+        if end_ts <= ts:
+            index_file.close()
+            return end_idx
+        if start_ts > ts:
+            index_file.close()
+            return None
+        # Start dichotomy algorithm
+        while end_idx - start_idx > 1:
+            cur_idx = int((start_idx + end_idx) // 2)
+            cur_ts = self.index_get_ts(index_file, cur_idx)
+            if cur_ts <= ts:
+                start_idx = cur_idx
+                start_ts = cur_ts
+            else:
+                end_idx = cur_idx
+                end_ts = cur_ts
+        index_file.close()
+        return cur_idx
+
+    def index_after(self, ts):
+        "Returns index in data file for first record that is after (or at) timestamp ts"
+        #self.debug('target ts: '+str(ts))
+        index_file = open(self.filename+'.idx', mode='rb')
+        start_idx = 0
+        start_ts = self.index_get_ts(index_file, start_idx)
+        end_idx = int(index_file.seek(0, io.SEEK_END) // self.idx_rec_size) - 1
+        end_ts = self.index_get_ts(index_file, end_idx)
+        if end_ts <= ts:
+            index_file.close()
+            return None
+        if start_ts > ts:
+            index_file.close()
+            return end_idx
+        # Start dichotomy algorithm
+        while end_idx - start_idx > 1:
+            cur_idx = int((start_idx + end_idx) // 2)
+            cur_ts = self.index_get_ts(index_file, cur_idx)
+            if cur_ts < ts:
+                start_idx = cur_idx
+                start_ts = cur_ts
+            else:
+                end_idx = cur_idx
+                end_ts = cur_ts
+        index_file.close()
+        return cur_idx
+
     async def history(self, args = {}):
         result = []
         data_file = open(self.filename+'.data', mode='rb')
         index_file = open(self.filename+'.idx', mode='rb')
-        size = struct.calcsize('QQL')
         done = False
+
+        #TEST
+        index_file.seek(self.index_after(time.time() - 3600 * 8) * self.idx_rec_size)
+
         while not done:
-            idx_b = index_file.read(size)
-            if len(idx_b) == size:
+            idx_b = index_file.read(self.idx_rec_size)
+            if len(idx_b) == self.idx_rec_size:
                 idx = struct.unpack('QQL', idx_b)
                 #self.debug(str(idx))
                 data_file.seek(idx[1])
@@ -63,4 +130,6 @@ class History(Node):
                 result.append(data)
             else:
                 done = True
+        data_file.close()
+        index_file.close()
         return result
