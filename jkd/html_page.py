@@ -62,8 +62,17 @@ class HtmlPartHisto(HtmlPart):
         self.html_template = jinja2.Template("""
   <!-- HtmlPartHisto {{p_id}} -->
   <div id="{{p_id}}-container">
-    <canvas style="bgcolor:white;" id="{{p_id}}-canvas" width="800" height="100"></canvas>
-    <div style=""><span id="{{p_id}}-update" style="width:100px;">Update</span></div>
+    <canvas style="bgcolor:white;" id="{{p_id}}-canvas" width="800" height="200"></canvas>
+    <div style="">
+      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">Update</span>
+      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;&lt;</span>
+      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;</span>
+      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;</span>
+      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;&gt;</span>
+      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">+</span>
+      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">-</span>
+      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">reset</span>
+    </div>
   </div>
   <!-- HtmlPartHisto end -->""")
         self.js_template = jinja2.Template("""
