@@ -3,14 +3,18 @@
 <head>
   <meta charset="utf-8">
   <title>{{pagetitle}}</title>
-  <link rel="stylesheet" href="/static/css/jkd.css">
-  <script src="/static/scripts/jquery-3.3.1.min.js"></script>
+{%- for css in css_list %}
+  <link rel="stylesheet" href="/static/css/{{css}}">
+{%- endfor %}
   <script src="/static/scripts/Chart.bundle.min.js"></script>
   <script src="/static/scripts/hammer.min.js"></script>
   <script src="/static/scripts/chartjs-plugin-zoom.min.js"></script>
-  <script src="/static/scripts/jkd.js"></script>
+{%- for script in scripts %}
+  <script src="/static/scripts/{{script}}"></script>
+{%- endfor %}
 </head>
 <body>
+{{html}}
   <p>{{name}}</p>
   <!-- Le reste du contenu -->
   <p id="test1">Blabla</p>
@@ -212,6 +216,8 @@ function removeData(chart) {
   env.run();
 
   $("#test1").text("Hello world!");
+
+{{js}}
 
 });
 
