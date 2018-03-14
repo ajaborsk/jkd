@@ -77,6 +77,16 @@ class JkdHistoryChart {
         self.chart.resetZoom();
     });
 
+    $("#" + this.prefix + "-unzoom").click(function (evt) {
+        self.duration *= 2;
+        self.update(self);
+    });
+
+    $("#" + this.prefix + "-zoom").click(function (evt) {
+        self.duration /= 2;
+        self.update(self);
+    });
+
 //    $("#" + this.prefix + "-duration").text(self.duration + " s");
 
     self.jkd_env.on_connect[self.prefix] ={'cb':self.update, 'client':self};
