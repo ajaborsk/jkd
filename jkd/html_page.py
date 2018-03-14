@@ -65,18 +65,22 @@ class HtmlPartHisto(HtmlPart):
     <canvas style="bgcolor:white;" id="{{p_id}}-canvas" width="800" height="200"></canvas>
     <div style="">
       <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">Update</span>
-      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;&lt;</span>
-      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;</span>
-      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;</span>
-      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;&gt;</span>
-      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">+</span>
-      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">-</span>
-      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">reset</span>
+      <span id="{{p_id}}-prev2" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;&lt;</span>
+      <span id="{{p_id}}-prev" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;</span>
+      <span id="{{p_id}}-next" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;</span>
+      <span id="{{p_id}}-next2" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;&gt;</span>
+      <span id="{{p_id}}-zoom" style="text-align:center; display:inline-block; width:12%; height:30px;">+</span>
+      <span id="{{p_id}}-unzoom" style="text-align:center; display:inline-block; width:12%; height:30px;">-</span>
+      <span id="{{p_id}}-zreset" style="text-align:center; display:inline-block; width:12%; height:30px;">RAZ</span>
     </div>
   </div>
   <!-- HtmlPartHisto end -->""")
         self.js_template = jinja2.Template("""
   // HtmlPartHisto {{p_id}} script part
+
+  var hc = new JkdHistoryChart(env, "{{p_id}}", "{{data_addr}}");
+""")
+        dummy = ("""
   var {{p_id}}_ctx = $("#{{p_id}}-canvas");
 
   var {{p_id}}_chart = new Chart({{p_id}}_ctx, {
@@ -145,6 +149,9 @@ class HtmlPartHisto(HtmlPart):
     }
   );
 
+  $("#{{p_id}}-zreset").click(function (evt) {
+    {{p_id}}_chart.resetZoom();
+  });
   // end of HtmlPartHisto script part
 """)
 
