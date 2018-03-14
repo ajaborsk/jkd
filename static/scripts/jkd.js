@@ -23,6 +23,7 @@ class JkdEnv
     this.ws_url = ws_url;
     this.from = from;
     this.channels = {};
+    this.on_connect = {};
    }
 
    // send a message
@@ -73,7 +74,6 @@ class JkdEnv
     this.websocket.send(JSON.stringify(msg));
     return lcid;
    }
-
 
   query(url, args, callback, client)
    {
@@ -139,6 +139,11 @@ class JkdEnv
      {
       $("#conn_status").text("Connected");
       //send({"data":"Plikdf 1"});
+      var keys = Object.keys(self.on_connect);
+      for (var i = 0;i < keys.length ;i++)
+       {
+        self.on_connect[keys[i]].cb(self.on_connect[keys[i]].client);
+       }
      };
 
     var p1 = partial(this.onmessage, this);

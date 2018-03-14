@@ -7,7 +7,7 @@ class JkdHistoryChart {
         this.data_addr = data_addr;
 
 
-        this.length = 3600; // in seconds
+        this.duration = 3600; // in seconds
         this.start_date = null; // computed from end_date and length
         this.end_date = null; // default => Date.now()
 
@@ -70,20 +70,54 @@ class JkdHistoryChart {
         });
 
     $("#" + this.prefix + "-update").click(function (evt) {
-        self.jkd_env.get(self.data_addr,
-            {'after':Date.now() / 1000 - 3600 * 3},
-            function (msg, client) {
-                self.chart.data = msg.reply;
-                self.chart.update();
-            },
-            null);
+        self.update();
     });
 
     $("#" + this.prefix + "-zreset").click(function (evt) {
         self.chart.resetZoom();
     });
 
+//    $("#" + this.prefix + "-duration").text(self.duration + " s");
+
+    self.jkd_env.on_connect[self.prefix] ={'cb':self.update, 'client':self};
+    //self.update();
     };
+
+    update(client)
+     {
+      var self = client;
+      var args = {};
+      var end_date = null;
+
+      if (self.end_date)
+       {
+        end_date = self.end_date;
+        args['before'] = end_date;
+       }
+      else
+       {
+        end_date = Date.now()/ 1000;
+       }
+
+      if (self.start_date)
+       {
+        args['after'] = self.start_date;
+        self.duration = end_date - self.start_date;
+       }
+      else
+       {
+        args['after'] = end_date - self.duration;
+       }
+
+      self.jkd_env.get(self.data_addr,
+            args,
+            function (msg, client) {
+                self.chart.data = msg.reply;
+                self.chart.update();
+            },
+            null);
+      $("#" + self.prefix + "-duration").text(self.duration + " s");
+     }
 
     addData(label, data) {
         this.chart.data.labels.push(label);

@@ -58,6 +58,7 @@ class HtmlPartHisto(HtmlPart):
         self.script_add("Chart.bundle.min.js")
         self.script_add("hammer.min.js")
         self.script_add("chartjs-plugin-zoom.min.js")
+        self.script_add("moment-with-locales.min.js")
         self.script_add("jkd-chart.js")
         self.html_template = jinja2.Template("""
   <!-- HtmlPartHisto {{p_id}} -->
@@ -67,6 +68,7 @@ class HtmlPartHisto(HtmlPart):
       <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">Update</span>
       <span id="{{p_id}}-prev2" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;&lt;</span>
       <span id="{{p_id}}-prev" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;</span>
+      <span id="{{p_id}}-duration" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;</span>
       <span id="{{p_id}}-next" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;</span>
       <span id="{{p_id}}-next2" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;&gt;</span>
       <span id="{{p_id}}-zoom" style="text-align:center; display:inline-block; width:12%; height:30px;">+</span>
