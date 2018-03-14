@@ -70,7 +70,7 @@ class JkdHistoryChart {
         });
 
     $("#" + this.prefix + "-update").click(function (evt) {
-        self.update();
+        self.update(self);
     });
 
     $("#" + this.prefix + "-zreset").click(function (evt) {
@@ -84,6 +84,30 @@ class JkdHistoryChart {
 
     $("#" + this.prefix + "-zoom").click(function (evt) {
         self.duration /= 2;
+        self.update(self);
+    });
+
+    $("#" + this.prefix + "-prev").click(function (evt) {
+        if (self.end_date)
+         {
+          self.end_date -= self.duration / 2;
+         }
+        else
+         {
+          self.end_date = Date.now() / 1000 - self.duration / 2;
+         }
+        self.update(self);
+    });
+
+    $("#" + this.prefix + "-next").click(function (evt) {
+        if (self.end_date)
+         {
+          self.end_date += self.duration / 2;
+          if (self.end_date > Date.now() / 1000)
+           {
+            self.end_date = null;
+           }
+         }
         self.update(self);
     });
 
