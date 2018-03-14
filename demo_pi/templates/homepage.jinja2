@@ -32,7 +32,7 @@
 
 $(document).ready(function()
  {
-  env = new JkdEnv("demo_pi", "ws://" + window.location.host + "/ws", "/demo_pi/homepage");
+  jkd_env = new JkdEnv("demo_pi", "ws://" + window.location.host + "/ws", "/demo_pi/homepage");
 
   send = function(msg)
    {
@@ -148,7 +148,7 @@ var myChart2 = new Chart(ctx2, {
 
   $("#push1").click(function(evt)
    {
-    env.get('/data_process_0_0/output', {'after':Date.now() / 1000 - 3600 * 3},
+    jkd_env.get('/data_process_0_0/output', {'after':Date.now() / 1000 - 3600 * 3},
       function (msg, client)
        {
         myChart.data = msg.reply;
@@ -160,7 +160,7 @@ var myChart2 = new Chart(ctx2, {
 
   $("#put1").click(function(evt)
    {
-    env.put('/config/data.test0', {'value':3.14},
+    jkd_env.put('/config/data.test0', {'value':3.14},
       function (msg, client)
        {
         $('#put1').text(msg.reply);
@@ -172,7 +172,7 @@ var myChart2 = new Chart(ctx2, {
    {
     $("#stop2").show();
     $("#start2").hide();
-    lcid = env.query('/heavyproc/siggen_ext/output', 'updates',
+    lcid = jkd_env.query('/heavyproc/siggen_ext/output', 'updates',
       function(msg, client)
        {
         $('#result2').text(client + msg.reply[1]);
@@ -190,13 +190,13 @@ var myChart2 = new Chart(ctx2, {
    {
     $("#start2").show();
     $("#stop2").hide();
-    env.send_on_channel(Number($("#stop2").attr('lcid')), {'flags':'d', 'cmd':'close'});
+    jkd_env.send_on_channel(Number($("#stop2").attr('lcid')), {'flags':'d', 'cmd':'close'});
    });
 
 {{js}}
 
   // Launch jkd environment
-  env.run();
+  jkd_env.run();
 
   $("#test1").text("Hello world!");
 
