@@ -147,7 +147,7 @@ class JkdHistoryChart {
             args,
             function (msg, client) {
                 self.chart.data = msg.reply;
-                self.chart.update();
+                self.chart.update(0);
             },
             null);
       $("#" + self.prefix + "-duration").text(self.duration + " s");

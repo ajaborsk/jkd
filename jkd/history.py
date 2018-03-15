@@ -131,7 +131,7 @@ class History(Node):
                 if idx[0] < before_ts:
                     data_file.seek(idx[1])
                     b_data = data_file.read(idx[2])
-                    self.debug(' '+repr(idx)+' '+repr(b_data))
+                    #self.debug(' '+repr(idx)+' '+repr(b_data))
                     data = json.loads(b_data.decode('utf8'))
                     result.append(data)
                 else:
