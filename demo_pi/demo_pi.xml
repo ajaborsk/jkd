@@ -7,20 +7,31 @@
     <!--    <link node="serial1" port="output" input="input" /> -->
       </links>
     </serial_line_process>
-    <data_object name="config" persistent="true"/>
     <history name="esp01_128_histo" timestamp="true"></history>
     <history name="jee_histo">
       <links>
         <link input="input" connect="auto" policy="on_update" node="serial_parser" port="output" />
       </links>
     </history>
+    <!-- model data: capacities, resistors values, gains, offsets, etc. -->
+    <data_object name="model" persistent="true"/>
+    <!-- Data preparation: from raw data (bunch of ints) to scaled & qualified (temperatures, currents, voltages...) -->
+    <data_process_1 name="data_process_1_0">
+      <links>
+        <link input="model" node="model" port="data" />
+        <link input="input" node="jee_histo" port="output" />
+      </links>
+    </data_process_1>
+    <!-- Display configuration (colors, scales, etc.) -->
+    <data_object name="config" persistent="true"/>
+    <!-- Display preparation: from raw data to Chart.js data object -->
     <data_process_0 name="data_process_0_0">
       <links>
         <link input="config" node="config" port="data" />
-        <link input="input" node="jee_histo" port="output" />
+        <link input="input" node="data_process_1_0" port="output" />
       </links>
     </data_process_0>
-    <subprocessus name="heavyproc" appname="erer">
+    <subprocessus name="heavyproc" appname="unused_app_name">
       <nodes>
         <signal_generator name="siggen_ext" />
         <!-- This is a comment -->
