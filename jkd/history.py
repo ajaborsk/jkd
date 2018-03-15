@@ -9,6 +9,10 @@ import struct
 from .node import Node
 
 class History(Node):
+    """A simple history class. It stores data as json strings in a big text file
+       with binary index (timestamp, record position, record size) stored as little endian '<QQL' in index file
+       Quite inefficient but very polyvalent
+    """
     tagname = "history"
     def __init__(self, elt = None, timestamp = False, **kwargs):
         super().__init__(elt=elt, **kwargs)
