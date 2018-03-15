@@ -12,7 +12,7 @@ class History(Node):
     tagname = "history"
     def __init__(self, elt = None, timestamp = False, **kwargs):
         super().__init__(elt=elt, **kwargs)
-        self.idx_rec_size = struct.calcsize('QQL')
+        self.idx_rec_size = struct.calcsize('<QQL')
         self.timestamp = timestamp
         self.port_add('input', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
@@ -42,7 +42,7 @@ class History(Node):
                 #self.debug('2: '+str(data))
                 self.current_pos = self.data_file.tell()
                 size = self.current_pos - pos
-                index_bin = struct.pack('QQL', int(data[0]), pos, size)
+                index_bin = struct.pack('<QQL', int(data[0]), pos, size)
                 #self.debug('3: '+str(data))
                 self.index_file.write(index_bin)
                 #self.debug('4: '+str(data))
@@ -51,7 +51,7 @@ class History(Node):
         #self.debug('idx: '+str(cur_idx))
         indexf.seek(cur_idx * self.idx_rec_size)
         idx_b = indexf.read(self.idx_rec_size)
-        idx = struct.unpack('QQL', idx_b)
+        idx = struct.unpack('<QQL', idx_b)
         #self.debug('idx: '+str(cur_idx)+' ts: '+str(idx[0]))
         return idx[0]
 
@@ -116,18 +116,22 @@ class History(Node):
         done = False
         before_ts = args.get("before", math.inf)
         after_ts = args.get("after", -math.inf)
-        #TEST
-        index_file.seek(self.index_after(after_ts) * self.idx_rec_size)
+
+        index_after = self.index_after(after_ts)
+        if index_after is None:
+            return []
+        else:
+            index_file.seek(index_after * self.idx_rec_size)
 
         while not done:
             idx_b = index_file.read(self.idx_rec_size)
             if len(idx_b) == self.idx_rec_size:
-                idx = struct.unpack('QQL', idx_b)
+                idx = struct.unpack('<QQL', idx_b)
                 #self.debug(str(idx))
                 if idx[0] < before_ts:
                     data_file.seek(idx[1])
                     b_data = data_file.read(idx[2])
-                    #self.debug(str(b_data))
+                    self.debug(' '+repr(idx)+' '+repr(b_data))
                     data = json.loads(b_data.decode('utf8'))
                     result.append(data)
                 else:

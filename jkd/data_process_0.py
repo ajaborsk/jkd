@@ -17,7 +17,8 @@ class DataProcess0(DataProcess):
 
     async def process(self, config, data, args={}):
         self.debug('config: '+str(config))
-        self.debug('data[0]: '+str(data[0])+' args: '+str(args))
+        self.debug('data: '+str(data))
+        #self.debug('data[0]: '+str(data[0])+' args: '+str(args))
         #value = float(line[1][7:])
         #self.debug('value: '+str(value))
         labels = []
