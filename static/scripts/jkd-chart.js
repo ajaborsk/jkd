@@ -40,6 +40,9 @@ class JkdHistoryChart {
                 }]
             },
             options: {
+                tooltips: {
+                    intersect:false,
+                },
                 scales: {
                     xAxes:[{
                         minRotation:45,
@@ -52,11 +55,32 @@ class JkdHistoryChart {
                             }
                         }
                     }],
-                    yAxes: [{
+                    yAxes: [
+                      {
                         ticks: {
                             //beginAtZero:true
-                        }
-                    }]
+                        },
+                       position:'right',
+                      },
+                      {
+                        id:'temp',
+                        scaleLabel:'Temperature (°C)',
+                        type:'linear',
+                        position:'left',
+                      },
+                      {
+                        id:'voltage',
+                        scaleLabel:'Voltage (V)',
+                        type:'linear',
+                        position:'left',
+                      },
+                      {
+                        id:'intensity',
+                        scaleLabel:'Intensity (mA)',
+                        type:'linear',
+                        position:'left',
+                      }
+                      ]
                 },
                 zoom:{
                     enabled:true,

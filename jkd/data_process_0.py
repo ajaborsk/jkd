@@ -23,22 +23,23 @@ class DataProcess0(DataProcess):
         #value = float(line[1][7:])
         #self.debug('value: '+str(value))
         labels = []
-        datasets = [{'borderWidth':1, 'borderColor':'black', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'borderWidth':1, 'borderColor':'green', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'borderWidth':1, 'borderColor':'blue', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'borderWidth':1, 'borderColor':'red', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'borderWidth':1, 'borderColor':'magenta', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'borderWidth':1, 'borderColor':'cyan', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
-                    {'borderWidth':1, 'borderColor':'orange', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},]
+        datasets = [{'label':'V Bat', 'yAxisID':'voltage', 'borderWidth':1, 'borderColor':'blue', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'label':'V Cir', 'yAxisID':'voltage', 'borderWidth':1, 'borderColor':'red', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'label':'T Ext ', 'yAxisID':'temp', 'borderWidth':1, 'borderColor':'magenta', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'label':'T Mcu', 'yAxisID':'temp', 'borderWidth':1, 'borderColor':'cyan', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    {'label':'I Bat', 'yAxisID':'intensity', 'borderWidth':1, 'borderColor':'orange', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
+                    ]
 
         labels = list(data.index.map(lambda a:a.timestamp()))
-        datasets[0]['data'] = list(data[1])
-        datasets[1]['data'] = list(data[2])
-        datasets[2]['data'] = list(data[3])
-        datasets[3]['data'] = list(data[4])
-        datasets[4]['data'] = list(data[5])
-        datasets[5]['data'] = list(data[6])
-        datasets[6]['data'] = list(data[4] - data[3])
+        #datasets[0]['data'] = list(data[1])
+        #datasets[1]['data'] = list(data[2])
+        datasets[0]['data'] = list(data['v_bat'])
+        datasets[1]['data'] = list(data['v_cir'])
+        #datasets[2]['data'] = list(data[3])
+        #datasets[3]['data'] = list(data[4])
+        datasets[2]['data'] = list(data['t_ext'])
+        datasets[3]['data'] = list(data['t_mcu'])
+        datasets[4]['data'] = list(data['i_bat'])
 
         response = {'labels':labels, 'datasets':datasets}
         return response
