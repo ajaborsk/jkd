@@ -8,7 +8,7 @@ from .node import *
 
 class SerialCapture(Node):
 
-    def __init__(self, env = None, parent = None, name = None, elt = None, serial_port="/dev/tty0", serial_baudrate=9600):
+    def __init__(self, env = None, parent = None, name = None, elt = None, serial_port="/dev/ttyS0", serial_baudrate=9600):
         super().__init__(env, parent, name)
 
         self.ports['output'] = {'mode': 'output', 'value': "", 'connections':[]}
