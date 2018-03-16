@@ -293,8 +293,8 @@ class Node:
                         # propagate query_args
                         if query_args is not None:
                             arg_msg['args'] = query_args
-                        #TODO: define a timeout policy instead of spreading 5. everywhere...
-                        resp = await self.msg_query(self.parent, arg_msg, timeout = 5.)
+                        #TODO: define a timeout policy instead of spreading 50. everywhere...
+                        resp = await self.msg_query(self.parent, arg_msg, timeout = 50.)
                         args.append(resp)
                 # Launch task
                 self.debug("launch task: "+str(task)+' '+str(args), 'msg')

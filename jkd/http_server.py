@@ -140,7 +140,7 @@ class HttpServer(Node):
 
             try:
                 app = self.env[app_name]
-                text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(request.query)}, timeout = 5.)
+                text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(request.query)}, timeout = 50.)
                 if text is None:
                     text = 'Timeout...'
                 else:
@@ -171,7 +171,7 @@ class HttpServer(Node):
             self.debug("args: " + str(await request.json()))
             try:
                 app = self.env[app_name]
-                text = await self.msg_query(app, {'method':'put', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(await request.json())}, timeout = 5.)
+                text = await self.msg_query(app, {'method':'put', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(await request.json())}, timeout = 50.)
                 if text is None:
                     text = 'Timeout...'
                 else:
@@ -188,7 +188,7 @@ class HttpServer(Node):
         app_name = request.match_info.get('app', "")
         try:
             app = self.env[app_name]
-            data = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':app_name, 'port':'state'}, timeout = 5.)
+            data = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':app_name, 'port':'state'}, timeout = 50.)
             self.debug("data"+str(data))
             if data is None:
                 text = 'Timeout...'

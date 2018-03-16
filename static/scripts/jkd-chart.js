@@ -1,3 +1,16 @@
+Chart.pluginService.register({
+    beforeDraw: function (chart, easing) {
+        if (chart.config.options.chartArea && chart.config.options.chartArea.backgroundColor) {
+            var ctx = chart.chart.ctx;
+            var chartArea = chart.chartArea;
+
+            ctx.save();
+            ctx.fillStyle = chart.config.options.chartArea.backgroundColor;
+            ctx.fillRect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+            ctx.restore();
+        }
+    }
+});
 
 class JkdHistoryChart {
     constructor(jkd_env, prefix, data_addr) {
@@ -7,7 +20,7 @@ class JkdHistoryChart {
         this.data_addr = data_addr;
 
 
-        this.duration = 3600; // in seconds
+        this.duration = 3600 * 24; // in seconds
         this.start_date = null; // computed from end_date and length
         this.end_date = null; // default => Date.now()
 
@@ -51,8 +64,15 @@ class JkdHistoryChart {
                             displayFormats:{
                                 millisecond:'HH:mm:ss.S',
                                 second:'HH:mm:ss',
-                                minut:'HH:mm',
-                            }
+                                minute:'DD-MM HH:mm',
+                                hour:'DD-MM HH:mm',
+                                day:'DD-MM HH:mm',
+                                week:'DD-MM-YYYY',
+                                month:'MM-YYYY',
+                                quarter:'MM-YYYY',
+                                year:'YYYY'
+                            },
+                            tooltipFormat:'DD-MM-YYYY HH:mm:ss.S'
                         }
                     }],
                     yAxes: [
@@ -90,6 +110,9 @@ class JkdHistoryChart {
                     enabled:true,
                     mode:'y',
                 },
+                chartArea: {
+                    backgroundColor: 'rgb(255, 255, 255)'
+                }
             },
         });
 

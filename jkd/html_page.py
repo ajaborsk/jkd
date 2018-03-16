@@ -55,10 +55,10 @@ class HtmlPartHisto(HtmlPart):
         self.data_addr = data
         self.css_add("jkd.css")
         self.script_add("jkd.js")
+        self.script_add("moment-with-locales.min.js")
         self.script_add("Chart.bundle.min.js")
         self.script_add("hammer.min.js")
         self.script_add("chartjs-plugin-zoom.min.js")
-        self.script_add("moment-with-locales.min.js")
         self.script_add("jkd-chart.js")
         self.html_template = jinja2.Template("""
   <!-- HtmlPartHisto {{p_id}} -->

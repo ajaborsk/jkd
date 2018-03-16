@@ -31,7 +31,7 @@ class DataProcess0(DataProcess):
                     {'label':'I Bat', 'yAxisID':'intensity', 'borderWidth':1, 'borderColor':'orange', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
                     ]
 
-        labels = list(data.index.map(lambda a:a.timestamp()))
+        labels = list(data.index.map(lambda a:a.timestamp()*1000))
         #datasets[0]['data'] = list(data[1])
         #datasets[1]['data'] = list(data[2])
         datasets[0]['data'] = list(data['v_bat'])
