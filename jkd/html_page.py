@@ -54,23 +54,28 @@ class HtmlPartEntry(HtmlPart):
         #parms = {'p_id':self.p_id}
         self.data_addr = data
         self.css_add("jkd.css")
+        self.css_add("jquery-ui.css")
+        self.script_add("jquery-ui.min.js")
         self.script_add("jkd.js")
         self.script_add("jkd-entry.js")
         self.html_template = jinja2.Template("""
   <!-- HtmlPartEntry {{p_id}} -->
   <div id="{{p_id}}-container">
-    <input style="bgcolor:white;" id="{{p_id}}-input">Data</input>
-    <div style="">
-      <span id="{{p_id}}-send" style="text-align:center; display:inline-block; width:12%; height:30px;">Send</span>
-      <span id="{{p_id}}-enter" style="text-align:center; display:inline-block; width:12%; height:30px;">Enter</span>
-      <span id="{{p_id}}-leave" style="text-align:center; display:inline-block; width:12%; height:30px;">Leave</span>
+    <select>
+      <option value="poke">Poke</option>
+    </select>
+    <input style="bgcolor:white; width:100px;" id="{{p_id}}-input" value="_"/>
+    <div style="css">
+      <button class="ui-button ui-corner-all" id="{{p_id}}-send"><span class="ui-icon ui-icon-plus"></span> Add</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-enter"><span class="ui-icon ui-icon-check"></span> Enter</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-leave"><span class="ui-icon ui-icon-close"></span> Leave</button>
     </div>
   </div>
   <!-- HtmlPartEntry end -->""")
         self.js_template = jinja2.Template("""
   // HtmlPartHisto {{p_id}} script part
 
-  var hc = new JkdHistoryChart(jkd_env, "{{p_id}}", "{{data_addr}}");
+  var ent = new JkdEntry(jkd_env, "{{p_id}}", "{{data_addr}}");
 
   // end of HtmlPartHisto script part
 """)
