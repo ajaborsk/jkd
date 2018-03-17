@@ -29,6 +29,7 @@ from .data_process import DataProcess
 from .data_format import DataFormat
 from .data_process_0 import DataProcess0
 from .data_process_1 import DataProcess1
+from .data_calibration_0 import DataCalibration0
 from .cache import Cache
 from .sql_datasource import SqlDatasource
 registry = {
@@ -46,6 +47,7 @@ registry = {
         "data_format":DataFormat,
         "data_process_0":DataProcess0,
         "data_process_1":DataProcess1,
+        "data_calibration_0":DataCalibration0,
         "sql_datasource":SqlDatasource,
          }
 
