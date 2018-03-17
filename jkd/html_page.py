@@ -61,10 +61,13 @@ class HtmlPartEntry(HtmlPart):
         self.html_template = jinja2.Template("""
   <!-- HtmlPartEntry {{p_id}} -->
   <div id="{{p_id}}-container">
-    <select>
-      <option value="poke">Poke</option>
+    <select id="{{p_id}}-constraint">
+      <option value="Text">Tp Ext (°C)</option>
+      <option value="Tmcu">Tp mcu (°C)</option>
+      <option value="Vbat">V bat (V)</option>
+      <option value="Ibat">I bat (mA)</option>
     </select>
-    <input style="bgcolor:white; width:100px;" id="{{p_id}}-input" value="_"/>
+    <input id="{{p_id}}-constraint-value" style="bgcolor:white; width:150px;" id="{{p_id}}-input" value="_"/>
     <div style="css">
       <button class="ui-button ui-corner-all" id="{{p_id}}-send"><span class="ui-icon ui-icon-plus"></span> Add</button>
       <button class="ui-button ui-corner-all" id="{{p_id}}-enter"><span class="ui-icon ui-icon-check"></span> Enter</button>
@@ -73,12 +76,18 @@ class HtmlPartEntry(HtmlPart):
   </div>
   <!-- HtmlPartEntry end -->""")
         self.js_template = jinja2.Template("""
-  // HtmlPartHisto {{p_id}} script part
+  // HtmlPartEntry {{p_id}} script part
 
   var ent = new JkdEntry(jkd_env, "{{p_id}}", "{{data_addr}}");
 
-  // end of HtmlPartHisto script part
+  // end of HtmlPartEntry script part
 """)
+
+    def context(self):
+        ctx = super().context()
+        ctx.update({'data_addr':self.data_addr})
+        return ctx
+
 
 class HtmlPartHisto(HtmlPart):
     def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, **kwargs):

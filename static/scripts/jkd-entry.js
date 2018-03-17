@@ -8,14 +8,18 @@ class JkdEntry {
 
         $("#" + this.prefix + "-send").click(function (evt) {
             //TODO
+            console.log(self.prefix+': Add event '+$("#"+self.prefix+"-constraint").val()+'=> '+$("#"+self.prefix+"-constraint-value").val()+' to "'+self.data_addr+'"');
+            self.jkd_env.put(self.data_addr, {'value':{'constraint':$("#"+self.prefix+"-constraint").val(), 'constraint-value':$("#"+self.prefix+"-constraint-value").val()}}, null, null);
         });
 
         $("#" + this.prefix + "-enter").click(function (evt) {
             //TODO
+            console.log(self.prefix+': Enter event '+$("#"+self.prefix+"-constraint").val()+'=> '+$("#"+self.prefix+"-constraint-value").val());
         });
 
         $("#" + this.prefix + "-leave").click(function (evt) {
             //TODO
+            console.log(self.prefix+': Leave event '+$("#"+self.prefix+"-constraint").val()+'=> '+$("#"+self.prefix+"-constraint-value").val());
         });
 
         self.jkd_env.on_connect[self.prefix] ={'cb':self.update, 'client':self};

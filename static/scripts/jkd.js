@@ -118,7 +118,7 @@ class JkdEnv
        {
         //$("#test1").text("Response : " + JSON.stringify(msg));
         var lcid = msg['lcid'];
-        //if (!(self.queries[lcid]['cb'] === undefined))
+        if (self.channels[lcid]['cb'])
          {
           self.channels[lcid]['cb'](msg, self.channels[lcid]['client']);
          }
