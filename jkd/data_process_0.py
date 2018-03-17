@@ -44,4 +44,5 @@ class DataProcess0(DataProcess):
         datasets[5]['data'] = list(data['i_bat'])
 
         response = {'labels':labels, 'datasets':datasets}
+        self.debug('response: '+str(response))
         return response

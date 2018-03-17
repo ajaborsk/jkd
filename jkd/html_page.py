@@ -48,6 +48,33 @@ class HtmlPartChart(HtmlPart):
         super().__init__(elt, p_class, p_name, p_id, **kwargs)
 
 
+class HtmlPartEntry(HtmlPart):
+    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, **kwargs):
+        super().__init__(elt, p_class, p_name, p_id, **kwargs)
+        #parms = {'p_id':self.p_id}
+        self.data_addr = data
+        self.css_add("jkd.css")
+        self.script_add("jkd.js")
+        self.script_add("jkd-entry.js")
+        self.html_template = jinja2.Template("""
+  <!-- HtmlPartEntry {{p_id}} -->
+  <div id="{{p_id}}-container">
+    <input style="bgcolor:white;" id="{{p_id}}-input">Data</input>
+    <div style="">
+      <span id="{{p_id}}-send" style="text-align:center; display:inline-block; width:12%; height:30px;">Send</span>
+      <span id="{{p_id}}-enter" style="text-align:center; display:inline-block; width:12%; height:30px;">Enter</span>
+      <span id="{{p_id}}-leave" style="text-align:center; display:inline-block; width:12%; height:30px;">Leave</span>
+    </div>
+  </div>
+  <!-- HtmlPartEntry end -->""")
+        self.js_template = jinja2.Template("""
+  // HtmlPartHisto {{p_id}} script part
+
+  var hc = new JkdHistoryChart(jkd_env, "{{p_id}}", "{{data_addr}}");
+
+  // end of HtmlPartHisto script part
+""")
+
 class HtmlPartHisto(HtmlPart):
     def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, **kwargs):
         super().__init__(elt, p_class, p_name, p_id, **kwargs)
@@ -97,6 +124,7 @@ class HtmlPage(Node):
         self.parts_registry = {'histo':HtmlPartHisto,
                                'value':HtmlPartValue,
                                'table':HtmlPartTable,
+                               'entry':HtmlPartEntry,
                                'chart':HtmlPartChart}
         if 'appname' in kwargs:
             self.appname = kwargs['appname']
