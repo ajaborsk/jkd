@@ -106,15 +106,15 @@ class HtmlPartHisto(HtmlPart):
   <div id="{{p_id}}-container">
     <canvas style="bgcolor:white;" id="{{p_id}}-canvas" width="800" height="200"></canvas>
     <div style="">
-      <span id="{{p_id}}-update" style="text-align:center; display:inline-block; width:12%; height:30px;">Update</span>
-      <span id="{{p_id}}-prev2" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;&lt;</span>
-      <span id="{{p_id}}-prev" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;</span>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-update"><span class="ui-icon ui-icon-refresh"></span> Refresh</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-prev2"><span class="ui-icon ui-icon-arrowthick-1-w"></span> Much sooner</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-prev"><span class="ui-icon ui-icon-arrow-1-w"></span> Sooner</button>
       <span id="{{p_id}}-duration" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;</span>
-      <span id="{{p_id}}-next" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;</span>
-      <span id="{{p_id}}-next2" style="text-align:center; display:inline-block; width:12%; height:30px;">&gt;&gt;</span>
-      <span id="{{p_id}}-zoom" style="text-align:center; display:inline-block; width:12%; height:30px;">+</span>
-      <span id="{{p_id}}-unzoom" style="text-align:center; display:inline-block; width:12%; height:30px;">-</span>
-      <span id="{{p_id}}-zreset" style="text-align:center; display:inline-block; width:12%; height:30px;">RAZ</span>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-next"><span class="ui-icon ui-icon-arrow-1-e"></span> Later</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-next2"><span class="ui-icon ui-icon-arrowthick-1-e"></span> Much later</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-zoom"><span class="ui-icon ui-icon-zoomin"></span> Zoom in</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-unzoom"><span class="ui-icon ui-icon-zoomout"></span> Zoom out</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-zreset"><span class="ui-icon ui-icon-arrow-2-sw-ne"></span> Reset</button>
     </div>
   </div>
   <!-- HtmlPartHisto end -->""")
