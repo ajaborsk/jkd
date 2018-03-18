@@ -26,22 +26,23 @@ class DataProcess1(DataProcess):
 
         # 1 - get input data and put it in a pandas DataFrame (table)
         work = pd.DataFrame([i[1] for i in data], index = [pd.datetime.fromtimestamp(i[0]) for i in data])
+        resp = pd.DataFrame()
 
         # 2 - process...
-        work['v_bat'] = (alpha_bat / work[1] * work[3]).rolling('10min').mean()
-        work['v_cir'] = (alpha_cir / work[1] * work[4]).rolling('10min').mean()
+        resp['v_bat'] = (alpha_bat / work[1] * work[3]).rolling('10min').mean()
+        resp['v_cir'] = (alpha_cir / work[1] * work[4]).rolling('10min').mean()
         #work['v_bat'] = (alpha_bat / work[1] * work[3])
         #work['v_cir'] = (alpha_cir / work[1] * work[4])
-        work['i_bat'] = -(work['v_cir'] - work['v_bat']) / 0.1 * 1000 # milli amps
-        work['v_int'] = work['v_bat'] + work['i_bat'] / 1000. * 0.40
-        work['t_ext'] = work[6] / 32768. * 25.
+        resp['i_bat'] = -(resp['v_cir'] - resp['v_bat']) / 0.1 * 1000 # milli amps
+        resp['v_int'] = resp['v_bat'] + resp['i_bat'] / 1000. * 0.40
+        resp['t_ext'] = work[6] / 32768. * 25.
 
         # 21888 => 23°C
         # 21500 => 17°C ~~
         # 388 => 6°C => 65 / °C
         c = 160.
-        work['t_mcu'] = (work[2] - (21888 - 23 * c)) / c
+        resp['t_mcu'] = (work[2] - (21888 - 23 * c)) / c
 
-        self.debug('work: '+str(work))
+        #self.debug('work: '+str(work))
 
-        return work
+        return resp

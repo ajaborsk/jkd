@@ -118,8 +118,8 @@ class History(Node):
         data_file = open(self.filename+'.data', mode='rb')
         index_file = open(self.filename+'.idx', mode='rb')
         done = False
-        before_ts = args.get("before", math.inf)
-        after_ts = args.get("after", -math.inf)
+        before_ts = float(args.get("before", math.inf))
+        after_ts = float(args.get("after", -math.inf))
 
         index_after = self.index_after(after_ts)
         if index_after is None:
