@@ -24,12 +24,15 @@ class DataProcess1(DataProcess):
         alpha_bat = 1.5961 # 4.065 * 10944 / 27872
         alpha_cir = 1.5888 # 4.065 * 10944 / 28000
 
+        alpha_bat_from_model = model['alpha_bat']
+
         # 1 - get input data and put it in a pandas DataFrame (table)
         work = pd.DataFrame([i[1] for i in data], index = [pd.datetime.fromtimestamp(i[0]) for i in data])
         resp = pd.DataFrame()
 
         # 2 - process...
-        resp['v_bat'] = (alpha_bat / work[1] * work[3]).rolling('10min').mean()
+        #resp['v_bat'] = (alpha_bat / work[1] * work[3]).rolling('10min').mean()
+        resp['v_bat'] = (work[3] / alpha_bat_from_model).rolling('10min').mean()
         resp['v_cir'] = (alpha_cir / work[1] * work[4]).rolling('10min').mean()
         #work['v_bat'] = (alpha_bat / work[1] * work[3])
         #work['v_cir'] = (alpha_cir / work[1] * work[4])

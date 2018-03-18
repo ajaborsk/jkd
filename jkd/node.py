@@ -116,6 +116,20 @@ class Node:
             self.warning("port '" + str(portname)+ "' does not exist")
             return None
 
+    async def port_input_get(self, portname, args = None):
+        if portname in self.links:
+            self.debug('  link found: '+str(self.links[portname]))
+            #text = await self.msg_query(app, {'method':'get', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(request.query)}, timeout = 5.)
+            msg = {'method':'get', 'policy':'immediate', 'flags':'c', 'url':self.links[portname]['node'], 'port':self.links[portname]['port']}
+            # propagate query_args
+            if args is not None:
+                msg['args'] = args
+            #TODO: define a timeout policy instead of spreading 50. everywhere...
+            resp = await self.msg_query(self.parent, msg, timeout = 50.)
+            return resp
+        else:
+            return None
+
     async def port_read(self, portname):
         queue = self.port_get(portname).get('queue')
         if queue is not None:

@@ -17,7 +17,7 @@
     <!-- Calibation node (use measurement data and calibration data to compute model data/parameters) -->
     <data_calibration_0 name="calibration0">
         <links>
-            <link input="input" node="data_process_1_0" port="output"/>
+            <link input="input" node="jee_histo" port="output"/>
             <link input="model" node="model" port="data"/>
             <link input="calib_data" node="calib" port="output"/>
         </links>
