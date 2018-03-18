@@ -28,8 +28,8 @@ class DataProcess1(DataProcess):
         work = pd.DataFrame([i[1] for i in data], index = [pd.datetime.fromtimestamp(i[0]) for i in data])
 
         # 2 - process...
-        work['v_bat'] = (alpha_bat / work[1] * work[3]).rolling('4min').mean()
-        work['v_cir'] = (alpha_cir / work[1] * work[4]).rolling('4min').mean()
+        work['v_bat'] = (alpha_bat / work[1] * work[3]).rolling('10min').mean()
+        work['v_cir'] = (alpha_cir / work[1] * work[4]).rolling('10min').mean()
         #work['v_bat'] = (alpha_bat / work[1] * work[3])
         #work['v_cir'] = (alpha_cir / work[1] * work[4])
         work['i_bat'] = -(work['v_cir'] - work['v_bat']) / 0.1 * 1000 # milli amps
