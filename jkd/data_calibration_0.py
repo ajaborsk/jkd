@@ -24,11 +24,22 @@ class DataCalibration0(DataProcess):
 
         vbat_idx = []
         vbat_cols = []
+        ibat_sessions = []
+        ibat_current_session = []
         for event in calib_data:
             if event[1]['mode'] == 'ponctual':
                  if event[1]['constraint'] == 'Vbat':
                     vbat_idx.append(pd.datetime.fromtimestamp(event[0]))
                     vbat_cols.append(float(event[1]['constraint-value']))
+            elif event[1]['mode'] == 'enter':
+                if event[1]['constraint'] == 'Ibat':
+                    ibat_current_session = [pd.datetime.fromtimestamp(event[0])]
+                    ibat_current_session.append(float(event[1]['constraint-value']))
+            elif event[1]['mode'] == 'leave':
+                if event[1]['constraint'] == 'Ibat' and len(ibat_current_session) == 2:
+                    ibat_current_session.append(pd.datetime.fromtimestamp(event[0]))
+                    ibat_sessions.append(ibat_current_session)
+                    ibat_current_session = []
 
         vbat_cal= pd.DataFrame(vbat_cols, index=vbat_idx, columns=['Vbat'])
 
@@ -55,12 +66,25 @@ class DataCalibration0(DataProcess):
 
         await self.msg_query(self.parent, {'method':'put', 'policy':'immediate', 'url':'/demo_pi/model', 'path':'/demo_pi/model', 'port':'data.alpha_bat', 'args':{'value':alpha}})
 
+        ibat_cal = pd.DataFrame()
+        for session in ibat_sessions:
+            if len(session) == 3:
+                start = session[0].timestamp()
+                end = session[2].timestamp()
+                # get values from history for calibration session
+                ivalues = await self.port_input_get("input", {'after': start, 'before': end})
+                # convert to pandas DataFrame
+                ivalues = pd.DataFrame([i[1] for i in ivalues], index = [pd.datetime.fromtimestamp(i[0]) for i in ivalues])
+                ibat_cal = pd.concat([ibat_cal, ivalues])
 
+        alpha_cir = (ibat_cal[4] / (ibat_cal[3] / alpha)).mean()
+        await self.msg_query(self.parent, {'method':'put', 'policy':'immediate', 'url':'/demo_pi/model', 'path':'/demo_pi/model', 'port':'data.alpha_cir', 'args':{'value':alpha_cir}})
 
         work = "Calibration result:<br/>"
         work += "  Calibration data vbat:<br/>"
         work += vbat_cal.to_html()
         work += "alpha: " + str(alpha)
-        work += "<br/>values :<br/>"+str(values.to_html())
+        work += str(ibat_sessions)
+        work += "<br/>Calibration data ibat :<br/>"+str(ibat_cal.to_html())
 
         return work

@@ -14,13 +14,13 @@ class JkdEntry {
 
         $("#" + this.prefix + "-enter").click(function (evt) {
             //TODO
-            console.log(self.prefix+': Enter event '+$("#"+self.prefix+"-constraint").val()+'=> '+$("#"+self.prefix+"-constraint-value").val());
+            console.log(self.prefix+': Enter event '+$("#"+self.prefix+"-constraint").val()+'=> '+$("#"+self.prefix+"-constraint-value").val()+' to "'+self.data_addr+'"');
             self.jkd_env.put(self.data_addr, {'value':{'mode':'enter', 'constraint':$("#"+self.prefix+"-constraint").val(), 'constraint-value':$("#"+self.prefix+"-constraint-value").val()}}, null, null);
         });
 
         $("#" + this.prefix + "-leave").click(function (evt) {
             //TODO
-            console.log(self.prefix+': Leave event '+$("#"+self.prefix+"-constraint").val()+'=> '+$("#"+self.prefix+"-constraint-value").val());
+            console.log(self.prefix+': Leave event '+$("#"+self.prefix+"-constraint").val()+'=> '+$("#"+self.prefix+"-constraint-value").val()+' to "'+self.data_addr+'"');
             self.jkd_env.put(self.data_addr, {'value':{'mode':'leave', 'constraint':$("#"+self.prefix+"-constraint").val(), 'constraint-value':$("#"+self.prefix+"-constraint-value").val()}}, null, null);
         });
 

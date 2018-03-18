@@ -41,6 +41,7 @@
       </links>
     </data_process_0>
     <history name="esp01_128_histo" timestamp="true"></history>
+    <history name="esp32_histo" timestamp="true"></history>
     <subprocessus name="heavyproc" appname="unused_app_name">
       <nodes>
         <signal_generator name="siggen_ext" />
