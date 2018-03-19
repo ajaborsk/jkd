@@ -41,6 +41,26 @@ class HtmlPartValue(HtmlPart):
 class HtmlPartTable(HtmlPart):
     def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, **kwargs):
         super().__init__(elt, p_class, p_name, p_id, **kwargs)
+        self.data_addr = data
+        self.css_add("jkd.css")
+        self.css_add("jquery-ui.css")
+        self.script_add("jquery-ui.min.js")
+        self.script_add("jkd-tabu.js")
+        self.script_add("jkd.js")
+        self.script_add("jkd-table.js")
+        self.html_template = jinja2.Template("""
+  <!-- HtmlPartTable {{p_id}} -->
+  <div id="{{p_id}}-container">
+    <div style="bgcolor:white;" id="{{p_id}}-table" width="800" height="200"></div>
+  </div>
+  <!-- HtmlPartTable end -->""")
+        self.js_template = jinja2.Template("""
+  // HtmlPartTable {{p_id}} script part
+
+  var t = new JkdTable(jkd_env, "{{p_id}}", "{{data_addr}}");
+
+  // end of HtmlPartTable script part
+""")
 
 
 class HtmlPartChart(HtmlPart):
