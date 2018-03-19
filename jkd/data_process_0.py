@@ -31,14 +31,13 @@ class DataProcess0(DataProcess):
                     {'label':'I Bat', 'yAxisID':'intensity', 'borderWidth':1, 'borderColor':'orange', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
                     ]
 
+        # time labels => unix timestamp * 1000
         labels = list(data.index.map(lambda a:a.timestamp()*1000))
-        #datasets[0]['data'] = list(data[1])
-        #datasets[1]['data'] = list(data[2])
+
+        # datasets
         datasets[0]['data'] = list(data['v_bat'])
         datasets[1]['data'] = list(data['v_cir'])
         datasets[2]['data'] = list(data['v_int'])
-        #datasets[2]['data'] = list(data[3])
-        #datasets[3]['data'] = list(data[4])
         datasets[3]['data'] = list(data['t_ext'])
         datasets[4]['data'] = list(data['t_mcu'])
         datasets[5]['data'] = list(data['i_bat'])

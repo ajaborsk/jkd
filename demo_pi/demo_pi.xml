@@ -50,6 +50,7 @@
     </subprocessus>
     <html_page appname="demo_pi" name="homepage" template="homepage" title="A jkd Demo Application">
       <histo data="/data_process_0_0/output" template="dummy" />
+      <histo data="/esp32_histo/output" template="dummy" />
       <entry data="/calib/input" template="dummy" />
       <chart data="/heavyproc/siggen_ext/output" template="table" />
     </html_page>
