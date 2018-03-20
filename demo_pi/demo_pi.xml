@@ -33,7 +33,7 @@
       <values>
         <value name="v_bat" eval="input[3] / model['alpha_bat']" unit="V" tags="" />
         <value name="v_cir" eval="input[4] / model['alpha_cir']" unit="V" tags="" />
-        <value name="i_bat" eval="(value['v_bat'] - value['v_cir']) * 0.1 * 1000" unit="mA" tags="" />
+        <value name="i_bat" eval="(value['v_bat'] - value['v_cir']) / 0.1 * 1000" unit="mA" tags="" />
         <value name="v_int" eval="value['v_bat'] + value['i_bat'] / 1000. * 0.40" unit="V" tags="" />
         <value name="t_ext" eval="input[6] / 32768. * 25." unit="degC" tags="" />
         <var name="c" eval="160." unit="" tags="" />
@@ -49,17 +49,45 @@
         <link input="input" node="jee_raw_to_table" port="output" />
       </links>
       <axes>
-          <axe name="x" pos="x_b"/>
-          <axe name="y_V" pos="y_l"/>
-          <axe name="y_C" pos="y_l"/>
-          <axe name="y_mA" pos="y_l"/>
+          <axis name="y_V" pos="yl"/>
+          <axis name="y_C" pos="y_l"/>
+          <axis name="y_mA" pos="y_l"/>
       </axes>
       <datasets>
-          <dataset data="v_bat" name="" color="blue" type="line" label="VBat"/>
+          <dataset data="v_bat" axis="y_V" color="blue" type="line" label="Vbat"/>
+          <dataset data="v_cir" axis="y_V" color="red" type="line" label="Vcir"/>
+          <dataset data="v_int" axis="y_V" color="black" type="line" label="Vint"/>
+          <dataset data="i_bat" axis="y_mA" color="orange" type="line" label="Ibat"/>
+          <dataset data="t_ext" axis="y_C" color="magenta" type="line" label="Text"/>
+          <dataset data="t_mcu" axis="y_C" color="cyan" type="line" label="Tmcu"/>
       </datasets>
     </data_table_to_chartjs>
     <history name="esp01_128_histo" timestamp="true" />
     <history name="esp32_histo" timestamp="true" />
+    <data_raw_to_table name="esp32_raw_to_table">
+      <links>
+        <link input="model" node="model" port="data" />
+        <link input="input" node="esp32_histo" port="output" />
+      </links>
+      <values>
+        <value name="t_amb" eval="input[0]" unit="degC" tags="" />
+        <value name="rh_amb" eval="input[1]" unit="%" tags="" />
+      </values>
+    </data_raw_to_table>
+    <data_table_to_chartjs name="esp32_table_to_chartjs" preset="history">
+      <links>
+        <link input="config" node="config" port="data" />
+        <link input="input" node="esp32_raw_to_table" port="output" />
+      </links>
+      <axes>
+          <axis name="y_C" pos="y_l"/>
+          <axis name="y_pc" pos="y_l"/>
+      </axes>
+      <datasets>
+          <dataset data="t_amb" axis="y_C" color="blue" type="line" label="Tamb"/>
+          <dataset data="rh_amb" axis="y_pc" color="red" type="line" label="HR"/>
+      </datasets>
+    </data_table_to_chartjs>
     <subprocessus name="heavyproc" appname="unused_app_name">
       <nodes>
         <signal_generator name="siggen_ext" />
@@ -68,7 +96,7 @@
     </subprocessus>
     <html_page appname="demo_pi" name="homepage" template="homepage" title="A jkd Demo Application">
       <histo data="/jee_table_to_chartjs/output" template="dummy" />
-      <histo data="/esp32_histo/output" template="dummy" />
+      <histo data="/esp32_table_to_chartjs/output" template="dummy" />
       <entry data="/calib/input" template="dummy" />
       <chart data="/heavyproc/siggen_ext/output" template="table" />
     </html_page>

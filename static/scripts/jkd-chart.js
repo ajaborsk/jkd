@@ -20,7 +20,7 @@ class JkdHistoryChart {
         this.data_addr = data_addr;
 
 
-        this.duration = 3600 * 24; // in seconds
+        this.duration = 36 * 24; // in seconds
         this.start_date = null; // computed from end_date and length
         this.end_date = null; // default => Date.now()
 
@@ -75,32 +75,6 @@ class JkdHistoryChart {
                             tooltipFormat:'DD-MM-YYYY HH:mm:ss.S'
                         }
                     }],
-                    yAxes: [
-                      {
-                        ticks: {
-                            //beginAtZero:true
-                        },
-                       position:'right',
-                      },
-                      {
-                        id:'temp',
-                        scaleLabel:'Temperature (°C)',
-                        type:'linear',
-                        position:'left',
-                      },
-                      {
-                        id:'voltage',
-                        scaleLabel:'Voltage (V)',
-                        type:'linear',
-                        position:'left',
-                      },
-                      {
-                        id:'intensity',
-                        scaleLabel:'Intensity (mA)',
-                        type:'linear',
-                        position:'left',
-                      }
-                      ]
                 },
                 zoom:{
                     enabled:true,
@@ -193,13 +167,15 @@ class JkdHistoryChart {
       self.jkd_env.get(self.data_addr,
             args,
             function (msg, client) {
-                if ('data' in msg.reply) {
-                    self.chart.data = msg.reply.data;
-                }
                 if ('options' in msg.reply) {
-                    self.chart.options = msg.reply.options;
+                    self.chart.options = Object.assign({}, msg.reply.options);
+                    console.log(self.chart.options);
                 }
-                self.chart.update(0);
+                if ('data' in msg.reply) {
+                    self.chart.data = Object.assign({}, msg.reply.data);
+                    console.log(self.chart.data);
+                }
+               self.chart.update(0);
             },
             null);
       $("#" + self.prefix + "-duration").text(self.duration + " s");
