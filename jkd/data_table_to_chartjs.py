@@ -7,8 +7,8 @@ import pandas as pd
 from .node import Node
 from .data_process import DataProcess
 
-class DataProcess0(DataProcess):
-    tagname = "data_process_0"
+class DataTableToChartjs(DataProcess):
+    tagname = "data_table_to_chartjs"
     def __init__(self, elt = None, **kwargs):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')

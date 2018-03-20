@@ -43,12 +43,12 @@
     <!-- Display configuration (colors, scales, etc.) -->
     <data_object name="config" persistent="true" />
     <!-- Display preparation: from raw data to Chart.js data object -->
-    <data_process_0 name="data_process_0_0">
+    <data_table_to_chartjs name="jee_table_to_chartjs">
       <links>
         <link input="config" node="config" port="data" />
         <link input="input" node="jee_raw_to_table" port="output" />
       </links>
-    </data_process_0>
+    </data_table_to_chartjs>
     <history name="esp01_128_histo" timestamp="true" />
     <history name="esp32_histo" timestamp="true" />
     <subprocessus name="heavyproc" appname="unused_app_name">
@@ -58,7 +58,7 @@
       </nodes>
     </subprocessus>
     <html_page appname="demo_pi" name="homepage" template="homepage" title="A jkd Demo Application">
-      <histo data="/data_process_0_0/output" template="dummy" />
+      <histo data="/jee_table_to_chartjs/output" template="dummy" />
       <histo data="/esp32_histo/output" template="dummy" />
       <entry data="/calib/input" template="dummy" />
       <chart data="/heavyproc/siggen_ext/output" template="table" />

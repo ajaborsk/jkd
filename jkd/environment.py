@@ -27,8 +27,8 @@ from .text_parser import TextParser
 from .serial_line_process import SerialLineProcess
 from .data_process import DataProcess
 from .data_format import DataFormat
-from .data_process_0 import DataProcess0
 from .data_raw_to_table import DataRawToTable
+from .data_table_to_chartjs import DataTableToChartjs
 from .data_calibration_0 import DataCalibration0
 from .cache import Cache
 from .sql_datasource import SqlDatasource
@@ -45,8 +45,8 @@ registry = {
         "serial_line_process":SerialLineProcess,
         "data_process":DataProcess,
         "data_format":DataFormat,
-        "data_process_0":DataProcess0,
         "data_raw_to_table":DataRawToTable,
+        "data_table_to_chartjs":DataTableToChartjs,
         "data_calibration_0":DataCalibration0,
         "sql_datasource":SqlDatasource,
          }

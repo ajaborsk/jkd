@@ -8,7 +8,7 @@ from .node import Node
 from .data_process import DataProcess
 
 class DataRawToTable(DataProcess):
-    tagname = "data_process_1"
+    tagname = "data_raw_to_table"
     def __init__(self, elt = None, **kwargs):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
