@@ -42,12 +42,21 @@
     </data_raw_to_table>
     <!-- Display configuration (colors, scales, etc.) -->
     <data_object name="config" persistent="true" />
-    <!-- Display preparation: from raw data to Chart.js data object -->
-    <data_table_to_chartjs name="jee_table_to_chartjs">
+    <!-- Display preparation: from raw data to Chart.js data object / history preset-->
+    <data_table_to_chartjs name="jee_table_to_chartjs" preset="history">
       <links>
         <link input="config" node="config" port="data" />
         <link input="input" node="jee_raw_to_table" port="output" />
       </links>
+      <axes>
+          <axe name="x" pos="x_b"/>
+          <axe name="y_V" pos="y_l"/>
+          <axe name="y_C" pos="y_l"/>
+          <axe name="y_mA" pos="y_l"/>
+      </axes>
+      <datasets>
+          <dataset data="v_bat" name="" color="blue" type="line" label="VBat"/>
+      </datasets>
     </data_table_to_chartjs>
     <history name="esp01_128_histo" timestamp="true" />
     <history name="esp32_histo" timestamp="true" />

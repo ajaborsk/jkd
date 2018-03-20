@@ -193,7 +193,12 @@ class JkdHistoryChart {
       self.jkd_env.get(self.data_addr,
             args,
             function (msg, client) {
-                self.chart.data = msg.reply;
+                if ('data' in msg.reply) {
+                    self.chart.data = msg.reply.data;
+                }
+                if ('options' in msg.reply) {
+                    self.chart.options = msg.reply.options;
+                }
                 self.chart.update(0);
             },
             null);

@@ -20,7 +20,7 @@ class DataRawToTable(DataProcess):
             if branch.tag == 'values':
                 for value in branch:
                     self.values.append({'mode':value.tag, 'name':value.get('name'), 'eval':value.get('eval'), 'unit':value.get('unit'), 'tags':value.get('tags')})
-        self.debug(str(self.values))
+#        self.debug(str(self.values))
 
     async def process(self, model, data, args={}):
         # 'model' input is for model parameters. Model description is this code.

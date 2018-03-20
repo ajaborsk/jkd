@@ -9,12 +9,25 @@ from .data_process import DataProcess
 
 class DataTableToChartjs(DataProcess):
     tagname = "data_table_to_chartjs"
-    def __init__(self, elt = None, **kwargs):
+    def __init__(self, elt = None, preset=None, **kwargs):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
         self.port_add('config', mode = 'input')
         self.port_add('output', cached = True, timestamped = True)
         self.task_add('process', coro = self.process, gets=['config','input'], returns=['output'])
+
+        #TODO: use this preset
+        self.preset = preset
+        self.axes = {}
+        self.datasets = []
+
+        for branch in elt:
+            if branch.tag == 'axes':
+                for axe in branch:
+                    self.axes[axe.get('name')] = {'pos':axe.get('pos')}
+            elif branch.tag == 'datasets':
+                for dataset in branch:
+                    self.datasets.append({'data':dataset.get('data'), 'color':dataset.get('color'), 'type':dataset.get('type'), 'label':dataset.get('label')})
 
     async def process(self, config, data, args={}):
         self.debug('config: '+str(config))
@@ -22,6 +35,8 @@ class DataTableToChartjs(DataProcess):
         #self.debug('data[0]: '+str(data[0])+' args: '+str(args))
         #value = float(line[1][7:])
         #self.debug('value: '+str(value))
+        options = {}
+
         labels = []
         datasets = [{'label':'V Bat', 'yAxisID':'voltage', 'borderWidth':1, 'borderColor':'blue', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
                     {'label':'V Cir', 'yAxisID':'voltage', 'borderWidth':1, 'borderColor':'red', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
@@ -42,6 +57,6 @@ class DataTableToChartjs(DataProcess):
         datasets[4]['data'] = list(data['t_mcu'])
         datasets[5]['data'] = list(data['i_bat'])
 
-        response = {'labels':labels, 'datasets':datasets}
+        response = {'data':{'labels':labels, 'datasets':datasets}}
         self.debug('response: '+str(response))
         return response
