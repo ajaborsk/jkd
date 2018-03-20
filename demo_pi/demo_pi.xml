@@ -31,13 +31,13 @@
         <link input="input" node="jee_histo" port="output" />
       </links>
       <values>
-        <value name="v_bat" eval="input[3] / model['alpha_bat']" unit="V" tags="" />
-        <value name="v_cir" eval="input[4] / model['alpha_cir']" unit="V" tags="" />
-        <value name="i_bat" eval="(value['v_bat'] - value['v_cir']) / 0.1 * 1000" unit="mA" tags="" />
-        <value name="v_int" eval="value['v_bat'] + value['i_bat'] / 1000. * 0.40" unit="V" tags="" />
-        <value name="t_ext" eval="input[6] / 32768. * 25." unit="degC" tags="" />
+        <value name="v_bat" eval="(input[3] / model['alpha_bat']).rolling('10min').mean()" unit="V" tags="" />
+        <value name="v_cir" eval="(input[4] / model['alpha_cir']).rolling('10min').mean()" unit="V" tags="" />
+        <value name="i_bat" eval="((value['v_bat'] - value['v_cir']) / 0.1 * 1000).rolling('10min').mean()" unit="mA" tags="" />
+        <value name="v_int" eval="(value['v_bat'] + value['i_bat'] / 1000. * 0.40).rolling('10min').mean()" unit="V" tags="" />
+        <value name="t_ext" eval="(input[6] / 32768. * 25.).rolling('10min').mean()" unit="degC" tags="" />
         <var name="c" eval="160." unit="" tags="" />
-        <value name="t_mcu" eval="(input[2] - (21888 - 23 * c)) / c" unit="degC" tags="" />
+        <value name="t_mcu" eval="((input[2] - (21888 - 23 * c)) / c).rolling('10min').mean()" unit="degC" tags="" />
       </values>
     </data_raw_to_table>
     <!-- Display configuration (colors, scales, etc.) -->
@@ -70,8 +70,8 @@
         <link input="input" node="esp32_histo" port="output" />
       </links>
       <values>
-        <value name="t_amb" eval="input[0]" unit="degC" tags="" />
-        <value name="rh_amb" eval="input[1]" unit="%" tags="" />
+        <value name="t_amb" eval="input[0].rolling('10min').mean()" unit="degC" tags="" />
+        <value name="rh_amb" eval="input[1].rolling('10min').mean()" unit="%" tags="" />
       </values>
     </data_raw_to_table>
     <data_table_to_chartjs name="esp32_table_to_chartjs" preset="history">
