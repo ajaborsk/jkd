@@ -1,47 +1,56 @@
 <?xml version = "1.0"  encoding="UTF-8" standalone="yes"?>
 <application name="demo_pi">
   <nodes>
-    <serial_capture name="serial1" serial_port="/dev/ttyUSB0" serial_baudrate="57600" />
-    <serial_line_process name="serial_parser">
+    <serial_capture name="jee_serial" serial_port="/dev/ttyUSB0" serial_baudrate="57600" />
+    <serial_line_process name="jee_serial_parser">
       <links>
-        <link node="serial1" port="output" input="input" />
+        <link node="jee_serial" port="output" input="input" />
       </links>
     </serial_line_process>
     <history name="jee_histo">
       <links>
-        <link input="input" connect="auto" policy="on_update" node="serial_parser" port="output" />
+        <link input="input" connect="auto" policy="on_update" node="jee_serial_parser" port="output" />
       </links>
     </history>
     <!-- Calibration events (manual input) -->
-    <history name="calib" timestamp="true"></history>
+    <history name="calib" timestamp="true" />
     <!-- Calibation node (use measurement data and calibration data to compute model data/parameters) -->
     <data_calibration_0 name="calibration0">
-        <links>
-            <link input="input" node="jee_histo" port="output"/>
-            <link input="model" node="model" port="data"/>
-            <link input="calib_data" node="calib" port="output"/>
-        </links>
+      <links>
+        <link input="input" node="jee_histo" port="output" />
+        <link input="model" node="model" port="data" />
+        <link input="calib_data" node="calib" port="output" />
+      </links>
     </data_calibration_0>
     <!-- model data: capacities, resistors values, gains, offsets, etc. -->
-    <data_object name="model" persistent="true"/>
+    <data_object name="model" persistent="true" />
     <!-- Data preparation: from raw data (bunch of ints) to scaled & qualified (temperatures, currents, voltages...) -->
-    <data_process_1 name="data_process_1_0">
+    <data_raw_to_table name="jee_raw_to_table">
       <links>
         <link input="model" node="model" port="data" />
         <link input="input" node="jee_histo" port="output" />
       </links>
-    </data_process_1>
+      <values>
+        <value name="v_bat" eval="input[3] / model['alpha_bat']" unit="V" tags="" />
+        <value name="v_cir" eval="input[4] / model['alpha_cir']" unit="V" tags="" />
+        <value name="i_bat" eval="(value['v_bat'] - value['v_cir']) * 0.1 * 1000" unit="mA" tags="" />
+        <value name="v_int" eval="value['v_bat'] + value['i_bat'] / 1000. * 0.40" unit="V" tags="" />
+        <value name="t_ext" eval="input[6] / 32768. * 25." unit="degC" tags="" />
+        <var name="c" eval="160." unit="" tags="" />
+        <value name="t_mcu" eval="(input[2] - (21888 - 23 * c)) / c" unit="degC" tags="" />
+      </values>
+    </data_raw_to_table>
     <!-- Display configuration (colors, scales, etc.) -->
-    <data_object name="config" persistent="true"/>
+    <data_object name="config" persistent="true" />
     <!-- Display preparation: from raw data to Chart.js data object -->
     <data_process_0 name="data_process_0_0">
       <links>
         <link input="config" node="config" port="data" />
-        <link input="input" node="data_process_1_0" port="output" />
+        <link input="input" node="jee_raw_to_table" port="output" />
       </links>
     </data_process_0>
-    <history name="esp01_128_histo" timestamp="true"></history>
-    <history name="esp32_histo" timestamp="true"></history>
+    <history name="esp01_128_histo" timestamp="true" />
+    <history name="esp32_histo" timestamp="true" />
     <subprocessus name="heavyproc" appname="unused_app_name">
       <nodes>
         <signal_generator name="siggen_ext" />
