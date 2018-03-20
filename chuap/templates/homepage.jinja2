@@ -3,18 +3,16 @@
 <head>
   <meta charset="utf-8">
   <title>{{pagetitle}}</title>
-  <link rel="stylesheet" href="/static/css/jkd.css">
-  <link rel="stylesheet" href="/static/css/jquery-ui.min.css">
-  <link rel="stylesheet" href="/static/css/tabulator.min.css">
-  <script src="/static/scripts/jquery-3.3.1.min.js"></script>
-  <script src="/static/scripts/jquery-ui.min.js"></script>
-  <script src="/static/scripts/tabulator.min.js"></script>
-  <script src="/static/scripts/moment-with-locales.min.js"></script>
-  <script src="/static/scripts/Chart.bundle.min.js"></script>
-  <script src="/static/scripts/jkd.js"></script>
+{%- for css in css_list %}
+  <link rel="stylesheet" href="/static/css/{{css}}"/>
+{%- endfor %}
+{%- for script in scripts %}
+  <script src="/static/scripts/{{script}}"></script>
+{%- endfor %}
 </head>
 <body>
   <h1>{{pagetitle}}</h1>
+{{html}}
   <p>{{name}}</p>
   <!-- Le reste du contenu -->
   <p id="test1">Blabla</p>
@@ -71,61 +69,17 @@ var tabledata = [
 //load sample data into the table
 $("#example-table").tabulator("setData", tabledata);
 
- 
+ /*
   send = function(msg)
    {
     websocket.send(JSON.stringify(msg));
    };
+*/
+ 
 
-  var ctx = $("#chart1");
+  var jkd_env = new JkdEnv("chuap", "ws://" + window.location.host + "/ws", "/chuap/homepage");
 
-var myChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-        datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255,99,132,1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
-        }
-    }
-});
-
-  var env = new JkdEnv("chuap", "ws://" + window.location.host + "/ws", "/chuap/homepage");
-
-  // First of all: launch websocket connection
-  //websocket = new WebSocket("ws://localhost:9080/ws");
-
-  $("#test1").text("Hello world!");
-
-//  $("#push1").click(function(evt){send({'qid':'q1', 'query':'test1'})});
-//  $("#push2").click(function(evt){send({'qid':'q2', 'query':'test2'})});
-
+/*
   $("#push1").click(function(evt)
    {
     env.get('/tabulator_format/output', {},
@@ -153,10 +107,12 @@ var myChart = new Chart(ctx, {
         $("#example-table").tabulator("setData", tableData);
        },
       null);
-   });
+   }); */
+   
+{{js}}
 
   // Launch jkd environment
-  env.run();
+  jkd_env.run();
 
 });
 </script>

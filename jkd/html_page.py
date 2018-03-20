@@ -39,13 +39,15 @@ class HtmlPartValue(HtmlPart):
 
 
 class HtmlPartTable(HtmlPart):
-    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, **kwargs):
+    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, **kwargs):
         super().__init__(elt, p_class, p_name, p_id, **kwargs)
         self.data_addr = data
         self.css_add("jkd.css")
         self.css_add("jquery-ui.css")
-        self.script_add("jquery-ui.min.js")
-        self.script_add("jkd-tabu.js")
+        self.css_add("tabulator.min.css")
+        self.script_add("jquery-3.3.1.min.js")
+        self.script_add("jquery-ui.min.js") 
+        self.script_add("tabulator.min.js")
         self.script_add("jkd.js")
         self.script_add("jkd-table.js")
         self.html_template = jinja2.Template("""
@@ -61,6 +63,11 @@ class HtmlPartTable(HtmlPart):
 
   // end of HtmlPartTable script part
 """)
+
+    def context(self):
+        ctx = super().context()
+        ctx.update({'data_addr':self.data_addr})
+        return ctx
 
 
 class HtmlPartChart(HtmlPart):

@@ -17,20 +17,20 @@
         WHERE da_ap >= '2018-02-01';
       </query>
     </sql_datasource>
-    <data_format name="tabulator_format">
+    <data_table_to_tabulatorjs name="tabulator_format">
       <links>
         <link input="config" node="config" port="data"/>
         <link input="input" node="sql0" port="test0"/>
       </links>
-    </data_format>
+    </data_table_to_tabulatorjs>
     <html_page appname="chuap" name="homepage" template="homepage" title="Test Application Asset+ CHU Amiens-Picardie">
-      <table src="/chuap/sql0/test0"/>
+      <!-- <table src="/chuap/sql0/test0"/>
       <table id="ma_table" src="/chuap/sql0/test0"/>
       <table class="table_sombre" src="/chuap/sql0/test0"/>
       <table src="/chuap/sql0/test0"/>
       <chart id="c1" src="/chuap/sql0/test12"/>
-      <table src="/chuap/sql0/test0"/>
-      <table src="/chuap/sql0/test0"/>
+      <table src="/chuap/sql0/test0"/> -->
+      <table name="t1" config="/config/data/t1" data="/tabulator_format/output"/>
     </html_page>
   </nodes>
   <ports>

@@ -2,6 +2,8 @@ import asyncio
 import time
 import datetime
 import math
+import pandas as pd
+
 from functools import partial
 
 from .node import Node
@@ -38,5 +40,9 @@ class SqlDatasource(Node):
             self.debug('response length: ' + str(len(resp)))
         except:
             pass
-        return {'cols':cols, 'data':resp, 'query':query}
+
+        df = pd.DataFrame(resp, columns=[c['title'] for c in cols])
+ 
+        return df       
+#        return {'cols':cols, 'data':resp, 'query':query, 'df':df}
 
