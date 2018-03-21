@@ -14,7 +14,7 @@
       <query name="test1">
         SELECT nu_int AS "Code interv", int_statut, int_cm, ri_suivi_techn, code_techn 
         FROM en_cours 
-        WHERE da_ap >= '2018-02-01';
+        WHERE int_cm = 'BIOMEDICAL' AND da_ap >= '2018-02-01';
       </query>
     </sql_datasource>
     <data_table_to_tabulatorjs name="tabulator_format">
