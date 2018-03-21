@@ -20,7 +20,7 @@
     <data_table_to_tabulatorjs name="tabulator_format">
       <links>
         <link input="config" node="config" port="data"/>
-        <link input="input" node="sql0" port="test0"/>
+        <link input="input" node="sql0" port="test1"/>
       </links>
     </data_table_to_tabulatorjs>
     <html_page appname="chuap" name="homepage" template="homepage" title="Test Application Asset+ CHU Amiens-Picardie">
