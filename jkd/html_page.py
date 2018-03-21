@@ -135,8 +135,8 @@ class HtmlPartHisto(HtmlPart):
     <canvas style="bgcolor:white;" id="{{p_id}}-canvas" width="800" height="200"></canvas>
     <div style="">
       <button class="ui-button ui-corner-all" id="{{p_id}}-update"><span class="ui-icon ui-icon-cancel"></span> <span class="ui-text">Unconn.</span></button>
-      <button class="ui-button ui-corner-all" id="{{p_id}}-prev2"><span class="ui-icon ui-icon-arrowthick-1-w"></span> Much sooner</button>
-      <button class="ui-button ui-corner-all" id="{{p_id}}-prev"><span class="ui-icon ui-icon-arrow-1-w"></span> Sooner</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-prev2"><span class="ui-icon ui-icon-arrowthick-1-w"></span> Much earlier</button>
+      <button class="ui-button ui-corner-all" id="{{p_id}}-prev"><span class="ui-icon ui-icon-arrow-1-w"></span> Earlier</button>
       <span id="{{p_id}}-duration" style="text-align:center; display:inline-block; width:12%; height:30px;">&lt;</span>
       <button class="ui-button ui-corner-all" id="{{p_id}}-next"><span class="ui-icon ui-icon-arrow-1-e"></span> Later</button>
       <button class="ui-button ui-corner-all" id="{{p_id}}-next2"><span class="ui-icon ui-icon-arrowthick-1-e"></span> Much later</button>
