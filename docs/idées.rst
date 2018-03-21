@@ -311,3 +311,19 @@ entre le timestamp produit par l'entrée et le présent (ou le timestamp de la r
 Le stockage de la donnée peut être en mémoire (défaut) ou dans un fichier (système persistant).
 
 
+Idées de fonctionnalités avancées :
+-----------------------------------
+
+Business Intelligence classique : Visualiser un ensemble de données (une grosse table) sur plusieurs axes (dimensions).
+Il est possible de filtrer sur chaque vue et le reste de l'hypercube se met à jour automatiquement.
+
+Amélioration : Etant donné un paramètre (une colonne ou une formule de colonnes), donner des indications sur
+les colonnes / dimensions les plus "expliquantes"
+
+Capacités de simulation : créer (et paramétrer sur les données existantes) un modèle et extrapoler ce que donne
+ce modèle. Exemple : évolution du parc bioméd et des coûts de maintenance (si simple remplacements à l'âge d'amortissement, par exemple).
+
+Capacité de décision avancée : Si on fait une expérimentation sur une période T, déterminer si l'impact sur le résultat est significatif.
+
+Capacité de détection automatique d'anomalies = changement "brutal" dans le modèle d'évolution (panne, dyfonctionnement...)
+
