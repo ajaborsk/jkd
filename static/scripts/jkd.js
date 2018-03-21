@@ -24,6 +24,7 @@ class JkdEnv
     this.from = from;
     this.channels = {};
     this.on_connect = {};
+    this.on_disconnect = {};
    }
 
    // send a message
@@ -154,6 +155,11 @@ class JkdEnv
     this.websocket.onclose = function(evt)
      {
       $("#conn_status").text("Unconnected");
+      var keys = Object.keys(self.on_disconnect);
+      for (var i = 0;i < keys.length ;i++)
+       {
+        self.on_disconnect[keys[i]].cb(self.on_connect[keys[i]].client);
+       }
      };
 
 //TODO:

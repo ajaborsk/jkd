@@ -134,7 +134,18 @@ class JkdHistoryChart {
 
 //    $("#" + this.prefix + "-duration").text(self.duration + " s");
 
+    $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
+    $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
+    $("#" + self.prefix + "-update > span.ui-icon").addClass("ui-icon-cancel");
+    $("#" + self.prefix + "-update > span.ui-text").text("Disconn.");
     self.jkd_env.on_connect[self.prefix] ={'cb':self.update, 'client':self};
+    self.jkd_env.on_disconnect[self.prefix] ={'cb':function(client){
+        self=client;
+        $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
+        $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
+        $("#" + self.prefix + "-update > span.ui-icon").addClass("ui-icon-cancel");
+        $("#" + self.prefix + "-update > span.ui-text").text("Disconn.");
+        }, 'client':self};
     //self.update();
     };
 
@@ -164,6 +175,11 @@ class JkdHistoryChart {
         args['after'] = end_date - self.duration;
        }
 
+      $("#" + this.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
+      $("#" + this.prefix + "-update > span.ui-icon").removeClass("ui-icon-cancel");
+      $("#" + this.prefix + "-update > span.ui-icon").addClass("ui-icon-close");
+      $("#" + this.prefix + "-update > span.ui-text").text("Cancel");
+
       self.jkd_env.get(self.data_addr,
             args,
             function (msg, client) {
@@ -176,6 +192,10 @@ class JkdHistoryChart {
                     console.log(self.chart.data);
                 }
                self.chart.update(0);
+               $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
+               $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-cancel");
+               $("#" + self.prefix + "-update > span.ui-icon").addClass("ui-icon-refresh");
+               $("#" + self.prefix + "-update > span.ui-text").text("Refresh");
             },
             null);
       $("#" + self.prefix + "-duration").text(self.duration + " s");

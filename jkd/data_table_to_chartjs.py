@@ -47,7 +47,7 @@ class DataTableToChartjs(DataProcess):
 
         self.debug(''+repr(y_axes))
 
-        options= {'tooltips': { 'intersect':False },
+        options= {'tooltips': { 'intersect':False, 'mode':'x' },
                   'scales': {
                     'xAxes':[{
                       'minRotation':45,
