@@ -29,6 +29,7 @@ from .data_process import DataProcess
 from .data_format import DataFormat
 from .data_raw_to_table import DataRawToTable
 from .data_table_to_chartjs import DataTableToChartjs
+from .data_table_to_plotlyjs import DataTableToPlotlyjs
 from .data_table_to_tabulatorjs import DataTableToTabulatorjs
 from .data_calibration_0 import DataCalibration0
 from .cache import Cache
@@ -48,6 +49,7 @@ registry = {
         "data_format":DataFormat,
         "data_raw_to_table":DataRawToTable,
         "data_table_to_chartjs":DataTableToChartjs,
+        "data_table_to_plotlyjs":DataTableToPlotlyjs,
         "data_table_to_tabulatorjs":DataTableToTabulatorjs,
         "data_calibration_0":DataCalibration0,
         "sql_datasource":SqlDatasource,
