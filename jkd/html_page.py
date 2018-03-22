@@ -117,22 +117,34 @@ class HtmlPartEntry(HtmlPart):
 
 
 class HtmlPartHisto(HtmlPart):
-    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, **kwargs):
+    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, mode="chartjs", **kwargs):
         super().__init__(elt, p_class, p_name, p_id, **kwargs)
         #parms = {'p_id':self.p_id}
         self.data_addr = data
         self.css_add("jkd.css")
         self.script_add("jkd.js")
-        self.script_add("moment-with-locales.min.js")
-        self.script_add("Chart.bundle.js")
-        #self.script_add("Chart.bundle.min.js")
-        self.script_add("hammer.min.js")
-        self.script_add("chartjs-plugin-zoom.min.js")
-        self.script_add("jkd-chart.js")
+
+        if mode == "chartjs":
+            self.script_add("moment-with-locales.min.js")
+            self.script_add("Chart.bundle.js")
+            #self.script_add("Chart.bundle.min.js")
+            self.script_add("hammer.min.js")
+            self.script_add("chartjs-plugin-zoom.min.js")
+            self.script_add("jkd-chart.js")
+            html_inset='<canvas id="{{p_id}}-canvas" width="800" height="200"></canvas>'
+            js_inset='var hc = new JkdHistoryChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
+        elif mode == "plotlyjs":
+            self.script_add("plotly.latest.min.js")
+            self.script_add("jkd-plotly.js")
+            html_inset='<div id="{{p_id}}-chart" style="width:800px;height:200px;"></div>'
+            js_inset='var hc = new JkdPlotlyChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
+        else:
+            #TODO: Issue a warning (but how ?)
+            pass
         self.html_template = jinja2.Template("""
   <!-- HtmlPartHisto {{p_id}} -->
   <div id="{{p_id}}-container">
-    <canvas style="bgcolor:white;" id="{{p_id}}-canvas" width="800" height="200"></canvas>
+    """ + html_inset + """
     <div style="">
       <button class="ui-button ui-corner-all" id="{{p_id}}-update"><span class="ui-icon ui-icon-cancel"></span> <span class="ui-text">Unconn.</span></button>
       <button class="ui-button ui-corner-all" id="{{p_id}}-prev2"><span class="ui-icon ui-icon-arrowthick-1-w"></span> Much earlier</button>
@@ -149,7 +161,7 @@ class HtmlPartHisto(HtmlPart):
         self.js_template = jinja2.Template("""
   // HtmlPartHisto {{p_id}} script part
 
-  var hc = new JkdHistoryChart(jkd_env, "{{p_id}}", "{{data_addr}}");
+  """ + js_inset + """
 
   // end of HtmlPartHisto script part
 """)
