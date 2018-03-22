@@ -71,7 +71,7 @@ class DataTableToPlotlyjs(DataProcess):
 
         # time labels => unix timestamp * 1000
         labels = []
-        labels = list(data.index.map(lambda a:a.timestamp()*1000))
+        labels = list(data.index.map(lambda a:str(a)))
 
         # datasets
         # datasets = [{'label':'V Bat', 'yAxisID':'voltage', 'borderWidth':1, 'borderColor':'blue', 'fill':False, 'pointRadius':0, 'lineTension':0, 'data':[]},
@@ -91,9 +91,9 @@ class DataTableToPlotlyjs(DataProcess):
 
         datasets = []
         for dataset in self.datasets:
-            datasets.append({'label':dataset['label'], 'data':list(data[dataset['data']]), 'yAxisID':dataset['axis'], 'borderColor':dataset['color'], 'borderWidth':1, 'fill':False, 'pointRadius':0, 'lineTension':0})
+            datasets.append({'x':labels, 'y':list(data[dataset['data']]), 'type':'scatter'})
 
-        response = {'options': options, 'data':{'labels': labels, 'datasets': datasets}}
+        response = {'data':datasets}
         self.debug('response: '+str(response))
 
         return response
