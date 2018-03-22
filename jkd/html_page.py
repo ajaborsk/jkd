@@ -134,7 +134,7 @@ class HtmlPartHisto(HtmlPart):
             html_inset='<canvas id="{{p_id}}-canvas" width="800" height="200"></canvas>'
             js_inset='var hc = new JkdHistoryChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
         elif mode == "plotlyjs":
-            self.script_add("plotly.latest.min.js")
+            self.script_add("plotly-latest.min.js")
             self.script_add("jkd-plotly.js")
             html_inset='<div id="{{p_id}}-chart" style="width:800px;height:200px;"></div>'
             js_inset='var hc = new JkdPlotlyChart(jkd_env, "{{p_id}}", "{{data_addr}}");'

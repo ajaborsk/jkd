@@ -12,8 +12,9 @@ class JkdPlotlyChart {
 
         var self = this;
 
-        //TODO: the chart...
-    }
+        // The chart
+        Plotly.newPlot(this.prefix + "-chart", [],{});
+
 
     $("#" + this.prefix + "-update").click(function (evt) {
         self.update(self);
@@ -108,15 +109,17 @@ class JkdPlotlyChart {
       self.jkd_env.get(self.data_addr,
             args,
             function (msg, client) {
-                if ('options' in msg.reply) {
+                var data = [];
+                var layout = {};
+                if ('layout' in msg.reply) {
                     //self.chart.options = Object.assign({}, msg.reply.options);
-                    //console.log(self.chart.options);
+                    console.log(layout);
                 }
                 if ('data' in msg.reply) {
                     //self.chart.data = Object.assign({}, msg.reply.data);
-                    //console.log(self.chart.data);
+                    console.log(data);
                 }
-               //self.chart.update(0);
+               Plotly.update(self.prefix + "-chart", data, layout);
                $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
                $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-cancel");
                $("#" + self.prefix + "-update > span.ui-icon").addClass("ui-icon-refresh");
