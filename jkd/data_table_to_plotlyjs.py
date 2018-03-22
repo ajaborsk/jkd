@@ -24,7 +24,7 @@ class DataTableToPlotlyjs(DataProcess):
         for branch in elt:
             if branch.tag == 'axes':
                 for axis in branch:
-                    self.axes[axis.get('name')] = {'pos':axis.get('pos')}
+                    self.axes[axis.get('name')] = {'pos':axis.get('pos'), 'label':axis.get('label')}
             elif branch.tag == 'datasets':
                 for dataset in branch:
                     self.datasets.append({'data':dataset.get('data'), 'axis':dataset.get('axis'), 'color':dataset.get('color'), 'type':dataset.get('type'), 'label':dataset.get('label')})
@@ -36,38 +36,53 @@ class DataTableToPlotlyjs(DataProcess):
         #value = float(line[1][7:])
         #self.debug('value: '+str(value))
         #options = {}
+        layout = {}
 
         y_axes = []
+        y_idx = 1
+        position = 0.01
         for axis in self.axes:
-            y_axes.append({ 'id':axis,
-                            'scaleLabel':self.axes[axis].get('label','eer'),
-                            'type':'linear',
-                            'position':'left',
-                          })
+            if axis[0] == 'y':
+                if y_idx == 1:
+                    y_idxt = ''
+                    self.axes[axis]['y_idxt'] = None
+                else:
+                    y_idxt = str(y_idx)
+                    self.axes[axis]['y_idxt'] = 'y' + str(y_idx)
+                layout['yaxis' + y_idxt] = { 'title': self.axes[axis].get('label',''),
+                                             'side': 'left',
+                                             'position': position,
+                                           }
+                if y_idxt:
+                    layout['yaxis' + y_idxt]['overlaying'] = 'y'
+                y_idx += 1
+                position += 0.035
 
         self.debug(''+repr(y_axes))
 
-        options= {'tooltips': { 'intersect':False },
-                  'scales': {
-                    'xAxes':[{
-                      'minRotation':45,
-                      'type': 'time',
-                      'time':{
-                        'displayFormats':{
-                          'millisecond':'HH:mm:ss.S',
-                          'second':'HH:mm:ss',
-                          'minute':'DD-MM HH:mm',
-                          'hour':'DD-MM HH:mm',
-                          'day':'DD-MM HH:mm',
-                          'week':'DD-MM-YYYY',
-                          'month':'MM-YYYY',
-                          'quarter':'MM-YYYY',
-                          'year':'YYYY'},
-                         'tooltipFormat':'DD-MM-YYYY HH:mm:ss.S'}}],
-                    'yAxes': y_axes },
-                  'zoom':{'enabled':True, 'mode':'y'},
-                  'pan':{'enabled':True, 'mode':'y'},
-                  'chartArea': {'backgroundColor': 'rgb(255, 255, 255)'}}
+        # options= {'tooltips': { 'intersect':False },
+                  # 'scales': {
+                    # 'xAxes':[{
+                      # 'minRotation':45,
+                      # 'type': 'time',
+                      # 'time':{
+                        # 'displayFormats':{
+                          # 'millisecond':'HH:mm:ss.S',
+                          # 'second':'HH:mm:ss',
+                          # 'minute':'DD-MM HH:mm',
+                          # 'hour':'DD-MM HH:mm',
+                          # 'day':'DD-MM HH:mm',
+                          # 'week':'DD-MM-YYYY',
+                          # 'month':'MM-YYYY',
+                          # 'quarter':'MM-YYYY',
+                          # 'year':'YYYY'},
+                         # 'tooltipFormat':'DD-MM-YYYY HH:mm:ss.S'}}],
+                    # 'yAxes': y_axes },
+                  # 'zoom':{'enabled':True, 'mode':'y'},
+                  # 'pan':{'enabled':True, 'mode':'y'},
+                  # 'chartArea': {'backgroundColor': 'rgb(255, 255, 255)'}}
+
+        layout.update({'margin':{'t':20, 'b':20, 'l':20, 'r':20}})
 
         # time labels => unix timestamp * 1000
         labels = []
@@ -91,9 +106,11 @@ class DataTableToPlotlyjs(DataProcess):
 
         datasets = []
         for dataset in self.datasets:
-            datasets.append({'x':labels, 'y':list(data[dataset['data']]), 'type':'scatter'})
+            datasets.append({'name':dataset['label'],'x':labels, 'y':list(data[dataset['data']]), 'type':'scatter'})
+            if self.axes[dataset['axis']]['y_idxt'] is not None:
+                datasets[-1]['yaxis'] = self.axes[dataset['axis']]['y_idxt']
 
-        response = {'data':datasets}
+        response = {'data':datasets, 'layout':layout}
         self.debug('response: '+str(response))
 
         return response

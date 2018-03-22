@@ -80,8 +80,8 @@
         <link input="input" node="esp32_raw_to_table" port="output" />
       </links>
       <axes>
-          <axis name="y_C" pos="y_l"/>
-          <axis name="y_pc" pos="y_l"/>
+          <axis name="y_C" pos="y_l" label="Degrees"/>
+          <axis name="y_pc" pos="y_l" label="%"/>
       </axes>
       <datasets>
           <dataset data="t_amb" axis="y_C" color="blue" type="line" label="Tamb"/>

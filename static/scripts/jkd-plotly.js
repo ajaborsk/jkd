@@ -13,7 +13,7 @@ class JkdPlotlyChart {
         var self = this;
 
         // The chart
-        Plotly.newPlot(this.prefix + "-chart", [],{});
+        Plotly.newPlot(this.prefix + "-chart", [], {}, {displaylogo: false});
 
 
     $("#" + this.prefix + "-update").click(function (evt) {
@@ -115,14 +115,15 @@ class JkdPlotlyChart {
                     //self.chart.options = Object.assign({}, msg.reply.options);
                     layout = msg.reply.layout;
                     console.log(layout);
+                    Plotly.relayout(self.prefix + "-chart", layout);
                 }
                 if ('data' in msg.reply) {
                     //self.chart.data = Object.assign({}, msg.reply.data);
                     data = msg.reply.data;
                     console.log(data);
+                    Plotly.deleteTraces(self.prefix + "-chart", Array.apply(null, Array(document.getElementById(self.prefix + "-chart").data.length)).map(function (_, i) {return i;}));
+                    Plotly.addTraces(self.prefix + "-chart", data);
                 }
-               Plotly.deleteTraces(self.prefix + "-chart", Array.apply(null, Array(document.getElementById(self.prefix + "-chart").data.length)).map(function (_, i) {return i;}));
-               Plotly.addTraces(self.prefix + "-chart", data);
                //Plotly.update(self.prefix + "-chart", data, layout);
                $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
                $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-cancel");
