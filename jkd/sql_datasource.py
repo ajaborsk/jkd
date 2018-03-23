@@ -21,10 +21,14 @@ class SqlDatasource(Node):
             if el.tag == 'query':
                 name = el.attrib['name']
                 query = "".join(el.itertext())
+                col_ops = []
+                for subel in el:
+                    if subel.tag == 'column':
+                        col_ops.append(dict(subel.attrib))
                 self.port_add(name)
-                self.task_add(name, partial(self.sql_query, query = query), returns = [el.attrib['name']])
+                self.task_add(name, partial(self.sql_query, query = query, col_ops = col_ops), returns = [el.attrib['name']])
 
-    async def sql_query(self, query = None, args={}):
+    async def sql_query(self, query = None, col_ops = [], args={}):
         self.debug("Query: "+str(query))
         cols = []
         resp = []
@@ -42,6 +46,11 @@ class SqlDatasource(Node):
             pass
 
         df = pd.DataFrame(resp, columns=[c['title'] for c in cols])
+        
+        
+        for col_op in col_ops:
+            pass
+            #pd.to_datetime(df['DA_AP']+' '+df['HE_AP'].str[0:2]+":"+df['HE_AP'].str[2:4])        
  
         return df       
 #        return {'cols':cols, 'data':resp, 'query':query, 'df':df}

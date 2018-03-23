@@ -4,7 +4,7 @@
     <data_object name="config" persistent="true"/>
     <sql_datasource name="sql0" database="AssetPlus" username="gmao" password="gmao">
       <query name="test0">
-        <column title="Blabla" field="int_statut"/>
+        <column name="int_statut" value="int_status" remove=""/>
         SELECT count(nu_int) AS "Total", code_techn
           FROM en_cours 
           WHERE int_cm = 'BIOMEDICAL' AND da_ap &lt; '2017-03-07' 
@@ -12,9 +12,10 @@
         ORDER BY "Total";
       </query>
       <query name="test1">
-        SELECT nu_int AS "Code interv", int_statut, int_cm, ri_suivi_techn, code_techn 
+        <column name="appel" value="" remove="da_ap, he_ap">
+        SELECT nu_int AS "Code interv", da_ap, he_ap, int_statut, int_cm, ri_suivi_techn, code_techn 
         FROM en_cours 
-        WHERE int_cm = 'BIOMEDICAL' AND da_ap >= '2018-02-01';
+        WHERE int_cm = 'BIOMEDICAL' AND da_ap >= '2018-03-01';
       </query>
     </sql_datasource>
     <data_table_to_tabulatorjs name="tabulator_format">
