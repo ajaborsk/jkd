@@ -103,3 +103,5 @@ ENV/
 # geany project files
 *.geany
 
+# nohup file
+nohup.out

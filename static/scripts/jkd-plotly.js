@@ -6,7 +6,7 @@ class JkdPlotlyChart {
         this.data_addr = data_addr;
 
 
-        this.duration = 36 * 24; // in seconds
+        this.duration = 3600 * 24; // in seconds
         this.start_date = null; // computed from end_date and length
         this.end_date = null; // default => Date.now()
 

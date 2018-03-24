@@ -43,7 +43,7 @@
     <!-- Display configuration (colors, scales, etc.) -->
     <data_object name="config" persistent="true" />
     <!-- Display preparation: from raw data to Chart.js data object / history preset-->
-    <data_table_to_chartjs name="jee_table_to_chartjs" preset="history">
+    <data_table_to_plotlyjs name="jee_table_to_plotlyjs" preset="history">
       <links>
         <link input="config" node="config" port="data" />
         <link input="input" node="jee_raw_to_table" port="output" />
@@ -61,7 +61,7 @@
           <dataset data="t_ext" axis="y_C" color="magenta" type="line" label="Text"/>
           <dataset data="t_mcu" axis="y_C" color="cyan" type="line" label="Tmcu"/>
       </datasets>
-    </data_table_to_chartjs>
+    </data_table_to_plotlyjs>
     <history name="esp01_128_histo" timestamp="true" />
     <history name="esp32_histo" timestamp="true" />
     <data_raw_to_table name="esp32_raw_to_table">
@@ -95,7 +95,7 @@
       </nodes>
     </subprocessus>
     <html_page appname="demo_pi" name="homepage" template="homepage" title="A jkd Demo Application">
-      <histo data="/jee_table_to_chartjs/output" template="dummy" mode="chartjs"/>
+      <histo data="/jee_table_to_plotlyjs/output" template="dummy" mode="plotlyjs"/>
       <histo data="/esp32_table_to_plotlyjs/output" template="dummy" mode="plotlyjs"/>
       <entry data="/calib/input" template="dummy" />
       <chart data="/heavyproc/siggen_ext/output" template="table" />

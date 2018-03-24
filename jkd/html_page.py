@@ -136,7 +136,7 @@ class HtmlPartHisto(HtmlPart):
         elif mode == "plotlyjs":
             self.script_add("plotly-latest.min.js")
             self.script_add("jkd-plotly.js")
-            html_inset='<div id="{{p_id}}-chart" style="width:100%;height:400px;"></div>'
+            html_inset='<div id="{{p_id}}-chart" style="width:100%;height:800px;"></div>'
             js_inset='var hc = new JkdPlotlyChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
         else:
             #TODO: Issue a warning (but how ?)
