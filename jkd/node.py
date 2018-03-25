@@ -311,29 +311,35 @@ class Node:
                         resp = await self.msg_query(self.parent, arg_msg, timeout = 50.)
                         args.append(resp)
                 # Launch task
-                self.debug("launch task: "+str(task)+' '+str(args), 'msg')
                 kwargs = {}
                 if query_args is not None:
                     kwargs['args'] = query_args
                 if task['client'] is not None:
                     kwargs['client'] = task['client']
-                if len(self.tasks[port['returned_by']]['returns']) == 1:
-                    coro_f = task['coro']
-                    coro = coro_f(*args, **kwargs)
-                    result = await coro
-                else:
-                    idx = self.tasks[port['returned_by']]['returns'].index(portname)
-                    result = await task['coro'](*args, **kwargs)
-                    result = result[idx]
-                self.debug("result: "+str(result), 'msg')
+                task = task['coro'](*args, **kwargs)
+                if inspect.iscoroutine(task):
+                    self.debug("launching (coroutine) task: "+str(task)+' args:'+str(args)+' kwargs:'+str(kwargs))
+                    result = await task
+                    if len(self.tasks[port['returned_by']]['returns']) != 1:
+                        idx = self.tasks[port['returned_by']]['returns'].index(portname)
+                        result = result[idx]
+                    response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'reply':result}
+                    #response = {'flags':'d', 'prx_src':self, 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
+                    await self.msg_send(msg['prx_src'], response)
+                    self.debug("Replied with:" + str(response), 'msg')
+                elif inspect.isasyncgen(task):
+                    self.debug("launching (generator) task: "+str(task)+' args:'+str(args)+' kwargs:'+str(kwargs))
+                    async for result in task:
+                        if len(self.tasks[port['returned_by']]['returns']) != 1:
+                            idx = self.tasks[port['returned_by']]['returns'].index(portname)
+                            result = result[idx]
+                        response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'reply':result}
+                        #response = {'flags':'d', 'prx_src':self, 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
+                        await self.msg_send(msg['prx_src'], response)
+                        self.debug("Replied with:" + str(response), 'msg')
             else:
                 self.warning('port "{}" is not provided nor returned by any task.'.format(portname))
                 return None
-            # Send reply
-            response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'reply':result}
-            #response = {'flags':'d', 'prx_src':self, 'prx_dst':msg['prx_src'], 'lcid':msg['lcid'], 'reply':result}
-            await self.msg_send(msg['prx_src'], response)
-            self.debug("Replied with:"+str(response), 'msg')
         elif msg['policy'] == 'on_update':
             if 'provided_by' in port:
                 self.debug("provided_by mode: "+str(msg), 'msg')

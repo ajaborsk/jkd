@@ -123,10 +123,13 @@ class History(Node):
 
         index_after = self.index_after(after_ts)
         if index_after is None:
-            return []
+            yield []
+            return
+#            return []
         else:
             index_file.seek(index_after * self.idx_rec_size)
 
+        count = 0
         while not done:
             idx_b = index_file.read(self.idx_rec_size)
             if len(idx_b) == self.idx_rec_size:
@@ -138,10 +141,16 @@ class History(Node):
                     #self.debug(' '+repr(idx)+' '+repr(b_data))
                     data = json.loads(b_data.decode('utf8'))
                     result.append(data)
+                    count += 1
+                    if count % 10000:
+                        #yield []
+                        pass
                 else:
                     done = True
             else:
                 done = True
         data_file.close()
         index_file.close()
-        return result
+        yield result
+        return
+        #return result
