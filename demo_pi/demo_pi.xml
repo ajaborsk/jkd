@@ -31,6 +31,14 @@
         <link input="input" node="jee_histo" port="output" />
       </links>
       <values>
+        <value name="v_bat" eval="(input[3] / model['alpha_bat'])" unit="V" tags="" />
+        <value name="v_cir" eval="(input[4] / model['alpha_cir'])" unit="V" tags="" />
+        <value name="i_bat" eval="((value['v_bat'] - value['v_cir']) / 0.1 * 1000)" unit="mA" tags="" />
+        <value name="v_int" eval="(value['v_bat'] + value['i_bat'] / 1000. * 0.40)" unit="V" tags="" />
+        <value name="t_ext" eval="(input[6] / 32768. * 25.)" unit="degC" tags="" />
+        <var name="c" eval="160." unit="" tags="" />
+        <value name="t_mcu" eval="((input[2] - (21888 - 23 * c)) / c)" unit="degC" tags="" />
+<!--
         <value name="v_bat" eval="(input[3] / model['alpha_bat']).rolling('10min').mean()" unit="V" tags="" />
         <value name="v_cir" eval="(input[4] / model['alpha_cir']).rolling('10min').mean()" unit="V" tags="" />
         <value name="i_bat" eval="((value['v_bat'] - value['v_cir']) / 0.1 * 1000).rolling('10min').mean()" unit="mA" tags="" />
@@ -38,6 +46,7 @@
         <value name="t_ext" eval="(input[6] / 32768. * 25.).rolling('10min').mean()" unit="degC" tags="" />
         <var name="c" eval="160." unit="" tags="" />
         <value name="t_mcu" eval="((input[2] - (21888 - 23 * c)) / c).rolling('10min').mean()" unit="degC" tags="" />
+-->
       </values>
     </data_raw_to_table>
     <!-- Display configuration (colors, scales, etc.) -->
@@ -70,8 +79,14 @@
         <link input="input" node="esp32_histo" port="output" />
       </links>
       <values>
+<!--
         <value name="t_amb" eval="input[0].rolling('10min').mean()" unit="degC" tags="" />
         <value name="rh_amb" eval="input[1].rolling('10min').mean()" unit="%" tags="" />
+-->
+        <value name="t_amb" eval="input[0]" unit="degC" tags="" />
+        <value name="rh_amb" eval="input[1]" unit="%" tags="" />
+        <value name="t_amb2" eval="input[2]" unit="degC" tags="" />
+        <value name="press_amb" eval="input[3]" unit="mb" tags="" />
       </values>
     </data_raw_to_table>
     <data_table_to_plotlyjs name="esp32_table_to_plotlyjs" preset="history">
@@ -82,10 +97,13 @@
       <axes>
           <axis name="y_C" pos="y_l" label="Degrees"/>
           <axis name="y_pc" pos="y_l" label="%"/>
+          <axis name="y_mb" pos="y_l" label="mb"/>
       </axes>
       <datasets>
           <dataset data="t_amb" axis="y_C" color="blue" type="line" label="Tamb"/>
           <dataset data="rh_amb" axis="y_pc" color="red" type="line" label="HR"/>
+          <dataset data="t_amb2" axis="y_C" color="gray" type="line" label="Tamb2"/>
+          <dataset data="press_amb" axis="y_mb" color="orange" type="line" label="Press"/>
       </datasets>
     </data_table_to_plotlyjs>
     <subprocessus name="heavyproc" appname="unused_app_name">
