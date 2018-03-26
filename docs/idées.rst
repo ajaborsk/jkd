@@ -290,12 +290,15 @@ Pour chaque *part* :
 - *css* spécifique ? (pas sûr...)
 - portion de html (ou de jinja2 ??)
 
-Un html *part* peut être un conteneur.
+Un html *part* peut être un conteneur => récursion
 
 On construit une page HTML complète à partir d'un template de base et d'un
 arbre de *part*s.
 
 Le tout est paramétrique (=> génère un template ??)
+
+=> décrire qu'est ce qui doit être dans chaque partie de l'application (look, images, logo, structure des pages, liens entre les pages...)
+=> Penser aux pages "multiscreen" (plusieurs pages synchronisées sur plusieurs écrans)
 
 Cache :
 -------
