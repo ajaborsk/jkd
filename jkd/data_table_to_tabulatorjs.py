@@ -31,6 +31,12 @@ class DataTableToTabulatorjs(DataProcess):
             #TODO: Get title from config
             result['columns'].append({'title':column, 'field':column})
         
+        # Convert pandas/numpy datatype to tabulator/json type/format
+        for col in data:
+            self.debug('Type: '+str(data[col].dtype))
+            if str(data[col].dtype).find('datetime') == 0:
+                data[col] = data[col].apply(lambda a: a.strftime('%d-%m-%Y %H:%M:%S'))
+        
         result['data'] = []
         for row_idx in range(len(data)):
             row={'id':row_idx}

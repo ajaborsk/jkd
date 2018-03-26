@@ -12,7 +12,7 @@
         ORDER BY "Total";
       </query>
       <query name="test1">
-        <column name="appel" value="" remove="da_ap, he_ap"/>
+        <column name="Appel" type="datetime" value="{DA_AP} + ' ' + {HE_AP}.str[0:2] + ':' + {HE_AP}.str[2:4]" remove="da_ap, he_ap"/>
         SELECT nu_int AS "Code interv", da_ap, he_ap, int_statut, int_cm, ri_suivi_techn, code_techn
         FROM en_cours
         WHERE int_cm = 'BIOMEDICAL' AND da_ap >= '2018-03-01';
