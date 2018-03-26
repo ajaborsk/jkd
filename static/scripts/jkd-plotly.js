@@ -15,6 +15,10 @@ class JkdPlotlyChart {
         // The chart
         Plotly.newPlot(this.prefix + "-chart", [], {}, {displaylogo: false});
 
+//        window.onresize = function() {
+//            Plotly.Plots.resize(self.prefix + "-chart");
+//        };
+
 
     $("#" + this.prefix + "-update").click(function (evt) {
         self.update(self);
@@ -64,8 +68,8 @@ class JkdPlotlyChart {
     $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
     $("#" + self.prefix + "-update > span.ui-icon").addClass("ui-icon-cancel");
     $("#" + self.prefix + "-update > span.ui-text").text("Disconn.");
-    self.jkd_env.on_connect[self.prefix] ={'cb':self.update, 'client':self};
-    self.jkd_env.on_disconnect[self.prefix] ={'cb':function(client){
+    self.jkd_env.on_connect[self.prefix] = {'cb':self.update, 'client':self};
+    self.jkd_env.on_disconnect[self.prefix] = {'cb':function(client){
         self=client;
         $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
         $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
@@ -73,6 +77,9 @@ class JkdPlotlyChart {
         $("#" + self.prefix + "-update > span.ui-text").text("Disconn.");
         }, 'client':self};
     //self.update();
+    self.jkd_env.on_resize[self.prefix] = {'cb':function(self) {
+            Plotly.Plots.resize(self.prefix + "-chart");
+        }, 'client':self};
     };
 
     update(client)

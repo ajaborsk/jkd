@@ -25,8 +25,19 @@ class JkdEnv
     this.channels = {};
     this.on_connect = {};
     this.on_disconnect = {};
-   }
+    this.on_resize = {};
 
+    var self = this;
+
+    window.onresize = function(){
+      var keys = Object.keys(self.on_resize);
+      for (var i = 0;i < keys.length ;i++)
+       {
+        self.on_resize[keys[i]].cb(self.on_resize[keys[i]].client);
+       }
+    };
+
+   }
    // send a message
    //send(msg)
    //{
