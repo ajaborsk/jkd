@@ -15,11 +15,6 @@ class JkdPlotlyChart {
         // The chart
         Plotly.newPlot(this.prefix + "-chart", [], {}, {displaylogo: false});
 
-//        window.onresize = function() {
-//            Plotly.Plots.resize(self.prefix + "-chart");
-//        };
-
-
     $("#" + this.prefix + "-update").click(function (evt) {
         self.update(self);
     });
