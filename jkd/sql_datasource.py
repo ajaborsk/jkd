@@ -2,6 +2,7 @@ import asyncio
 import time
 import datetime
 import math
+import string
 import pandas as pd
 
 from functools import partial
@@ -49,9 +50,27 @@ class SqlDatasource(Node):
         
         
         for col_op in col_ops:
-            pass
-            #pd.to_datetime(df['DA_AP']+' '+df['HE_AP'].str[0:2]+":"+df['HE_AP'].str[2:4])        
- 
+            #test_code
+            #if col_op['name'] == 'Appel':
+            #    df['Appel'] = pd.to_datetime(df['DA_AP']+' '+df['HE_AP'].str[0:2]+":"+df['HE_AP'].str[2:4])        
+            args = {}
+            for fmt in string.Formatter().parse(col_op['value']):
+                if fmt[1] is not None:
+                    args[fmt[1]] = 'df["{}"]'.format(fmt[1])
+            self.debug(str(args))
+            value = eval(col_op['value'].format(**args), None, {'df':df})
+            if col_op.get('type', 'int') == 'datetime':
+                df[col_op['name']] = pd.to_datetime(value)
+            else:
+                self.warning("Unknown type for column operation: "+str(col_op.get('type')))
+            for to_del in col_op.get('remove',"").split(','):
+                to_del = to_del.strip().upper()
+                if to_del != '':
+                    if to_del in df:
+                        del df[to_del]
+                    else:
+                        self.warning('Trying to remove unknown column: '+str(to_del))
+                
         return df       
 #        return {'cols':cols, 'data':resp, 'query':query, 'df':df}
 

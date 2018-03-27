@@ -320,6 +320,16 @@ entre le timestamp produit par l'entrée et le présent (ou le timestamp de la r
 Le stockage de la donnée peut être en mémoire (défaut) ou dans un fichier (système persistant).
 
 
+Modèle :
+--------
+
+Un modèle est un ensemble déclaratif d'équations (?) ou permet d'en calculer un à partir du descriptif du circuit et/ou du descritif mécanique
+
+Ce modèle déclaratif est (sera) ensuite utilisé pour déterminer les différentes fonctions de conversion (mesures => affichage), calibration (détermination des paramètres du modèle), (prévisions ??)
+
+Un modèle peut posséder (et c'est presque toujours le cas) des paramètres/inconnues qui sont ajustées avec les données connues (calibration / apprentissage).
+
+
 Idées de fonctionnalités avancées :
 -----------------------------------
 
