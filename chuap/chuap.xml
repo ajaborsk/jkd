@@ -3,6 +3,21 @@
   <nodes>
     <data_object name="config" persistent="true"/>
     <sql_datasource name="sql0" database="AssetPlus" username="gmao" password="gmao">
+      <query name="inventory">
+        <!-- Workaround to prevent Decimal() bug -->
+        <column name="Prix" type="float" value="{PRIX_100} / 100." remove="PRIX_100"/>
+        <column name="MES" type="datetime" value="{MES1}" remove="MES1"/>
+        <column name="Fin Garantie" type="datetime" value="{FDG}" remove="FDG"/>
+        <column name="Réforme" type="datetime" value="{DATE_REFOR}" remove="DATE_REFOR"/>
+       SELECT 
+         n_imma, mes1, typ_mod, marque, n_nom_cneh, date_refor, prix * 100 as "PRIX_100", poste_w, fdg, fk_budget_nu_compte 
+       FROM 
+         b_eq1996 
+       WHERE 
+        v_fonc = 'BM' 
+         AND 
+        mes1 LIKE '2017%';
+      </query>
       <query name="test0">
         <column name="int_statut" value="int_status" remove=""/>
         SELECT count(nu_int) AS "Total", code_techn
@@ -24,7 +39,7 @@
     <data_table_to_tabulatorjs name="tabulator_format">
       <links>
         <link input="config" node="config" port="data"/>
-        <link input="input" node="sql0" port="test1"/>
+        <link input="input" node="sql0" port="inventory"/>
       </links>
     </data_table_to_tabulatorjs>
     <html_page appname="chuap" name="homepage" template="homepage" title="Test Application Asset+ CHU Amiens-Picardie">

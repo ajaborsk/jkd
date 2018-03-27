@@ -4,6 +4,7 @@ import datetime
 import math
 import string
 import pandas as pd
+import decimal
 
 from functools import partial
 
@@ -36,11 +37,13 @@ class SqlDatasource(Node):
         cur = self.cnx.cursor()
         try:
             cur.execute(query)
-            self.debug(str(cur))
-            self.debug(str(cur.description))
+            #self.debug(str(cur))
+            #self.debug(str(cur.description))
             for desc in cur.description:
                 cols.append({'title':desc[0]})
             for row in cur.fetchall():
+                #self.debug(repr(row))
+                #self.debug(str(list(row)))
                 resp.append(list(row))
             self.debug('response length: ' + str(len(resp)))
         except:
@@ -48,6 +51,10 @@ class SqlDatasource(Node):
 
         df = pd.DataFrame(resp, columns=[c['title'] for c in cols])
         
+#        for col in range(len(df.columns)):
+#            self.debug(str(cur.description[col]))
+#            if cur.description[col][1] == decimal.Decimal:
+#                df[df.columns[col]] = pd.to_numeric(df[df.columns[col]])/100. 
         
         for col_op in col_ops:
             #test_code
@@ -61,6 +68,8 @@ class SqlDatasource(Node):
             value = eval(col_op['value'].format(**args), None, {'df':df})
             if col_op.get('type', 'int') == 'datetime':
                 df[col_op['name']] = pd.to_datetime(value)
+            elif col_op.get('type', 'int') == 'float':
+                df[col_op['name']] = pd.to_numeric(value)
             else:
                 self.warning("Unknown type for column operation: "+str(col_op.get('type')))
             for to_del in col_op.get('remove',"").split(','):
