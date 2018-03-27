@@ -258,6 +258,15 @@ Un message a trois drapeaux possibles de propagation (bas niveau). c et f sont e
 |Left     |      3.5 €|
 +---------+-----------+
 
+Les tâches :
+------------
+
+une tâche référencée produit/lit les données sur les ports d'entrée/sortie.
+
+- Simple : Coroutine (voire fonction) classique : prend les valeur en entrée et retourne les résultats
+- Générateur : prends les valeurs en entrée et retourne les réultats, éventuellement par parties, en les 'yieldant'
+- Polyvalente : Gère tout (y compris les messages d'I/O)
+
 Le système de types :
 ---------------------
 
@@ -328,7 +337,8 @@ Idées de fonctionnalités avancées :
 -----------------------------------
 
 Business Intelligence classique : Visualiser un ensemble de données (une grosse table) sur plusieurs axes (dimensions).
-Il est possible de filtrer sur chaque vue et le reste de l'hypercube se met à jour automatiquement.
+Il est possible de filtrer sur chaque vue et le reste de l'hypercube se met à jour automatiquement. Chaque axe est hiérarchique. Année->mois->jour->heure->minute->seconde...
+La difficulté est de trouver la bonne table et les bonnes vues...
 
 Amélioration : Etant donné un paramètre (une colonne ou une formule de colonnes), donner des indications sur
 les colonnes / dimensions les plus "expliquantes"

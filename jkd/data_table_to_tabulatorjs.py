@@ -9,6 +9,7 @@ import asyncio
 import time
 import datetime
 import math
+import pandas as pd
 
 from .data_process import DataProcess
 
@@ -30,6 +31,12 @@ class DataTableToTabulatorjs(DataProcess):
         for column in data.columns:
             #TODO: Get title from config
             result['columns'].append({'title':column, 'field':column})
+        
+        # Convert pandas/numpy datatype to tabulator/json type/format
+        for col in data:
+            self.debug('Type: '+str(data[col].dtype))
+            if str(data[col].dtype).find('datetime') == 0:
+                data[col] = data[col].apply(lambda a: a.strftime('%d-%m-%Y %H:%M:%S') if not pd.isna(a) else None)
         
         result['data'] = []
         for row_idx in range(len(data)):
