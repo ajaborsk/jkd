@@ -10,13 +10,13 @@
         <column name="Fin Garantie" type="datetime" value="{FDG}" remove="FDG"/>
         <column name="Réforme" type="datetime" value="{DATE_REFOR}" remove="DATE_REFOR"/>
        SELECT 
-         n_imma, mes1, typ_mod, marque, n_nom_cneh, date_refor, prix * 100 as "PRIX_100", poste_w, fdg, fk_budget_nu_compte 
+         n_imma, nom, n_seri, mes1, typ_mod, marque, n_nom_cneh, date_refor, prix * 100 as "PRIX_100", poste_w, fdg, fk_budget_nu_compte 
        FROM 
          b_eq1996 
        WHERE 
         v_fonc = 'BM' 
          AND 
-        mes1 LIKE '2017%';
+        mes1 LIKE '201%';
       </query>
       <query name="test0">
         <column name="int_statut" value="int_status" remove=""/>
