@@ -22,6 +22,12 @@
       </nodes>
     </subprocessus>
     <multipivot name="mp0">
+      <links>
+        <link input="input" node="h0" port="output" />
+      </links>
+      <axe title="Axis 0", cols=""/>
+      <axe title="Axis 1", cols=""/>
+      <axe title="Axis 2", cols=""/>
     </multipivot>
     <html_page appname="demo" name="homepage" template="homepage" title="A jkd Demo Application">
       <table data="node:/heavyproc#output" template="table" />

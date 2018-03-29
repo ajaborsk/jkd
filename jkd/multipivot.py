@@ -3,9 +3,9 @@ import time
 import datetime
 import math
 
-from .node import Node
+from .data_process import DataProcess
 
-class Multipivot(Node):
+class Multipivot(DataProcess):
     tagname = "multipivot"
     def __init__(self, elt = None, **kwargs):
         super().__init__(elt=elt, **kwargs)
