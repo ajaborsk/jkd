@@ -10,9 +10,12 @@ class Multipivot(DataProcess):
     def __init__(self, elt = None, **kwargs):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
-        self.port_add('output', cached = True, timestamped = True)
-        self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
+        self.port_add('output0', cached = True, timestamped = True)
+        self.port_add('output1', cached = True, timestamped = True)
+        self.task_add('do_it', coro = self.do_it, needs=['input'], provides=['output0', 'output1'])
 
-    async def parse(self, line, args={}):
-        value = 1.
-        return "#" * int(100. * (value + 100) / 200.)
+    async def do_it(self, args={}):
+        while True:
+            data = await self.port_input_get("input", args)
+            self.port_update("output1", data)
+    

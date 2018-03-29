@@ -70,6 +70,38 @@ class HtmlPartTable(HtmlPart):
         return ctx
 
 
+class HtmlPartDynTable(HtmlPart):
+    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, **kwargs):
+        super().__init__(elt, p_class, p_name, p_id, **kwargs)
+        self.data_addr = data
+        self.css_add("jkd.css")
+        self.css_add("jquery-ui.css")
+        self.css_add("tabulator.min.css")
+        self.script_add("jquery-3.3.1.min.js")
+        self.script_add("jquery-ui.min.js")
+        self.script_add("tabulator.min.js")
+        self.script_add("jkd.js")
+        self.script_add("jkd-dyn-table.js")
+        self.html_template = jinja2.Template("""
+  <!-- HtmlPartTable {{p_id}} -->
+  <div id="{{p_id}}-container">
+    <div style="bgcolor:white;" id="{{p_id}}-table" width="800" height="200"></div>
+  </div>
+  <!-- HtmlPartTable end -->""")
+        self.js_template = jinja2.Template("""
+  // HtmlPartTable {{p_id}} script part
+
+  var t = new JkdDynTable(jkd_env, "{{p_id}}", "{{data_addr}}");
+
+  // end of HtmlPartTable script part
+""")
+
+    def context(self):
+        ctx = super().context()
+        ctx.update({'data_addr':self.data_addr})
+        return ctx
+
+
 class HtmlPartChart(HtmlPart):
     def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, **kwargs):
         super().__init__(elt, p_class, p_name, p_id, **kwargs)
@@ -178,6 +210,7 @@ class HtmlPage(Node):
         self.parts_registry = {'histo':HtmlPartHisto,
                                'value':HtmlPartValue,
                                'table':HtmlPartTable,
+                               'dyn-table':HtmlPartDynTable,
                                'entry':HtmlPartEntry,
                                'chart':HtmlPartChart}
         if 'appname' in kwargs:

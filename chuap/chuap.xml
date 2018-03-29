@@ -16,7 +16,7 @@
        WHERE 
         v_fonc = 'BM' 
          AND 
-        mes1 LIKE '201%';
+        mes1 LIKE '2018-03-%';
       </query>
       <query name="test0">
         <column name="int_statut" value="int_status" remove=""/>
@@ -42,6 +42,17 @@
         <link input="input" node="sql0" port="inventory"/>
       </links>
     </data_table_to_tabulatorjs>
+    <multipivot name="mpv_test">
+      <links>
+        <link input="input" node="sql0" port="inventory" />
+      </links>
+    </multipivot>
+    <data_table_to_tabulatorjs name="mpv_tab1_fmt">
+      <links>
+        <link input="config" node="config" port="data"/>
+        <link input="input" node="mpv_test" port="output1"/>
+      </links>
+    </data_table_to_tabulatorjs>
     <html_page appname="chuap" name="homepage" template="homepage" title="Test Application Asset+ CHU Amiens-Picardie">
       <!-- <table src="/chuap/sql0/test0"/>
       <table id="ma_table" src="/chuap/sql0/test0"/>
@@ -49,7 +60,8 @@
       <table src="/chuap/sql0/test0"/>
       <chart id="c1" src="/chuap/sql0/test12"/>
       <table src="/chuap/sql0/test0"/> -->
-      <table name="t1" config="/config/data/t1" data="/tabulator_format/output"/>
+      <dyn-table name="t1" config="/config/data/t1" data="/tabulator_format/output"/>
+      <dyn-table name="t2" config="/config/data/t2" data="/mpv_tab1_fmt/output"/>
     </html_page>
   </nodes>
   <ports>

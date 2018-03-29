@@ -176,7 +176,8 @@ class Node:
 
     async def _on_update_loop(self, inputs = [], outputs = [], coro = None, query_args = {}):
         self.debug('inputs: '+str(inputs)+', outputs:'+str(outputs))
-        while True:
+        done = False
+        while not done:
             args = []
             for input_port in inputs:
                 args.append(await self.port_read(input_port))
@@ -188,6 +189,9 @@ class Node:
             else:
                 for i in range(len(outputs)):
                     await self.port_value_update(outputs[i], results[i])
+            # If there is no input => Do not enter into a infinite loop        
+            if len(inputs) == 0:
+                done = True
 
     async def link_connect(self, linkname):
         #TODO
