@@ -54,8 +54,8 @@ class JkdEnv
 //    console.log(typeof(this.channels[lcid]['cb']));
 
     var msg = { 'url'   : '/' + this.appname + url,
-                'src'   : '/chuap/homepage', // Unused ??
-                'from'  : this.from, // Unused ??
+                //'src'   : '/chuap/homepage', // Unused ??
+                //'from'  : this.from, // Unused ??
                 'lcid'  : lcid,
                 'flags' : 'c',
                 'method': 'get',
@@ -76,8 +76,8 @@ class JkdEnv
 //    console.log(typeof(this.channels[lcid]['cb']));
 
     var msg = { 'url'   : '/' + this.appname + url,
-                'src'   : '/chuap/homepage', // Unused ??
-                'from'  : this.from, // Unused ??
+                //'src'   : '/chuap/homepage', // Unused ??
+                //'from'  : this.from, // Unused ??
                 'lcid'  : lcid,
                 'flags' : 'c',
                 'method': 'put',
@@ -98,8 +98,8 @@ class JkdEnv
 //    console.log(typeof(this.channels[lcid]['cb']));
 
     var msg = { 'url'   : '/' + this.appname + url,
-                'src'   : '/demo/homepage', // Unused ??
-                'from'  : this.from, // Unused ??
+                //'src'   : '/demo/homepage', // Unused ??
+                //'from'  : this.from, // Unused ??
                 'lcid'  : lcid,
                 'flags' : 'c',
                 'method': 'get',

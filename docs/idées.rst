@@ -10,6 +10,7 @@ Exemples d'applications
 * Analyse activité EFS
 * Compilation (test)
   Par exemple pour un script Arduino
+* Système domotique
 
 Structure
 =========
@@ -18,7 +19,7 @@ Application
 -----------
 
 Une application est créée à partir  d'un fichier (xml ?) qui décrit le graphe (noeuds et arcs).
-
+=> plutôt définir un format basé sur "JSON", avec une équivalence XML, pour faciliter la sérialisation
 
 Types de noeuds :
 -----------------
@@ -32,9 +33,18 @@ Types de noeuds :
 
 * Caches
 * Transformateurs de données (import / export)
-* Table (ou ce serait pluôt un type de données ?)
+* Table (ou ce serait plutôt un type de données ? => OUI)
 * Rapport (pdf/html/dhtml/svg...)
 * noeuds de calcul (Processor)
+
+Chaque Noeud est identifié de façon unique
+MAIS il n'est pas envisageable d'avoir une gestion GLOBALE des identifiants
+
+donc:
+
+* gestion arborescente (chaque noeud a un ID unique dans son parent)
+* Cela nécessite un système de requête pour rechercher l'id d'un noeud
+* pour la messagerie, if faut donc aussi un mécanisme de routage (utilisation d'une url)
 
 Noeuds de calcul
 ----------------
@@ -69,6 +79,13 @@ Structure du dict **tasks** de chaque noeud (node) :
 |                 |              |                                         |
 +-----------------+--------------+-----------------------------------------+
 
+une tâche référencée produit/lit les données sur les ports d'entrée/sortie.
+
+- Simple : Coroutine (voire fonction) classique : prend les valeurs en entrée et retourne les résultats
+- Générateur : prends les valeurs en entrée et retourne les résultats, éventuellement par parties, en les 'yieldant'
+- Polyvalente : Gère tout (y compris les messages d'I/O)
+
+
 Tests à prévoir :
 * Tous les Nodes doivent être sérialisables
 
@@ -88,13 +105,6 @@ Un rapport peut être :
 
 Le type est *fixe* : html, pdf, web_page, txt...
 
-Chaque Noeud est identifié de façon unique
-MAIS il n'est pas envisageable d'avoir une gestion GLOBALE des identifiants
-
-donc:
-
-* gestion arborescente (chaque noeud a un ID unique dans son parent)
-* Cela nécessite un système de requête pour rechercher l'id d'un noeud
 
 Communication entre les noeuds
 ==============================
@@ -258,14 +268,6 @@ Un message a trois drapeaux possibles de propagation (bas niveau). c et f sont e
 |Left     |      3.5 €|
 +---------+-----------+
 
-Les tâches :
-------------
-
-une tâche référencée produit/lit les données sur les ports d'entrée/sortie.
-
-- Simple : Coroutine (voire fonction) classique : prend les valeur en entrée et retourne les résultats
-- Générateur : prends les valeurs en entrée et retourne les réultats, éventuellement par parties, en les 'yieldant'
-- Polyvalente : Gère tout (y compris les messages d'I/O)
 
 Le système de types :
 ---------------------
@@ -280,7 +282,7 @@ Il existe des types littéraux :
 
 :list: Idem
 
-:dict: Idem
+:dict: Idem mais la clé est impérativement une str (ou un int ?) (pas de généralisation au hashable).
 
 etc.
 

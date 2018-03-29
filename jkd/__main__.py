@@ -30,12 +30,12 @@ print(args)
 
 if args.mode == 'httpd':
     environment = jkd.EnvHttpServer()
-    if len(args.launch) > 0:
+    if args.launch is not None and len(args.launch) > 0:
         for appname in args.launch:
             environment.app_launch(appname)
     environment.run(port=args.port)
 elif args.mode == 'batch':
-    if len(args.launch) > 0:
+    if args.launch is not None and len(args.launch) > 0:
         app_name = args.launch[0]
         #TODO
         print("application result : blabla...")

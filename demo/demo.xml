@@ -21,12 +21,14 @@
         <!-- This is a comment -->
       </nodes>
     </subprocessus>
+    <multipivot name="mp0">
+    </multipivot>
     <html_page appname="demo" name="homepage" template="homepage" title="A jkd Demo Application">
       <table data="node:/heavyproc#output" template="table" />
       <value data="node:/siggen#output" template="simple_value" />
     </html_page>
   </nodes>
-  <!-- 'ports' tag create container port and links it to a contained node port-->
+  <!-- 'ports' tag create container port and links it to a contained node port -->
   <ports>
     <port name="index.html" node="homepage" port="html" />
   </ports>

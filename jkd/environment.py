@@ -34,6 +34,7 @@ from .data_table_to_tabulatorjs import DataTableToTabulatorjs
 from .data_calibration_0 import DataCalibration0
 from .cache import Cache
 from .sql_datasource import SqlDatasource
+from .multipivot import Multipivot
 registry = {
         "html_page":HtmlPage,
         "subprocessus":Subprocessus,
@@ -53,6 +54,7 @@ registry = {
         "data_table_to_tabulatorjs":DataTableToTabulatorjs,
         "data_calibration_0":DataCalibration0,
         "sql_datasource":SqlDatasource,
+        "multipivot":Multipivot,
          }
 
 
