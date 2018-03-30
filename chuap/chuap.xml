@@ -42,6 +42,10 @@
         <link input="input" node="sql0" port="inventory"/>
       </links>
     </data_table_to_tabulatorjs>
+    <excel_file name="xls0" file="2018-03-29 - Liste amortissements.xlsx">
+        <sheet port="data" name="Rapport 1" index="">
+        </sheet>
+    </excel_file>
     <multipivot name="mpv_test">
       <links>
         <link input="input" node="sql0" port="inventory" />
