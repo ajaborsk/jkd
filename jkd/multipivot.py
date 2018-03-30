@@ -17,5 +17,6 @@ class Multipivot(DataProcess):
     async def do_it(self, args={}):
         while True:
             data = await self.port_input_get("input", args)
-            self.port_update("output1", data)
+            await self.port_value_update("output1", data)
+            await asyncio.sleep(1.)
     

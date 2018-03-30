@@ -150,6 +150,8 @@ class Node:
             #self.debug('port:'+str(port)+' '+str(self.ports[portname]))
         # internal stuff...
         await self.port_write(portname, value)
+        
+        # external stuff
         for cnx in port['connections']:
             #self.debug('cnx: '+str(cnx))
             if 'update' in cnx:
