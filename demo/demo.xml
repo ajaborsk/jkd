@@ -21,6 +21,10 @@
         <!-- This is a comment -->
       </nodes>
     </subprocessus>
+    <excel_file name="xls0" file="2018-03-29 - Liste amortissements.xlsx">
+        <sheet port="data" name="Rapport 1" index="">
+        </sheet>
+    </excel_file>
     <multipivot name="mp0">
       <links>
         <link input="input" node="h0" port="output" />
