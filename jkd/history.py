@@ -169,6 +169,9 @@ class History(Node):
             before_ts = float(args.get("before", math.inf))
             after_ts = float(args.get("after", -math.inf))
 
+            if after_ts < 0:
+                after_ts = time.time() + after_ts
+
             index_after = self.index_after(after_ts)
             if index_after is None:
                 done = True

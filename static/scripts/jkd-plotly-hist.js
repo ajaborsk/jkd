@@ -106,6 +106,10 @@ class JkdPlotlyHistChart {
         args['after'] = end_date - self.duration;
        }
 
+      if (!('before' in args)) {
+          args['after'] = - self.duration;
+      }
+
       $("#" + this.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
       $("#" + this.prefix + "-update > span.ui-icon").removeClass("ui-icon-cancel");
       $("#" + this.prefix + "-update > span.ui-icon").addClass("ui-icon-close");
@@ -183,6 +187,10 @@ class JkdPlotlyHistChart {
          {
           args['after'] = end_date - self.duration;
          }
+
+        if (!('before' in args)) {
+            args['after'] = - self.duration;
+        }
 
         console.log('plotly: Connection asked...', args);
         self.lcid = self.jkd_env.query(
