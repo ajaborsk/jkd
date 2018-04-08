@@ -6,7 +6,7 @@ class JkdPlotlyHistChart {
         this.data_addr = data_addr;
 
 
-        this.duration = 3600; // in seconds
+        this.duration = 3600 * 3; // in seconds
         this.start_date = null; // computed from end_date and length
         this.end_date = null; // default => Date.now()
 
