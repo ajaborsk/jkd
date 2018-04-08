@@ -82,6 +82,7 @@ Structure du dict **tasks** de chaque noeud (node) :
 une tâche référencée produit/lit les données sur les ports d'entrée/sortie.
 
 - Simple : Coroutine (voire fonction) classique : prend les valeurs en entrée et retourne les résultats
+    - Chaque sortie (port de sortie) a des arguments, susceptibles d'être modifiés en cours de connexion => paramètre 'args' pour une fonction avec une seule valeur de retour
 - Générateur : prends les valeurs en entrée et retourne les résultats, éventuellement par parties, en les 'yieldant'
 - Polyvalente : Gère tout (y compris les messages d'I/O)
 
@@ -352,3 +353,8 @@ Capacité de décision avancée : Si on fait une expérimentation sur une pério
 
 Capacité de détection automatique d'anomalies = changement "brutal" dans le modèle d'évolution (panne, dyfonctionnement...)
 
+Plus simple :
+- Ajouter des tests statistiques automatiques. Exemple : test de significativité d'une regression linéaire, d'un changement de moyenne, etc.
+
+.. todo::
+   Test de chose à faire

@@ -87,6 +87,7 @@ class HtmlPartDynTable(HtmlPart):
   <div id="{{p_id}}-container">
     <div style="bgcolor:white;" id="{{p_id}}-table" width="800" height="200"></div>
   </div>
+  <br/>
   <!-- HtmlPartTable end -->""")
         self.js_template = jinja2.Template("""
   // HtmlPartTable {{p_id}} script part
@@ -103,8 +104,50 @@ class HtmlPartDynTable(HtmlPart):
 
 
 class HtmlPartChart(HtmlPart):
-    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, **kwargs):
+    def __init__(self, elt = None, p_class = None, p_name = None, p_id = None, data=None, mode="plotlyjs", **kwargs):
         super().__init__(elt, p_class, p_name, p_id, **kwargs)
+        #parms = {'p_id':self.p_id}
+        self.data_addr = data
+        self.css_add("jkd.css")
+        self.script_add("jkd.js")
+
+        if mode == "chartjs":
+            #TODO : update chartjs code
+            self.script_add("moment-with-locales.min.js")
+            self.script_add("Chart.bundle.js")
+            #self.script_add("Chart.bundle.min.js")
+            self.script_add("hammer.min.js")
+            self.script_add("chartjs-plugin-zoom.min.js")
+            self.script_add("jkd-chart.js")
+            html_inset='<canvas id="{{p_id}}-canvas" width="800" height="200"></canvas>'
+            js_inset='var hc = new JkdHistoryChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
+        elif mode == "plotlyjs":
+            self.script_add("plotly-latest.min.js")
+            self.script_add("jkd-plotly.js")
+            html_inset='<div id="{{p_id}}-chart" style="width:90%;margin-left:5%;height:90vh;margin-top:5vh"></div>'
+            js_inset='var hc = new JkdPlotlyChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
+        else:
+            #TODO: Issue a warning (but how ?)
+            pass
+        self.html_template = jinja2.Template("""
+  <!-- HtmlPartChart {{p_id}} -->
+  <div id="{{p_id}}-container">
+    """ + html_inset + """
+  </div>
+  <br/>
+  <!-- HtmlPartChart end -->""")
+        self.js_template = jinja2.Template("""
+  // HtmlPartChart {{p_id}} script part
+
+  """ + js_inset + """
+
+  // end of HtmlPartChart script part
+""")
+
+    def context(self):
+        ctx = super().context()
+        ctx.update({'data_addr':self.data_addr})
+        return ctx
 
 
 class HtmlPartEntry(HtmlPart):
@@ -167,9 +210,9 @@ class HtmlPartHisto(HtmlPart):
             js_inset='var hc = new JkdHistoryChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
         elif mode == "plotlyjs":
             self.script_add("plotly-latest.min.js")
-            self.script_add("jkd-plotly.js")
+            self.script_add("jkd-plotly-hist.js")
             html_inset='<div id="{{p_id}}-chart" style="width:90%;margin-left:5%;height:90vh;margin-top:5vh"></div>'
-            js_inset='var hc = new JkdPlotlyChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
+            js_inset='var hc = new JkdPlotlyHistChart(jkd_env, "{{p_id}}", "{{data_addr}}");'
         else:
             #TODO: Issue a warning (but how ?)
             pass
@@ -189,6 +232,7 @@ class HtmlPartHisto(HtmlPart):
       <button class="ui-button ui-corner-all" id="{{p_id}}-zreset"><span class="ui-icon ui-icon-arrow-2-sw-ne"></span> Reset</button>
     </div>
   </div>
+  <br/>
   <!-- HtmlPartHisto end -->""")
         self.js_template = jinja2.Template("""
   // HtmlPartHisto {{p_id}} script part

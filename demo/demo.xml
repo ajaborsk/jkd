@@ -10,32 +10,89 @@
         <link input="input" node="siggen" port="text_output" />
       </links>
     </text_parser>
+    <data_object name="model" persistent="true" />
     <history name="h0">
       <links>
         <link input="input" connect="auto" policy="on_update" node="siggen" port="output" />
       </links>
     </history>
+    <data_raw_to_table name="signal_raw_to_table">
+      <links>
+        <link input="model" node="model" port="data" />
+        <link input="input" node="h0" port="output" />
+      </links>
+      <values>
+        <value name="signal" eval="input[0]" unit="" tags="" />
+      </values>
+    </data_raw_to_table>
+    <data_table_to_plotlyjs name="h0_fmt">
+      <links>
+        <link input="config" node="config" port="data"/>
+        <link input="input" node="signal_raw_to_table" port="output"/>
+      </links>
+      <axes>
+          <axis name="y_none" pos="y_l" label=""/>
+      </axes>
+      <datasets>
+          <dataset data="signal" axis="y_none" color="blue" type="line" label="Signal"/>
+      </datasets>
+    </data_table_to_plotlyjs>
     <subprocessus name="heavyproc" appname="dummy">
       <nodes>
         <signal_generator name="siggen_ext" />
         <!-- This is a comment -->
       </nodes>
     </subprocessus>
+    <data_object name="config" persistent="true" />
     <excel_file name="xls0" file="2018-03-29 - Liste amortissements.xlsx">
         <sheet port="data" name="Rapport 1" index="">
         </sheet>
     </excel_file>
+
     <multipivot name="mp0">
       <links>
-        <link input="input" node="h0" port="output" />
+        <link input="input" node="xls0" port="data" />
       </links>
       <axe title="Axis 0" cols=""/>
       <axe title="Axis 1" cols=""/>
       <axe title="Axis 2" cols=""/>
+      <group title="g1"/>
+      <data title="ere" aggreg=""/>
     </multipivot>
+
+    <data_table_to_tabulatorjs name="table0_format">
+      <links>
+        <link input="config" node="config" port="data"/>
+        <link input="input" node="mp0" port="output0"/>
+      </links>
+    </data_table_to_tabulatorjs>
+    <data_table_to_tabulatorjs name="table1_format">
+      <links>
+        <link input="config" node="config" port="data"/>
+        <link input="input" node="mp0" port="output1"/>
+      </links>
+    </data_table_to_tabulatorjs>
+    <data_table_to_plotlyjs name="chart0_fmt">
+      <links>
+        <link input="config" node="config" port="data"/>
+        <link input="input" node="mp0" port="output1"/>
+      </links>
+      <axes>
+          <axis name="y_none" pos="y_l" label=""/>
+      </axes>
+      <datasets>
+          <dataset data="c3" axis="y_none" color="blue" type="line" label="c3"/>
+          <dataset data="c4" axis="y_none" color="red" type="line" label="c4"/>
+      </datasets>
+    </data_table_to_plotlyjs>
     <html_page appname="demo" name="homepage" template="homepage" title="A jkd Demo Application">
-      <table data="node:/heavyproc#output" template="table" />
+      <!-- <table data="node:/heavyproc#output" template="table" />
       <value data="node:/siggen#output" template="simple_value" />
+      <table data="node:/heavyproc#output" template="table" /> -->
+      <dyn-table name="t1" config="/config/data/t1" data="/table0_format/output"/>
+      <dyn-table name="t2" config="/config/data/t2" data="/table1_format/output"/>
+      <chart mode="plotlyjs" name="plotly0" config="" data="/chart0_fmt/output"/>
+      <histo data="/h0_fmt/output" template="dummy" mode="plotlyjs"/>
     </html_page>
   </nodes>
   <!-- 'ports' tag create container port and links it to a contained node port -->

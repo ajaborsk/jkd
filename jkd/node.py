@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 import inspect
 import asyncio
 import logging
+import traceback
 import time
 import sys
 
@@ -43,6 +44,9 @@ class Node:
         self.parent = parent
         self.name = name
         self.debug(str(self.__class__) + " fqn: " + self.fqn())
+
+        self.force_debug = False
+        self.do_debug = False
 
         # Next available Local Channel ID (lcid)
         self.next_lcid = 0
@@ -88,6 +92,14 @@ class Node:
                         # No check for now (will be done in self.run() preparation part)
                         self.debug('link: '+str(port_name)+' <== '+str(self.links[port_name]))
 
+    def _task_done_callback(self, future):
+        e = future.exception()
+        if e is not None:
+            self.warning(repr(e))
+            stack = future.print_stack()
+#            for frame in traceback.format_list(stack):
+#                self.warning("  "+str(frame))
+
     def task_add(self, taskname, coro = None, gets = [], returns = [], needs = [], provides = [], autolaunch = False, client = None):
         """Add a task to node tasks list
         """
@@ -99,6 +111,9 @@ class Node:
                                 'autolaunch':autolaunch,
                                 'client':client,
                                 'task':None }
+
+    async def _wait_for_port(self, portname, client = None):
+        return (portname, await self.port_get(portname)['queue'].get(), client)
 
     def port_add(self, portname, mode = 'output', cached = False, timestamped = False, auto = False, client = None):
         self.ports[portname] = { 'mode': mode,
@@ -141,19 +156,11 @@ class Node:
         # default action : do nothing
         pass
 
-    async def port_value_update(self, portname, value):
-        #self.debug('portname: '+str(portname))
-        port = self.port_get(portname)
-        #self.debug('port: '+str(port))
-        if port.get('cached', False):
-            port['value'] = value
-            #self.debug('port:'+str(port)+' '+str(self.ports[portname]))
-        # internal stuff...
-        await self.port_write(portname, value)
-        
-        # external stuff
+    async def port_output(self, port, value):
+        # Triggers output connections
+        #TODO: fire also connections/queues of overlapping ports
         for cnx in port['connections']:
-            #self.debug('cnx: '+str(cnx))
+            self.debug('cnx: '+str(cnx))
             if 'update' in cnx:
                 if 'finished' not in cnx or cnx['finished'] == False:
                     flags = 'f'
@@ -164,8 +171,21 @@ class Node:
                     msg = {'prx_src':self, 'lcid':cnx['lcid'], 'flags':flags, 'reply':(time.time(), value)}
                 else:
                     msg = {'prx_src':self, 'lcid':cnx['lcid'], 'flags':flags, 'reply':value}
-                #self.debug(str(self.name) + " : output_msg to "+str(cnx['prx_dst'])+': '+str(msg))
+                self.debug(str(self.name) + " : output_msg to "+str(cnx['prx_dst'])+': '+str(msg))
                 await self.msg_send(cnx['prx_dst'], msg)
+
+
+    async def port_value_update(self, portname, value, from_inside = False):
+        #self.debug('portname: '+str(portname))
+        port = self.port_get(portname)
+        #self.debug('port: '+str(port))
+        if port.get('cached', False):
+            port['value'] = value
+            #self.debug('port:'+str(port)+' '+str(self.ports[portname]))
+
+        # internal stuff...
+        if not from_inside:
+            await self.port_write(portname, value)
 
         queue = port.get('queue')
         if isinstance(queue, asyncio.Queue):
@@ -174,26 +194,69 @@ class Node:
                 # make some place...
                 queue.get_nowait()
             queue.put_nowait(value)
+
+        # external stuff
+        await self.port_output(port, value)
+
         return value
 
-    async def _on_update_loop(self, inputs = [], outputs = [], coro = None, query_args = {}):
-        self.debug('inputs: '+str(inputs)+', outputs:'+str(outputs))
+    async def _on_update_loop(self, inputs = [], outputs = [], coro = None, args = {}, client = None):
+        self.debug('coro: '+repr(coro)+' inputs: '+str(inputs)+', outputs:'+str(outputs))
         done = False
+        xref = {name:inputs.index(name) for name in inputs}
+        kwargs = {}
+        if args is not None:
+            kwargs['args'] = args
+        if client is not None:
+            kwargs['client'] = client
+        process_args = []
+        # "get" a initial value for every port
+        for input_port in inputs:
+            process_args.append(await self.port_read(input_port))
         while not done:
-            args = []
-            for input_port in inputs:
-                args.append(await self.port_read(input_port))
-            self.debug('process...'+str(coro)+', args='+str(args))
-            results = await coro(*args, args = query_args)
-            self.debug('processed. results= '+str(results))
-            if len(outputs) == 1:
-                await self.port_value_update(outputs[0], results)
-            else:
-                for i in range(len(outputs)):
-                    await self.port_value_update(outputs[i], results[i])
-            # If there is no input => Do not enter into a infinite loop        
+            self.debug('process... '+str(coro)+', args='+str(process_args))
+            task = coro(*process_args, **kwargs)
+            if inspect.iscoroutine(task):
+                results = await task
+                self.debug('processed. results = '+str(results))
+                if len(outputs) == 1:
+                    await self.port_value_update(outputs[0], results)
+                else:
+                    for i in range(len(outputs)):
+                        await self.port_value_update(outputs[i], results[i])
+            elif inspect.isasyncgen(task):
+                async for results in task:
+                    self.debug('processed. results = '+str(results))
+                    if len(outputs) == 1:
+                        await self.port_value_update(outputs[0], results)
+                    else:
+                        for i in range(len(outputs)):
+                            await self.port_value_update(outputs[i], results[i])
+
+            # If there is no input => Do not enter into a infinite loop
             if len(inputs) == 0:
                 done = True
+            else:
+                self.debug('Waiting for *any* input update...'+repr(inputs))
+                wait_list = []
+                for portname in inputs:
+                    if 'queue' in self.ports[portname]:
+                        wait_list.append(self._wait_for_port(portname))
+                self.debug("-*-*- Entering ")
+                done_tasks, pending = await asyncio.wait(wait_list, return_when = asyncio.FIRST_COMPLETED)
+                for p in pending:
+                    p.cancel()
+                for d in done_tasks:
+                    r = d.result()
+                self.debug("T: "+str(r[0])+' '+str(r[1]))
+                self.debug("-*-*- Exited ")
+                process_args[xref[r[0]]] = r[1]
+                self.debug("xref" + repr(xref))
+                self.debug("args: "+repr(process_args))
+                # #TODO
+                # args = []
+                # for input_port in inputs:
+                    # args.append(await self.port_read(input_port))
 
     async def link_connect(self, linkname):
         #TODO
@@ -242,12 +305,14 @@ class Node:
                 if self.tasks[taskname].get('autolaunch'):
                     self.debug("(auto)launching task: " + taskname)
                     self.tasks[taskname]['task'] = self.env.loop.create_task(self.tasks[taskname]['coro']())
+                    self.tasks[taskname]['task'].add_done_callback(self._task_done_callback)
             # Launch autolaunch tasks
             for portname in self.links:
                 link = self.links[portname]
                 if link.get('connect') == 'auto':
                     self.debug("(auto)connecting port: " + portname)
-                    self.env.loop.create_task(self.msg_query(self.parent, {'method':'get', 'policy':link['policy'], 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.port_updated, client = portname))
+                    t = self.env.loop.create_task(self.msg_query(self.parent, {'method':'get', 'policy':link['policy'], 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.port_updated, client = portname))
+                    t.add_done_callback(self._task_done_callback)
 
     def stop(self):
         #TODO
@@ -269,6 +334,7 @@ class Node:
         self.debug("msg: "+str(msg), 'msg')
         portname = msg['port']
         port = self.port_get(portname)
+        query_args = msg.get("args", None)
         if port is None:
             self.warning('Trying to get value of unknown port "{}"'.format(portname), 'msg')
             response = {'flags':'d', 'prx_src':self, 'lcid':msg['lcid'], 'error':'Unknown port '+str(portname)}
@@ -288,7 +354,8 @@ class Node:
                             self.warning("TODO")
                         # Launch task
                         self.debug('Launching task: '+str(port['provided_by'])+' '+str(task['coro']))
-                        task['task'] = self.env.loop.create_task(task['coro']())
+                        task['task'] = self.env.loop.create_task(task['coro'](args=query_args))
+                        task['task'].add_done_callback(self._task_done_callback)
                         self.debug('Launched task: '+str(port['provided_by']))
                         #TODO : How to stop this task ?
                     #TODO : Wait for task do its job !
@@ -298,7 +365,6 @@ class Node:
                     self.warning("TODO")
             elif 'returned_by' in port:
                 self.debug("returned_by mode: "+str(msg), 'msg')
-                query_args = msg.get("args", None)
                 # Port is *returned* by a task
                 task = self.tasks[port['returned_by']]
                 # Get needed parameters for task
@@ -352,15 +418,28 @@ class Node:
                 task = self.tasks[port['provided_by']]
                 needs = task['needs']
                 kwargs = {}
+                if query_args is not None:
+                    kwargs['args'] = query_args
+                if task['client'] is not None:
+                    kwargs['client'] = task['client']
             elif 'returned_by' in port:
                 self.debug('returns_by mode - internal loop on process task')
-                task = self.tasks['_on_update_loop']
                 needs = self.tasks[port['returned_by']]['gets']
-                kwargs = {'query_args':msg.get('args', {}), 'coro':self.tasks[port['returned_by']]['coro'], 'inputs':needs, 'outputs':self.tasks[port['returned_by']]['returns']}
+                # if len(needs) == 0:
+                    # # If process tasks needs no input then do not launch loop task => nothing to do
+                    # task = None
+                # else:
+                task = self.tasks['_on_update_loop']
+                kwargs = {'args':msg.get('args', {}), 'coro':self.tasks[port['returned_by']]['coro'], 'inputs':needs, 'outputs':self.tasks[port['returned_by']]['returns'], 'client':self.tasks[port['returned_by']]['client']}
+                if query_args is not None:
+                    kwargs['args'] = query_args
+                if task['client'] is not None:
+                    kwargs['client'] = task['client']
             else:
                 self.warning('Unable to reply for on_update policy: '+str(msg))
                 return
-            if task['task'] is None:
+
+            if task is not None and task['task'] is None:
                 # The task isn't running => launch it
                 # Prepare source data
                 for need in needs:
@@ -370,12 +449,15 @@ class Node:
                     if True:
                         self.port_get(need)['queue'] = asyncio.Queue(maxsize = 1)
                         #self.debug('ports: '+str(self.ports))
-                        await self.msg_query(self.parent, {'method':'get', 'policy':'on_update', 'flags':'c', 'path':link['node'], 'port':link['port']}, coro=self.port_updated, client = need)
+                        await self.msg_query(self.parent, {'method':'get', 'policy':'on_update', 'flags':'c', 'path':link['node'], 'port':link['port'], 'args':query_args}, coro=self.port_updated, client = need)
                 #TODO
                 # Launch task
+
                 self.debug('Launching task: '+str(task['coro']))
                 task['task'] = self.env.loop.create_task(task['coro'](**kwargs))
+                task['task'].add_done_callback(self._task_done_callback)
                 self.debug('Launched task.')
+
             # Add a subscription to the port
             cnx = {'update':True, 'lcid':msg['lcid'], 'prx_dst':msg['prx_src']}
 
@@ -388,6 +470,11 @@ class Node:
             # Add connection to the port
             port['connections'].append(cnx)
             self.debug(self.name + ": subscriptions = " + str(port['connections']), 'msg')
+
+            # If output is cached AND a value has already been set, then send a first reply
+            if port.get('cached', False) and port.get('value', None) is not None:
+                response = {'flags':'f', 'prx_src':self, 'lcid':msg['lcid'], 'reply':port.get('value', None)}
+                await self.msg_send(msg['prx_src'], response)
         else:
             self.warning("Unhandled policy: "+str(msg['policy']))
 
@@ -452,7 +539,8 @@ class Node:
                     self.back_channels[key] = {'lcid':lcid, 'prx_dst':msg['prx_src']}
                     self.debug("Updated back_channels " + str(key) + ' : ' +  str(self.back_channels[key]), 'msg')
 #            await self.msg_queue_handle(msg)
-            self.env.loop.create_task(self.msg_queue_handle(msg))
+            t = self.env.loop.create_task(self.msg_queue_handle(msg))
+            t.add_done_callback(self._task_done_callback)
 
     async def msg_send(self, destination, message, delegate = False):
         "Low level message API"
@@ -489,26 +577,28 @@ class Node:
 
         elif 'reply' in msg:
             # This is a reply
-            self.debug(self.name + ' reply catched : ' + str(msg), 'msg')
+            self.debug(' reply catched : ' + str(msg), 'msg')
             lcid = msg['lcid']
             if lcid in self.channels:
                 if isinstance(self.channels[lcid], asyncio.Queue):
-                    self.debug(self.name + ' reply queue mode : ' + str(msg), 'msg')
+                    self.debug(' reply queue mode : ' + str(msg), 'msg')
                     # The node is the final destination (queue mode)
                     await self.channels[lcid].put(msg)
                 elif isinstance(self.channels[lcid], tuple):
-                    #self.debug(self.name + ' reply coro mode : ' + str(msg), 'msg')
+                    self.debug(' reply coro mode : ' + str(msg), 'msg')
+                    self.debug('       coro = ' + repr(self.channels[lcid][0]), 'msg')
+
                     # The node is the final destination (coroutine mode)
                     await self.channels[lcid][0](msg, self.channels[lcid][1])
                 else:
                     # Just route to next node
-                    #self.debug(self.name + ' reply  mode : ' + str(msg), 'msg')
+                    self.debug(' reply route mode : ' + str(msg), 'msg')
                     msg['lcid'] = self.channels[lcid]['lcid']
                     msg['prx_src'] = self
                     await self.msg_send(self.channels[lcid]['prx_dst'], msg)
-                if 'eoq' in msg and msg['eoq'] == True:
-                    # last message of the reply (eoq = End Of Query), so remove internal dedicated queue
-                    del self.channels[lcid]
+                # if 'eoq' in msg and msg['eoq'] == True:
+                    # # last message of the reply (eoq = End Of Query), so remove internal dedicated queue
+                    # del self.channels[lcid]
         elif 'error' in msg:
             # This is a (replied) error
             if 0:

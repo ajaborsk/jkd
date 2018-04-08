@@ -33,9 +33,15 @@ class HttpServer(Node):
 
         aiohttp_jinja2.setup(self.web_app, loader=jinja2.FileSystemLoader('templates/'))
 
+    def json_encoder(self, obj):
+        if hasattr(obj, 'to_json'):
+            return obj.to_json()
+
     async def msg_ws_send(self, wsid, message):
         if self.ws[wsid] is not None and self.ws[wsid].closed == False:
-            await self.ws[wsid].send_json(message)
+            string = json.dumps(message, default=self.json_encoder)
+            #print(string)
+            await self.ws[wsid].send_str(string)
         else:
             self.info('Trying to send message '+str(message)+' to WS'+str(wsid)+' while it is closed => closing channel', 'msg')
             # Closing channel
@@ -126,7 +132,7 @@ class HttpServer(Node):
         else:
             #self.debug("application :{:s} // address: {:s}".format(name, request.match_info.get('address', "")))
             address = request.match_info.get('address', "")
-            self.debug('request: '+str(request.method)+' '+str(request.path)+' '+str(dict(request.query)))
+            self.debug('request: '+str(request.method)+' '+str(request.path)+' '+str(dict(request.query)), 'msg')
             #text = await self.ext_app.aget(address)
 
             path = request.url.path.split('/')
@@ -136,7 +142,7 @@ class HttpServer(Node):
             if port_name == '':
                 port_name = 'index.html'
 
-            self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name))
+            self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name), 'msg')
 
             try:
                 app = self.env[app_name]
@@ -167,8 +173,8 @@ class HttpServer(Node):
             msg_url = '/'.join(path[1:-1])
             if port_name == '':
                 port_name = 'data'
-            self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name))
-            self.debug("args: " + str(await request.json()))
+            self.debug('url data: '+str(path)+' '+str(app_name)+' '+str(msg_url)+' '+str(port_name), 'msg')
+            self.debug("args: " + str(await request.json()), 'msg')
             try:
                 app = self.env[app_name]
                 text = await self.msg_query(app, {'method':'put', 'policy':'immediate', 'src':self.fqn(), 'url':msg_url, 'port':port_name, 'args':dict(await request.json())}, timeout = 50.)

@@ -13,7 +13,7 @@ class DataRawToTable(DataProcess):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
         self.port_add('model', mode = 'input')
-        self.port_add('output', cached = True, timestamped = True)
+        self.port_add('output', cached = True, timestamped = False)
         self.task_add('process', coro = self.process, gets=['model','input'], returns=['output'])
         self.values = []
         for branch in elt:
@@ -26,6 +26,7 @@ class DataRawToTable(DataProcess):
         # 'model' input is for model parameters. Model description is this code.
         # self.debug('model: '+str(model))
         # self.debug('data: '+str(data))
+        self.debug("########## last input:" + repr(data[-1]))
 
         # 1 - get input data and put it in a pandas DataFrame (table)
         input = pd.DataFrame([i[1] for i in data], index = [pd.datetime.fromtimestamp(i[0]) for i in data])
@@ -43,5 +44,7 @@ class DataRawToTable(DataProcess):
                 temp[val['name']] = eval(val['eval'], None, my_locals)
             elif val['mode'] == 'var':
                 my_locals[val['name']] = eval(val['eval'], None, my_locals)
+
+        self.debug("########## last output:" + repr(value.ix[-1]))
 
         return value

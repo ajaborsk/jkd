@@ -88,6 +88,8 @@ class JkdHistoryChart {
                     backgroundColor: 'rgb(255, 255, 255)'
                 }
             },
+
+
         });
 
     $("#" + this.prefix + "-update").click(function (evt) {
@@ -147,9 +149,31 @@ class JkdHistoryChart {
         $("#" + self.prefix + "-update > span.ui-text").text("Disconn.");
         }, 'client':self};
     //self.update();
+
+    self.jkd_env.on_connect[self.prefix] = {'cb':self.connect, 'client':self};
+
     };
 
-    update(client)
+    connect(client) {
+        var self = client;
+        var args = {};
+        console.log('Connection asked...');
+        self.lcid = self.jkd_env.query(
+            self.data_addr,
+            args,
+            function (msg, client) {
+                self = client;
+                console.log('response received !', msg);
+                if ('data' in msg.reply)
+                 {
+                  console.log("data received.");
+                 }
+            },
+            client
+        );
+    }
+
+        update(client)
      {
       var self = client;
       var args = {};

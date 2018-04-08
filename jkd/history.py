@@ -18,10 +18,12 @@ class History(Node):
         super().__init__(elt=elt, **kwargs)
         self.idx_rec_size = struct.calcsize('<QQL')
         self.timestamp = timestamp
+        self.update_queue = None
         self.port_add('input', mode = 'input')
-        self.port_add('output', cached = True, timestamped = True)
+        self.port_add('output', cached = True, timestamped = False)
         self.task_add('process', autolaunch = True, coro = self.historize, needs=['input'], provides=[])
-        self.task_add('history', coro = self.history, gets=[], returns=['output'])
+        #self.task_add('history', coro = self.history, gets=[], returns=['output'])
+        self.task_add('history2', coro = self.history2, needs=[], provides=['output'])
 
     async def historize(self):
         self.ports['input']['queue'] = asyncio.Queue(maxsize=5)
@@ -50,6 +52,8 @@ class History(Node):
                 #self.debug('3: '+str(data))
                 self.index_file.write(index_bin)
                 #self.debug('4: '+str(data))
+                if self.update_queue is not None:
+                    self.update_queue.put_nowait(0)
 
     def index_get_ts(self, indexf, cur_idx):
         #self.debug('idx: '+str(cur_idx))
@@ -139,7 +143,7 @@ class History(Node):
                     data_file.seek(idx[1])
                     b_data = data_file.read(idx[2])
                     #self.debug(' '+repr(idx)+' '+repr(b_data))
-                    data = json.loads(b_data.decode('utf8'))
+                    data = json.loads(b_data.decode('utf-8'))
                     result.append(data)
                     count += 1
                     if count % 10000:
@@ -154,3 +158,50 @@ class History(Node):
         yield result
         return
         #return result
+
+    async def history2(self, args = {}):
+        self.update_queue = asyncio.Queue()
+        while True:
+            result = []
+            data_file = open(self.filename+'.data', mode='rb')
+            index_file = open(self.filename+'.idx', mode='rb')
+            done = False
+            before_ts = float(args.get("before", math.inf))
+            after_ts = float(args.get("after", -math.inf))
+
+            index_after = self.index_after(after_ts)
+            if index_after is None:
+                done = True
+            else:
+                index_file.seek(index_after * self.idx_rec_size)
+
+            count = 0
+            while not done:
+                idx_b = index_file.read(self.idx_rec_size)
+                if len(idx_b) == self.idx_rec_size:
+                    idx = struct.unpack('<QQL', idx_b)
+                    #self.debug(str(idx))
+                    if idx[0] < before_ts:
+                        data_file.seek(idx[1])
+                        b_data = data_file.read(idx[2])
+                        #self.debug(' '+repr(idx)+' '+repr(b_data))
+                        data = json.loads(b_data.decode('utf-8'))
+                        result.append(data)
+                        count += 1
+                        if count % 10000:
+                            #yield []
+                            pass
+                    else:
+                        done = True
+                else:
+                    done = True
+            data_file.close()
+            index_file.close()
+            self.debug("########## last:" + repr(result[-1]))
+            await self.port_value_update('output', result)
+
+            # Wait for new input but don't use returned value
+            dummy = await self.update_queue.get()
+            # consume all queue
+            while not self.update_queue.empty():
+                dummy = await self.update_queue.get()

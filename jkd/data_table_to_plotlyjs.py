@@ -12,9 +12,10 @@ class DataTableToPlotlyjs(DataProcess):
     def __init__(self, elt = None, preset=None, **kwargs):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
-        self.port_add('config', mode = 'input')
-        self.port_add('output', cached = True, timestamped = True)
-        self.task_add('process', coro = self.process, gets=['config','input'], returns=['output'])
+        #self.port_add('config', mode = 'input')
+        self.port_add('output', cached = True, timestamped = False)
+        #self.task_add('process', coro = self.process, gets=['config','input'], returns=['output'])
+        self.task_add('process', coro = self.process, gets=['input'], returns=['output'])
 
         #TODO: use this preset
         self.preset = preset
@@ -29,8 +30,8 @@ class DataTableToPlotlyjs(DataProcess):
                 for dataset in branch:
                     self.datasets.append({'data':dataset.get('data'), 'axis':dataset.get('axis'), 'color':dataset.get('color'), 'type':dataset.get('type'), 'label':dataset.get('label')})
 
-    async def process(self, config, data, args={}):
-        self.debug('config: '+str(config))
+    async def process(self, data, args={}):
+        #self.debug('config: '+str(config))
         self.debug('data: '+str(data))
         layout = {}
 

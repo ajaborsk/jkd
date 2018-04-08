@@ -1,5 +1,9 @@
 
 
+// Easy to use :
+// fn2 = partial(fn,arg0,arg1..)
+// a call to fn2 will call fn with arg0, arg1,... as firsts arguments
+//
 function partial(fn) { // `fn` is the original function
     // `args_a` are the arguments (barring `fn`) of the first call.
     var args_a = Array.prototype.slice.call(arguments, 1);

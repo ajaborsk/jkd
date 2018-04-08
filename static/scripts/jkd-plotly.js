@@ -5,76 +5,16 @@ class JkdPlotlyChart {
         this.prefix = prefix;
         this.data_addr = data_addr;
 
-
-        this.duration = 3600 * 24; // in seconds
-        this.start_date = null; // computed from end_date and length
-        this.end_date = null; // default => Date.now()
-
         var self = this;
 
         // The chart
         Plotly.newPlot(this.prefix + "-chart", [], {}, {displaylogo: false});
 
-    $("#" + this.prefix + "-update").click(function (evt) {
-        self.update(self);
-    });
+        self.jkd_env.on_connect[self.prefix] = {'cb':self.connect, 'client':self};
 
-    $("#" + this.prefix + "-zreset").click(function (evt) {
-        self.chart.resetZoom();
-    });
-
-    $("#" + this.prefix + "-unzoom").click(function (evt) {
-        self.duration *= 2;
-        self.update(self);
-    });
-
-    $("#" + this.prefix + "-zoom").click(function (evt) {
-        self.duration /= 2;
-        self.update(self);
-    });
-
-    $("#" + this.prefix + "-prev").click(function (evt) {
-        if (self.end_date)
-         {
-          self.end_date -= self.duration / 2;
-         }
-        else
-         {
-          self.end_date = Date.now() / 1000 - self.duration / 2;
-         }
-        self.update(self);
-    });
-
-    $("#" + this.prefix + "-next").click(function (evt) {
-        if (self.end_date)
-         {
-          self.end_date += self.duration / 2;
-          if (self.end_date > Date.now() / 1000)
-           {
-            self.end_date = null;
-           }
-         }
-        self.update(self);
-    });
-
-//    $("#" + this.prefix + "-duration").text(self.duration + " s");
-
-    $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
-    $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
-    $("#" + self.prefix + "-update > span.ui-icon").addClass("ui-icon-cancel");
-    $("#" + self.prefix + "-update > span.ui-text").text("Disconn.");
-    self.jkd_env.on_connect[self.prefix] = {'cb':self.update, 'client':self};
-    self.jkd_env.on_disconnect[self.prefix] = {'cb':function(client){
-        self=client;
-        $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
-        $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
-        $("#" + self.prefix + "-update > span.ui-icon").addClass("ui-icon-cancel");
-        $("#" + self.prefix + "-update > span.ui-text").text("Disconn.");
-        }, 'client':self};
-    //self.update();
-    self.jkd_env.on_resize[self.prefix] = {'cb':function(self) {
-            Plotly.Plots.resize(self.prefix + "-chart");
-        }, 'client':self};
+        self.jkd_env.on_resize[self.prefix] = {'cb':function(self) {
+                Plotly.Plots.resize(self.prefix + "-chart");
+            }, 'client':self};
     };
 
     update(client)
@@ -103,11 +43,6 @@ class JkdPlotlyChart {
         args['after'] = end_date - self.duration;
        }
 
-      $("#" + this.prefix + "-update > span.ui-icon").removeClass("ui-icon-refresh");
-      $("#" + this.prefix + "-update > span.ui-icon").removeClass("ui-icon-cancel");
-      $("#" + this.prefix + "-update > span.ui-icon").addClass("ui-icon-close");
-      $("#" + this.prefix + "-update > span.ui-text").text("Cancel");
-
       self.jkd_env.get(self.data_addr,
             args,
             function (msg, client) {
@@ -126,16 +61,38 @@ class JkdPlotlyChart {
                     Plotly.deleteTraces(self.prefix + "-chart", Array.apply(null, Array(document.getElementById(self.prefix + "-chart").data.length)).map(function (_, i) {return i;}));
                     Plotly.addTraces(self.prefix + "-chart", data);
                 }
-               //Plotly.update(self.prefix + "-chart", data, layout);
-               $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-close");
-               $("#" + self.prefix + "-update > span.ui-icon").removeClass("ui-icon-cancel");
-               $("#" + self.prefix + "-update > span.ui-icon").addClass("ui-icon-refresh");
-               $("#" + self.prefix + "-update > span.ui-text").text("Refresh");
             },
             null);
-      $("#" + self.prefix + "-duration").text(self.duration + " s");
      }
 
+    connect(client) {
+        var self = client;
+        var args = {};
+        console.log('plotly: Connection asked...');
+        self.lcid = self.jkd_env.query(
+            self.data_addr,
+            args,
+            function (msg, client) {
+                self = client;
+                console.log('plotly: response received !', msg);
+                if ('layout' in msg.reply) {
+                    //self.chart.options = Object.assign({}, msg.reply.options);
+                    var layout = msg.reply.layout;
+                    console.log(layout);
+                    Plotly.relayout(self.prefix + "-chart", layout);
+                }
+                if ('data' in msg.reply)
+                 {
+                    console.log('plotly: data received !', msg.reply.data);
+                    var data = msg.reply.data;
+                    console.log(data);
+                    Plotly.deleteTraces(self.prefix + "-chart", Array.apply(null, Array(document.getElementById(self.prefix + "-chart").data.length)).map(function (_, i) {return i;}));
+                    Plotly.addTraces(self.prefix + "-chart", data);
+                 }
+            },
+            client
+        );
+    }
     addData(label, data) {
         //this.chart.data.labels.push(label);
         //this.chart.data.datasets.forEach((dataset) => {

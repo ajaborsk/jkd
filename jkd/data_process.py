@@ -10,7 +10,7 @@ class DataProcess(Node):
     def __init__(self, elt = None, **kwargs):
         super().__init__(elt=elt, **kwargs)
         self.port_add('input', mode = 'input')
-        self.port_add('output', cached = True, timestamped = True)
+        self.port_add('output', cached = True, timestamped = False)
         #self.task_add('process', coro = self.process, gets=['input'], returns=['output'])
 
     async def process(self, data, args={}):

@@ -25,6 +25,7 @@ class DataObject(Node):
                 self.data = {}
 
     async def port_write(self, portname, value):
+        self.debug(str(portname)+str(' <<== ')+str(value))
         splitted = portname.split(sep='.')
         touched = False
         if splitted[0] == 'data':
@@ -38,10 +39,16 @@ class DataObject(Node):
                     root[path[idx]] = {}
                     root = root[path[idx]]
                     touched = True
-            root[path[-1]] = value
+            self.debug(str(path))
+            #TODO+++ : check this part (first hypothesis) !!!
+            if path == []:
+                root = value
+            else:
+                root[path[-1]] = value
             touched = True
         if self.persistent and touched:
             with open(self.filename, "w") as f:
+                self.debug(repr(self.data))
                 json.dump(self.data, f)
 
     def port_get(self, portname):
