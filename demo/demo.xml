@@ -7,19 +7,19 @@
       <!-- links tag is used to describe links between this node (input) ports and other nodes (output) ports -->
       <!-- these will be used to create appropriate channels on request (queries) -->
       <links>
-        <link input="input" node="siggen" port="text_output" />
+        <item input="input" node="siggen" port="text_output" />
       </links>
     </text_parser>
     <data_object name="model" persistent="true" />
     <history name="h0">
       <links>
-        <link input="input" connect="auto" policy="on_update" node="siggen" port="output" />
+        <item input="input" connect="auto" policy="on_update" node="siggen" port="output" />
       </links>
     </history>
     <data_raw_to_table name="signal_raw_to_table">
       <links>
-        <link input="model" node="model" port="data" />
-        <link input="input" node="h0" port="output" />
+        <item input="model" node="model" port="data" />
+        <item input="input" node="h0" port="output" />
       </links>
       <values>
         <value name="signal" eval="input[0]" unit="" tags="" />
@@ -27,8 +27,8 @@
     </data_raw_to_table>
     <data_table_to_plotlyjs name="h0_fmt">
       <links>
-        <link input="config" node="config" port="data"/>
-        <link input="input" node="signal_raw_to_table" port="output"/>
+        <item input="config" node="config" port="data"/>
+        <item input="input" node="signal_raw_to_table" port="output"/>
       </links>
       <axes>
           <axis name="y_none" pos="y_l" label=""/>
@@ -51,7 +51,7 @@
 
     <multipivot name="mp0">
       <links>
-        <link input="input" node="xls0" port="data" />
+        <item input="input" node="xls0" port="data" />
       </links>
       <axe title="Axis 0" cols=""/>
       <axe title="Axis 1" cols=""/>
@@ -62,20 +62,20 @@
 
     <data_table_to_tabulatorjs name="table0_format">
       <links>
-        <link input="config" node="config" port="data"/>
-        <link input="input" node="mp0" port="output0"/>
+        <item input="config" node="config" port="data"/>
+        <item input="input" node="mp0" port="output0"/>
       </links>
     </data_table_to_tabulatorjs>
     <data_table_to_tabulatorjs name="table1_format">
       <links>
-        <link input="config" node="config" port="data"/>
-        <link input="input" node="mp0" port="output1"/>
+        <item input="config" node="config" port="data"/>
+        <item input="input" node="mp0" port="output1"/>
       </links>
     </data_table_to_tabulatorjs>
     <data_table_to_plotlyjs name="chart0_fmt">
       <links>
-        <link input="config" node="config" port="data"/>
-        <link input="input" node="mp0" port="output1"/>
+        <item input="config" node="config" port="data"/>
+        <item input="input" node="mp0" port="output1"/>
       </links>
       <axes>
           <axis name="y_none" pos="y_l" label=""/>

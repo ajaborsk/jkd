@@ -4,12 +4,12 @@
     <serial_capture name="jee_serial" serial_port="/dev/ttyUSB0" serial_baudrate="57600" />
     <serial_line_process name="jee_serial_parser">
       <links>
-        <link node="jee_serial" port="output" input="input" />
+        <item node="jee_serial" port="output" input="input" />
       </links>
     </serial_line_process>
     <history name="jee_histo">
       <links>
-        <link input="input" connect="auto" policy="on_update" node="jee_serial_parser" port="output" />
+        <item input="input" connect="auto" policy="on_update" node="jee_serial_parser" port="output" />
       </links>
     </history>
     <!-- Calibration events (manual input) -->
@@ -17,9 +17,9 @@
     <!-- Calibation node (use measurement data and calibration data to compute model data/parameters) -->
     <data_calibration_0 name="calibration0">
       <links>
-        <link input="input" node="jee_histo" port="output" />
-        <link input="model" node="model" port="data" />
-        <link input="calib_data" node="calib" port="output" />
+        <item input="input" node="jee_histo" port="output" />
+        <item input="model" node="model" port="data" />
+        <item input="calib_data" node="calib" port="output" />
       </links>
     </data_calibration_0>
     <!-- model data: capacities, resistors values, gains, offsets, etc. -->
@@ -27,8 +27,8 @@
     <!-- Data preparation: from raw data (bunch of ints) to scaled & qualified (temperatures, currents, voltages...) -->
     <data_raw_to_table name="jee_raw_to_table">
       <links>
-        <link input="model" node="model" port="data" />
-        <link input="input" node="jee_histo" port="output" />
+        <item input="model" node="model" port="data" />
+        <item input="input" node="jee_histo" port="output" />
       </links>
       <values>
         <value name="v_bat" eval="(input[3] / model['alpha_bat'])" unit="V" tags="" />
@@ -54,8 +54,8 @@
     <!-- Display preparation: from raw data to Chart.js data object / history preset-->
     <data_table_to_plotlyjs name="jee_table_to_plotlyjs" preset="history">
       <links>
-        <link input="config" node="config" port="data" />
-        <link input="input" node="jee_raw_to_table" port="output" />
+        <item input="config" node="config" port="data" />
+        <item input="input" node="jee_raw_to_table" port="output" />
       </links>
       <axes>
           <axis name="y_V" pos="yl"/>
@@ -75,8 +75,8 @@
     <history name="esp32_histo" timestamp="true" />
     <data_raw_to_table name="esp32_raw_to_table">
       <links>
-        <link input="model" node="model" port="data" />
-        <link input="input" node="esp32_histo" port="output" />
+        <item input="model" node="model" port="data" />
+        <item input="input" node="esp32_histo" port="output" />
       </links>
       <values>
 <!--
@@ -91,8 +91,8 @@
     </data_raw_to_table>
     <data_table_to_plotlyjs name="esp32_table_to_plotlyjs" preset="history">
       <links>
-        <link input="config" node="config" port="data" />
-        <link input="input" node="esp32_raw_to_table" port="output" />
+        <item input="config" node="config" port="data" />
+        <item input="input" node="esp32_raw_to_table" port="output" />
       </links>
       <axes>
           <axis name="y_C" pos="y_l" label="Degrees"/>
