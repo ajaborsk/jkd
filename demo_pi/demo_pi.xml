@@ -58,17 +58,17 @@
         <item input="input" node="jee_raw_to_table" port="output" />
       </links>
       <axes>
-          <axis name="y_V" pos="yl"/>
-          <axis name="y_C" pos="y_l"/>
-          <axis name="y_mA" pos="y_l"/>
+          <item name="y_V" pos="yl"/>
+          <item name="y_C" pos="y_l"/>
+          <item name="y_mA" pos="y_l"/>
       </axes>
       <datasets>
-          <dataset data="v_bat" axis="y_V" color="blue" type="line" label="Vbat"/>
-          <dataset data="v_cir" axis="y_V" color="red" type="line" label="Vcir"/>
-          <dataset data="v_int" axis="y_V" color="black" type="line" label="Vint"/>
-          <dataset data="i_bat" axis="y_mA" color="orange" type="line" label="Ibat"/>
-          <dataset data="t_ext" axis="y_C" color="magenta" type="line" label="Text"/>
-          <dataset data="t_mcu" axis="y_C" color="cyan" type="line" label="Tmcu"/>
+          <item data="v_bat" axis="y_V" color="blue" type="line" label="Vbat"/>
+          <item data="v_cir" axis="y_V" color="red" type="line" label="Vcir"/>
+          <item data="v_int" axis="y_V" color="black" type="line" label="Vint"/>
+          <item data="i_bat" axis="y_mA" color="orange" type="line" label="Ibat"/>
+          <item data="t_ext" axis="y_C" color="magenta" type="line" label="Text"/>
+          <item data="t_mcu" axis="y_C" color="cyan" type="line" label="Tmcu"/>
       </datasets>
     </data_table_to_plotlyjs>
     <history name="esp01_128_histo" timestamp="true" />
@@ -95,15 +95,15 @@
         <item input="input" node="esp32_raw_to_table" port="output" />
       </links>
       <axes>
-          <axis name="y_C" pos="y_l" label="Degrees"/>
-          <axis name="y_pc" pos="y_l" label="%"/>
-          <axis name="y_mb" pos="y_l" label="mb"/>
+          <item name="y_C" pos="y_l" label="Degrees"/>
+          <item name="y_pc" pos="y_l" label="%"/>
+          <item name="y_mb" pos="y_l" label="mb"/>
       </axes>
       <datasets>
-          <dataset data="t_amb" axis="y_C" color="blue" type="line" label="Tamb"/>
-          <dataset data="rh_amb" axis="y_pc" color="red" type="line" label="HR"/>
-          <dataset data="t_amb2" axis="y_C" color="gray" type="line" label="Tamb2"/>
-          <dataset data="press_amb" axis="y_mb" color="orange" type="line" label="Press"/>
+          <item data="t_amb" axis="y_C" color="blue" type="line" label="Tamb"/>
+          <item data="rh_amb" axis="y_pc" color="red" type="line" label="HR"/>
+          <item data="t_amb2" axis="y_C" color="gray" type="line" label="Tamb2"/>
+          <item data="press_amb" axis="y_mb" color="orange" type="line" label="Press"/>
       </datasets>
     </data_table_to_plotlyjs>
     <subprocessus name="heavyproc" appname="unused_app_name">
@@ -120,6 +120,6 @@
     </html_page>
   </nodes>
   <ports>
-    <port name="index.html" node="homepage" port="html" />
+    <item name="index.html" node="homepage" port="html" />
   </ports>
 </application>

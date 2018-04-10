@@ -70,6 +70,6 @@
   </nodes>
   <ports>
     <!-- Route application "index.html" port to node "homepage", port "html" -->
-    <port name="index.html" node="homepage" port="html"/>
+    <item name="index.html" node="homepage" port="html"/>
   </ports>
 </application>

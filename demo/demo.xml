@@ -31,10 +31,10 @@
         <item input="input" node="signal_raw_to_table" port="output"/>
       </links>
       <axes>
-          <axis name="y_none" pos="y_l" label=""/>
+          <item name="y_none" pos="y_l" label=""/>
       </axes>
       <datasets>
-          <dataset data="signal" axis="y_none" color="blue" type="line" label="Signal"/>
+          <item data="signal" axis="y_none" color="blue" type="line" label="Signal"/>
       </datasets>
     </data_table_to_plotlyjs>
     <subprocessus name="heavyproc" appname="dummy">
@@ -78,11 +78,11 @@
         <item input="input" node="mp0" port="output1"/>
       </links>
       <axes>
-          <axis name="y_none" pos="y_l" label=""/>
+          <item name="y_none" pos="y_l" label=""/>
       </axes>
       <datasets>
-          <dataset data="c3" axis="y_none" color="blue" type="line" label="c3"/>
-          <dataset data="c4" axis="y_none" color="red" type="line" label="c4"/>
+          <item data="c3" axis="y_none" color="blue" type="line" label="c3"/>
+          <item data="c4" axis="y_none" color="red" type="line" label="c4"/>
       </datasets>
     </data_table_to_plotlyjs>
     <html_page appname="demo" name="homepage" template="homepage" title="A jkd Demo Application">
@@ -97,6 +97,6 @@
   </nodes>
   <!-- 'ports' tag create container port and links it to a contained node port -->
   <ports>
-    <port name="index.html" node="homepage" port="html" />
+    <item name="index.html" node="homepage" port="html" />
   </ports>
 </application>
