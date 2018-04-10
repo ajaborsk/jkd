@@ -200,7 +200,8 @@ class History(Node):
                     done = True
             data_file.close()
             index_file.close()
-            self.debug("########## last:" + repr(result[-1]))
+            # if len(result) >= 1:
+                # self.debug("########## last:" + repr(result[-1]))
             await self.port_value_update('output', result)
 
             # Wait for new input but don't use returned value
