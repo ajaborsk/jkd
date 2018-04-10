@@ -114,9 +114,9 @@
     </subprocessus>
     <html_page appname="demo_pi" name="homepage" template="homepage" title="A jkd Demo Application">
       <histo data="/jee_table_to_plotlyjs/output" template="dummy" mode="plotlyjs"/>
-      <histo data="/esp32_table_to_plotlyjs/output" template="dummy" mode="plotlyjs"/>
+      <!-- <histo data="/esp32_table_to_plotlyjs/output" template="dummy" mode="plotlyjs"/>
       <entry data="/calib/input" template="dummy" />
-      <chart data="/heavyproc/siggen_ext/output" template="table" />
+      <chart data="/heavyproc/siggen_ext/output" template="table" /> -->
     </html_page>
   </nodes>
   <ports>

@@ -20,7 +20,7 @@ class SignalGenerator(Node):
         value = self.amplitude * math.sin((time.time() - self.offset) * (math.pi * 2 / self.period))
         return value, 'signal:' + str(value)
 
-    async def output_task(self):
+    async def output_task(self, args={}):
         #TODO: output_task scheduling should be determined by query policy
         while True:
             #self.debug(str(self.name) + " : output_task...")
