@@ -9,13 +9,13 @@
         <column name="MES" type="datetime" value="{MES1}" remove="MES1"/>
         <column name="Fin Garantie" type="datetime" value="{FDG}" remove="FDG"/>
         <column name="Réforme" type="datetime" value="{DATE_REFOR}" remove="DATE_REFOR"/>
-       SELECT 
-         n_imma, nom, n_seri, mes1, typ_mod, marque, n_nom_cneh, date_refor, prix * 100 as "PRIX_100", poste_w, fdg, fk_budget_nu_compte 
-       FROM 
-         b_eq1996 
-       WHERE 
-        v_fonc = 'BM' 
-         AND 
+       SELECT
+         n_imma, nom, n_seri, mes1, typ_mod, marque, n_nom_cneh, date_refor, prix * 100 as "PRIX_100", poste_w, fdg, fk_budget_nu_compte
+       FROM
+         b_eq1996
+       WHERE
+        v_fonc = 'BM'
+         AND
         mes1 LIKE '2018-03-%';
       </query>
       <query name="test0">
@@ -38,8 +38,8 @@
     </sql_datasource>
     <data_table_to_tabulatorjs name="tabulator_format">
       <links>
-        <link input="config" node="config" port="data"/>
-        <link input="input" node="sql0" port="inventory"/>
+        <item input="config" node="config" port="data"/>
+        <item input="input" node="sql0" port="inventory"/>
       </links>
     </data_table_to_tabulatorjs>
     <excel_file name="xls0" file="2018-03-29 - Liste amortissements.xlsx">
@@ -48,13 +48,13 @@
     </excel_file>
     <multipivot name="mpv_test">
       <links>
-        <link input="input" node="sql0" port="inventory" />
+        <item input="input" node="sql0" port="inventory" />
       </links>
     </multipivot>
     <data_table_to_tabulatorjs name="mpv_tab1_fmt">
       <links>
-        <link input="config" node="config" port="data"/>
-        <link input="input" node="mpv_test" port="output1"/>
+        <item input="config" node="config" port="data"/>
+        <item input="input" node="mpv_test" port="output1"/>
       </links>
     </data_table_to_tabulatorjs>
     <html_page appname="chuap" name="homepage" template="homepage" title="Test Application Asset+ CHU Amiens-Picardie">
