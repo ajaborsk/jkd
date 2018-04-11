@@ -20,9 +20,18 @@ Application
 
 Une application est créée à partir  d'un fichier (xml ?) qui décrit le graphe (noeuds et arcs).
 => plutôt définir un format basé sur "JSON", avec une équivalence XML, pour faciliter la sérialisation
+=> Le format doit exister en version "verbose", facile à lire par un human (avec du texte) et en version compacte (avec des nombres)
+    plus adapté à une marchine (avec des ressources limitées). Ex. un ID doit pouvoir être une chaîne de caractère pour les humains
+    et un entier pour les machines. Cela limite l'usage des 'dict' (implémentation lourde sur les petites machines).
+
+Structure/format
+----------------
+
+Application = dictionnaire de noeuds (clef = nom du noeud) OU liste de noeuds ?
 
 Types de noeuds :
 -----------------
+
 * Source de données (brutes)
 
   * Base de données
