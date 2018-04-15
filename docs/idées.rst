@@ -46,7 +46,7 @@ Types de noeuds :
 * Rapport (pdf/html/dhtml/svg...)
 * noeuds de calcul (Processor)
 
-Chaque Noeud est identifié de façon unique
+Chaque Noeud est identifié de façon unique dans son parent
 MAIS il n'est pas envisageable d'avoir une gestion GLOBALE des identifiants
 
 donc:
