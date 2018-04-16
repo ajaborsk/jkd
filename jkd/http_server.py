@@ -44,9 +44,9 @@ class HttpServer(Node):
             try:
                 await self.ws[wsid].send_str(string)
                 return
-            except asyncio.ConnectionResetError:
+            except ConnectionResetError:
                 self.info("WS Connection lost")
-                self.ws[wsid].close()
+                await self.ws[wsid].close()
         else:
             self.info('Trying to send message '+str(message)+' to WS'+str(wsid)+' while it is closed => closing channel', 'msg')
 
