@@ -29,6 +29,9 @@ class SerialLineProcess(Node):
             lst = line[6:].strip(' \r\n').split(' ')
             data = list(map(lambda a:a[0]+256*a[1], zip([int(k) for k in lst[::2]], [int(k) for k in lst[1::2]])))
 
+            if len(data) != 7:
+                return [None, "Badly formated line"]
+
             self.debug(str(data))
             v_bat = self.alpha_bat / data[1] * data[3]
             if self.v_bat_old is not None:
