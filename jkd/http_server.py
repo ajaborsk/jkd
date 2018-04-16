@@ -41,9 +41,17 @@ class HttpServer(Node):
         if self.ws[wsid] is not None and self.ws[wsid].closed == False:
             string = json.dumps(message, default=self.json_encoder)
             #print(string)
-            await self.ws[wsid].send_str(string)
+            try:
+                await self.ws[wsid].send_str(string)
+                return
+            except asyncio.ConnectionResetError:
+                self.info("WS Connection lost")
+                self.ws[wsid].close()
         else:
             self.info('Trying to send message '+str(message)+' to WS'+str(wsid)+' while it is closed => closing channel', 'msg')
+
+        # To execute only in case of transmit error
+        if True:
             # Closing channel
             # Send back a 'stop' query update
             channel = self.ws_channels[(wsid, message['lcid'])]
