@@ -173,6 +173,7 @@ class Node:
                     msg = {'prx_src':self, 'lcid':cnx['lcid'], 'flags':flags, 'reply':value}
                 self.debug(str(self.name) + " : output_msg to "+str(cnx['prx_dst'])+': '+str(msg))
                 await self.msg_send(cnx['prx_dst'], msg)
+                #TODO: handle send error (dst does not exist, for instance)
 
 
     async def port_value_update(self, portname, value, from_inside = False):
@@ -603,9 +604,11 @@ class Node:
             # This is a (replied) error
             if 0:
                 # The node is the final destination
+                #TODO: handle error locally
                 pass
             else:
                 # Just route to next node
+                #TODO: route error to next node in channel
                 pass
         elif 'cmd' in msg:
             # This is a query update

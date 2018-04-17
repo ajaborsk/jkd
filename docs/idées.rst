@@ -24,6 +24,16 @@ Une application est créée à partir  d'un fichier (xml ?) qui décrit le graph
     plus adapté à une marchine (avec des ressources limitées). Ex. un ID doit pouvoir être une chaîne de caractère pour les humains
     et un entier pour les machines. Cela limite l'usage des 'dict' (implémentation lourde sur les petites machines).
 
+Prévoir une structure dynamique : Un port est créé à la demande et est supprimé lorsqu'il n'est plus utilisé. Idem pour un noeud.
+Idem pour une tâche. Si toute une chaîne ou un arbre est créé, ils doivent disparaître avec la fin de la requête (cas typique = page WEB).
+Il faut donc mettre en place un système de dépendances dynamiques :
+  Un port dynamique dépend des abonnements (et disparaît s'ils disparaissent tous)
+  Une tâche dynamique disparaît si tous les ports de sortie qu'elle alimente disparaissent
+  Un noeud dynamique disparaît si tous les ports dynamiques de sortie disparaissent. Dans ce cas, il doit au préalable
+  rompre les abonnements sur ses entrées.
+
+Attention, certaines parties d'une application doivent continuer à tourner en permanence (par exemple: chaîne d'acquisition)
+
 Structure/format
 ----------------
 
