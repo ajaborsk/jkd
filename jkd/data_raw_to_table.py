@@ -26,8 +26,8 @@ class DataRawToTable(DataProcess):
         # 'model' input is for model parameters. Model description is this code.
         # self.debug('model: '+str(model))
         # self.debug('data: '+str(data))
-        if len(data) >= 1:
-            self.debug("########## last input:" + repr(data[-1]))
+        #if len(data) >= 1:
+        #    self.debug("########## last input:" + repr(data[-1]))
 
         # 1 - get input data and put it in a pandas DataFrame (table)
         input = pd.DataFrame([i[1] for i in data], index = [pd.datetime.fromtimestamp(i[0]) for i in data])
@@ -37,7 +37,7 @@ class DataRawToTable(DataProcess):
 
         # 2 - process...
         for val in self.values:
-            #TODO: A more safe eval environment (globals)
+            #TODO: A safer eval environment (globals)
             #TODO: Exception handling
             if val['mode'] == 'value':
                 value[val['name']] = eval(val['eval'], None, my_locals)
@@ -46,6 +46,6 @@ class DataRawToTable(DataProcess):
             elif val['mode'] == 'var':
                 my_locals[val['name']] = eval(val['eval'], None, my_locals)
 
-        self.debug("########## last output:" + repr(value.ix[-1]))
+        #self.debug("########## last output:" + repr(value.ix[-1]))
 
         return value
