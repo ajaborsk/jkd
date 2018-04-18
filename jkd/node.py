@@ -8,6 +8,9 @@ import sys
 
 import xml.etree.ElementTree as ET
 
+class JkdSendError(Exception):
+    pass
+
 # class Port:
     # def __init__(self):
         # self.input = asyncio.Queue()
@@ -504,7 +507,12 @@ class Node:
             ##msg.update({'prx_src':self, 'lcid':channel['lcid']})
         # Always set the proxy source (which is this node)
         msg['prx_src'] = self
-        await destination.input.put(msg)
+        try:
+            await destination.input.put(msg)
+        except:
+            # send error
+            #TODO: remove (back) channel ??
+            raise JkdSendError("cannot send message to (queue) destination")
         self.debug("Transmitted.", 'msg')
         if 'cmd' in msg and 'd' in msg['flags']:
             # remove channel, only in "command" mode
