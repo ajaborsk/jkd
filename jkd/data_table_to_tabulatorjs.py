@@ -33,10 +33,10 @@ class DataTableToTabulatorjs(DataProcess):
             result['columns'].append({'title':column, 'field':column})
 
         # Convert pandas/numpy datatype to tabulator/json type/format
-        # for col in data:
+        for col in data:
             # self.debug('Type: '+str(data[col].dtype))
-            # if str(data[col].dtype).find('datetime') == 0:
-                # data[col] = data[col].apply(lambda a: a.strftime('%d-%m-%Y %H:%M:%S') if not pd.isna(a) else None)
+            if str(data[col].dtype).find('datetime') == 0:
+                data[col] = data[col].apply(lambda a: a.strftime('%d-%m-%Y %H:%M:%S') if not pd.isna(a) else None)
             # elif str(data[col].dtype).find('int64') == 0:
                 # data[col].astype(pd.np.dtype('int32'), copy=False)
             #elif str(data[col].dtype).find('object') == 0:
@@ -48,5 +48,5 @@ class DataTableToTabulatorjs(DataProcess):
             row.update(dict(data.iloc[row_idx]))
             result['data'].append(row)
 
-        self.debug('result: '+str(result))
+        self.debug('result["data"]: '+str(result['data']))
         return result

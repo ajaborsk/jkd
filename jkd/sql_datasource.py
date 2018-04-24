@@ -68,6 +68,8 @@ class SqlDatasource(Node):
             value = eval(col_op['value'].format(**args), None, {'df':df})
             if col_op.get('type', 'int') == 'datetime':
                 df[col_op['name']] = pd.to_datetime(value)
+                #self.debug(repr(value))
+                #self.debug(repr(df[col_op['name']]))
             elif col_op.get('type', 'int') == 'float':
                 df[col_op['name']] = pd.to_numeric(value)
             else:
