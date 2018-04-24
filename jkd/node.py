@@ -129,7 +129,7 @@ class Node:
 
     def port_get(self, portname, args={}):
         # get a port and create a dynamic port from a factory if needed (and possible)
-        if portname in self.ports
+        if portname in self.ports:
             if self.ports[portname].get('factory', False):
                 d_portname = portname+'-'+hex(hash(frozenset(args.items())) % ((sys.maxsize+1)*2))[2:]
                 #TODO
