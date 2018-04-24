@@ -30,7 +30,7 @@ Il faut donc mettre en place un système de dépendances dynamiques :
   Un port dynamique dépend des abonnements (et disparaît s'ils disparaissent tous)
   Une tâche dynamique disparaît si tous les ports de sortie qu'elle alimente disparaissent
   Un noeud dynamique disparaît si tous les ports dynamiques de sortie disparaissent. Dans ce cas, il doit au préalable
-  rompre les abonnements sur ses entrées.
+  rompre les abonnements sur ses entrées. Il peut aussi disparaître si tous ses ports non dynamiques voient disparaître tous leurs abonnements.
 
 Attention, certaines parties d'une application doivent continuer à tourner en permanence (par exemple: chaîne d'acquisition)
 

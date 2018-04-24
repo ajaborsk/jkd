@@ -51,8 +51,8 @@ class DataObject(Node):
                 self.debug(repr(self.data))
                 json.dump(self.data, f)
 
-    def port_get(self, portname):
-        if portname in self.ports:
+    def port_get(self, portname, args={}):
+        if portname in self.ports and len(args) == 0:
             return self.ports[portname]
         else:
             splitted = portname.split(sep='.')
