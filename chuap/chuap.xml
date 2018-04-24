@@ -46,7 +46,7 @@
         <sheet port="data" name="Rapport 1" index="">
         </sheet>
     </excel_file>
-    <multipivot name="mpv_test">
+    <multipivot name="mp0">
       <links>
         <item input="input" node="sql0" port="inventory" />
       </links>
@@ -54,7 +54,7 @@
     <data_table_to_tabulatorjs name="mpv_tab1_fmt">
       <links>
         <item input="config" node="config" port="data"/>
-        <item input="input" node="mpv_test" port="output1"/>
+        <item input="input" node="mp0" port="output1"/>
       </links>
     </data_table_to_tabulatorjs>
     <html_page appname="chuap" name="homepage" template="homepage" title="Test Application Asset+ CHU Amiens-Picardie">
