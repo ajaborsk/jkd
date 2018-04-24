@@ -9,6 +9,7 @@
         <column name="MES" type="datetime" value="{MES1}" remove="MES1"/>
         <column name="Fin Garantie" type="datetime" value="{FDG}" remove="FDG"/>
         <column name="Réforme" type="datetime" value="{DATE_REFOR}" remove="DATE_REFOR"/>
+        <column name="Age" type="float" value="(pd.to_numeric(pd.datetime.now() - {MES})/(1e9 * 3600 * 24)).round()"/>
        SELECT
          n_imma, nom, n_seri, mes1, typ_mod, marque, n_nom_cneh, date_refor, prix * 100 as "PRIX_100", poste_w, fdg, fk_budget_nu_compte
        FROM
