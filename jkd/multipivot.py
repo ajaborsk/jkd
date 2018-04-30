@@ -3,6 +3,7 @@ import time
 import datetime
 import math
 import pandas as pd
+import numpy as np
 
 from .data_process import DataProcess
 
@@ -23,7 +24,9 @@ class Multipivot(DataProcess):
         dftest2 = pd.DataFrame([[1.5,2.5],[3.3,5.1]], columns=['c3','c4'])
 
         await self.port_value_update("output0", dftest)
-        await self.port_value_update("output1", dftest2)
+        output = pd.pivot_table(data, values=["Prix"], index=['Age'], columns=['DOMAINE'], fill_value = 0, aggfunc=np.sum)['Prix']
+        output['Age'] = output.index
+        await self.port_value_update("output1", output)
 
         ports_list = ['input', 'control']
         while True:
@@ -42,5 +45,7 @@ class Multipivot(DataProcess):
             dftest['c1'] = dftest['c2'] + dftest['c1']
             dftest2['c4'] = dftest2['c3'] + dftest2['c4']
             await self.port_value_update("output0", dftest)
-            await self.port_value_update("output1", dftest2)
+            output = pd.pivot_table(data, values=["Prix"], index=['Age'], columns=['DOMAINE'], fill_value = 0, aggfunc=np.sum, margins=True)['Prix']
+            output['Age'] = output.index
+            await self.port_value_update("output1", output)
 #            await asyncio.sleep(16.)

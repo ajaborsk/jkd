@@ -9,15 +9,15 @@
         <column name="MES" type="datetime" value="{MES1}" remove="MES1"/>
         <column name="Fin Garantie" type="datetime" value="{FDG}" remove="FDG"/>
         <column name="Réforme" type="datetime" value="{DATE_REFOR}" remove="DATE_REFOR"/>
-        <column name="Age" type="float" value="(pd.to_numeric(pd.datetime.now() - {MES})/(1e9 * 3600 * 24)).round()"/>
+        <column name="Age" type="float" value="(pd.to_numeric(pd.datetime.now() - {MES})/(1e9 * 3600 * 24 * 365.25)).round()"/>
        SELECT
-         n_imma, nom, n_seri, mes1, typ_mod, marque, n_nom_cneh, date_refor, prix * 100 as "PRIX_100", poste_w, fdg, fk_budget_nu_compte
+         n_imma, nom, n_seri, mes1, typ_mod, marque, n_nom_cneh, (CASE WHEN ASCII(n_nom_cneh) >= 65 THEN SUBSTR(n_nom_cneh, 1, 4) ELSE '----' END) AS "DOMAINE", date_refor, prix * 100 as "PRIX_100", poste_w, fdg, fk_budget_nu_compte
        FROM
          b_eq1996
        WHERE
         v_fonc = 'BM'
          AND
-        mes1 LIKE '2018-03-%';
+        mes1 LIKE '20%';
       </query>
       <query name="test0">
         <column name="int_statut" value="int_status" remove=""/>
@@ -64,8 +64,8 @@
       <table class="table_sombre" src="/chuap/sql0/test0"/>
       <table src="/chuap/sql0/test0"/>
       <chart id="c1" src="/chuap/sql0/test12"/>
-      <table src="/chuap/sql0/test0"/> -->
-      <dyn-table name="t1" config="/config/data/t1" data="/tabulator_format/output"/>
+      <table src="/chuap/sql0/test0"/> 
+      <dyn-table name="t1" config="/config/data/t1" data="/tabulator_format/output"/> -->
       <dyn-table name="t2" config="/config/data/t2" data="/mpv_tab1_fmt/output"/>
     </html_page>
   </nodes>
