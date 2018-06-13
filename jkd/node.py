@@ -118,9 +118,11 @@ class Node:
     async def _wait_for_port(self, portname, client = None):
         return (portname, await self.port_get(portname)['queue'].get(), client)
 
-    def port_add(self, portname, mode = 'output', cached = False, timestamped = False, auto = False, client = None):
+    def port_add(self, portname, mode = 'output', cached = False, timestamped = False, auto = False, client = None, factory = None, on_demand = False):
         self.ports[portname] = { 'mode': mode,
                                  'cached': cached,
+                                 'factory': factory,
+                                 'on-demand': on_demand,
                                  'value': None,
                                  'timestamped': timestamped,
                                  'auto': auto,
