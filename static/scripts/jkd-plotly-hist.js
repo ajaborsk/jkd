@@ -4,7 +4,7 @@ class JkdPlotlyHistChart {
         this.jkd_env = jkd_env;
         this.prefix = prefix;
         this.data_addr = data_addr;
-        this.lcid = null;
+        //this.lcid = null;
 
         this.duration = 3600 * 3; // in seconds
         this.start_date = null; // computed from end_date and length
