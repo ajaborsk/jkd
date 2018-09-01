@@ -12,8 +12,8 @@ class DataFile(Node):
 
         self.data = None
 
-        #self.port_add('output', cached = False, timestamped = True)
-        #self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
+#self.port_add('output', cached = False, timestamped = True)
+#self.task_add('process', coro = self.parse, gets=['input'], returns=['output'])
 
     async def process(self, line):
         return self.data

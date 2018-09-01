@@ -35,7 +35,15 @@
         <value name="v_cir" eval="(input[4] / model['alpha_cir'])" unit="V" tags="" />
         <value name="i_bat" eval="((value['v_bat'] - value['v_cir']) / 0.1 * 1000)" unit="mA" tags="" />
         <value name="v_int" eval="(value['v_bat'] + value['i_bat'] / 1000. * 0.40)" unit="V" tags="" />
-        <value name="t_ext" eval="(input[6] / 32768. * 25.)" unit="degC" tags="" />
+
+        <var name="A" eval="-0.000685889139822" unit="" tags="" />
+        <var name="B" eval="0.000771000043226" unit="" tags="" />
+        <var name="C" eval="-5.49603989514405E-05" unit="" tags="" />
+        <var name="D" eval="1.9724853651315E-06" unit="" tags="" />
+        <var name="R" eval="12708.2132412908" unit="" tags="" />
+        <var name="t_1" eval="pd.np.log(R * (65536./input[6] - 1))" unit="" tags="" />
+        <value name="t_ext" eval="-273.15 + 1/(A + B * t_1 + C * t_1 * t_1 + D * t_1 * t_1 * t_1)" unit="degC" tags="" />
+
         <var name="c" eval="160." unit="" tags="" />
         <value name="t_mcu" eval="((input[2] - (21888 - 23 * c)) / c)" unit="degC" tags="" />
 <!--
