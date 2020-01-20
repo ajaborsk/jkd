@@ -13,7 +13,7 @@ et-xmlfile==1.0.1         # via openpyxl
 #idna-ssl==1.0.1           # via aiohttp
 idna==2.6                 # via idna-ssl, yarl
 jdcal==1.4                # via openpyxl
-jinja2==2.10
+jinja2>=2.10.1
 markupsafe==1.0           # via jinja2
 multidict==4.2.0          # via aiohttp, yarl
 numpy==1.14.2             # via pandas
