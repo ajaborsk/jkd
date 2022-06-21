@@ -16,7 +16,7 @@ jdcal==1.4                # via openpyxl
 jinja2>=2.10.1
 markupsafe==1.0           # via jinja2
 multidict==4.2.0          # via aiohttp, yarl
-numpy==1.14.2             # via pandas
+numpy==1.22.0             # via pandas
 openpyxl==2.5.2
 pandas==0.22.0
 pyserial==3.4
